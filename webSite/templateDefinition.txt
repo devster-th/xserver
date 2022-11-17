@@ -1,0 +1,37 @@
+TEMPLATE DEFINITION
+Will use template to define structure of html then convert it to the real html at presenting time to the user
+
+[[
+.img/class:contentPic/src:nicePic.jpg/
+.div/class:frame
+  .div/class:title/{{title}}/
+  .div/class:text/{{text}}/
+/div 
+
+
+
+
+
+
+
+]]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,20 @@
+2022-09-10, @mutita
+
+this is another symetric crypto program
+good and easy
+installed in this machine
+
+use:
+$ mcrypt -f key-file input-file
+
+then it gens the input-file.nc which is encrypted
+
+to decrypt
+$ mcrypt -d -f key-file encrypted-file.nc
+
+output will be the originalname without .nc
+
+
+summary: good, easy and symetric
+
+

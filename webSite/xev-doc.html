@@ -1,0 +1,167 @@
+<html>
+<style>
+h1 {color:}
+h2 {color:red}
+h3 {color:green}
+code {background-color:lightgray ;border:1px solid lightgray ;
+padding:}
+</style>
+<body>
+<h1>Document for xev</h1>
+<span style="font-size:small; color:gray">version 0.1, last updated: 2022-11-04, by:@mutita</span>
+
+<!--table of contents-->
+<ol>
+<li><a href="#intro">Introduction</a></li>
+<li><a href="#spec">Specification</a></li>
+<li><a href="#command">Command ref</a></li>
+  <ol>
+    <li><a href="#html">html</a></li>
+    <li>sessionStorage</li>
+    <li>localStorage</li>
+    <li>json</li>
+    <li>database</li>
+    <li>file</li>
+    <li>communications</li>
+    <li>diagram</li>
+    <li>data visualization</li>
+  </ol>
+<li><a href="sum">Summary</a></li>
+</ol>
+
+<!--intro-->
+<h2 id="intro">Introduction</h2>
+<p>"xev" มาจาก next generation dev (ก่อนหน้านี้ตั้งชื่อว่า xdev แต่เพื่อให้สั้นอีก จึงเป็น xev)... เป็นแนวคิดที่จะทำให้การ dev ง่ายขึ้น คนทั่วไปเข้าใจได้ไม่ยาก ทำให้เกิด clean & clear code</p>
+
+<p>Pattern ของคำสั่ง หรือจะเรียกว่า ภาษา ก็พอได้ เป็นดังนี้
+<br>
+<br><code>xev({...})</code>
+<br>หรือ <code>xev({do:this, to:whom, by:how})</code>
+<br>ทำนองนี้ จะเห็นว่า รูปแบบจะเป็น object แต่จะเป็น object ที่เรียงกันคล้ายภาษาคน 
+</p>
+
+<p>ยกตัวอย่างจะส่งข้อมูลให้ใครคนหนึ่ง ก็อาจใช้ว่า <code>xev({send:customerData, to:"john"})</code> เป็นต้น ดังนั้นอาจจะพูดได้ว่า xev จะทำให้เกิดภาษาทางซอฟท์แวร์ที่ คล้ายคน มากขึ้น ก็จะพยายามพัฒนาจากจุดนี้เป็นต้นไป ไม่แน่ว่าอาจจะไปถึงขั้น AI ก็เป็นได้</p>
+
+<p>เบื้องต้นจะทำใน java script ก่อน โดยหลักแล้วเราไม่ได้คิด engine ของภาษาขึ้นมาใหม่ เพียงแต่เอาภาษาเดิมนั่นแหละ เช่น java script มาทำให้ดูง่ายขึ้น เท่านั้น แล้วหากทำสำเร็จที่ js ก็จะขยายไปภาษาอื่นๆ ต่อไป โลก อาจกลายเป็นว่า ไม่ว่าจะภาษาอะไร เช่น python, java, C, R หรืออะไรก็แล้วแต่ ก็สามารถ "พูดคุย" กันได้ เพราะคุยกันผ่าน xev นั่นเอง</p>
+
+<!--spec-->
+<h2 id="spec">Specification</h2>
+<ol>
+<li>เป้าหมายคือจะให้ xev เป็น ภาษา หรือ โมเดล หรือรูปแบบ ที่ใช้เหมือนกันในทุกๆ programming language และทำให้เกิด code ของซอฟท์แวร์ในลักษณะ clean & clear ไม่สลับซับซ้อน จนคนทั่วไปเข้าใจได้ยาก</li>
+<li>ใช้ภาษาอังกฤษ (English) ในการเขียน xev</li>
+<li>รูปแบบคือ <code>xev({...})</code> โดยจะส่ง input ให้ xev function ที่เป็น object</li>
+</ol>
+
+
+
+
+
+
+
+
+
+<!--command-->
+<h2 id="command">Command ref</h2>
+<p>ส่วนนี้อธิบายคำสั่งต่างๆ ที่ได้พัฒนาขึ้น</p>
+
+
+<h3 id="html">html</h3>
+<ul>
+<li>setText</li>
+<li>show</li>
+<li>hide</li>
+<li>setClass</li>
+<li>setAttrib</li>
+</ul>
+<p>setText
+<br><code>xev({htmlid:"#1000", 
+<br>setText:"sssssssssssss"})</code>
+<br>เป็นการสั่งว่า ให้เอาตัวหนังสือตาม setText ไปใส่ใน html element ที่มี id คือ #1000 นั่นเอง</p>
+
+<p>show
+<br><code>{show:"#htmlid"}</code>
+</p>
+
+<p>hide
+<br><code>{hide:"#htmlid"}</code>
+</p>
+
+<p>setClass
+<br><code>{setClass:"#htmlid", to:"aaa bbb ccc"}</code>
+</p>
+
+<p>setAttrib
+<br><code>{setAttrib:"#htmlid", 
+<br>{att1:val1, att2:val2, ...}}</code>
+</p>
+
+
+
+<h3>sessionStorage</h3>
+<ul>
+  <li>xess</li>
+</ul>
+
+
+<h3>localStorage</h3>
+<ul>
+  <li>loxo</li>
+</ul>
+
+
+
+<h3>json</h3>
+<ul>
+  <li>mkJson</li>
+  <li>rdJson</li>
+</ul>
+
+
+<h3>database</h3>
+<ul>
+  <li>mongo</li>
+  <li>xdb</li>
+</ul>
+
+
+
+<h3>file</h3>
+<ul>
+  <li>readFile</li>
+  <li>saveFile</li>
+</ul>
+
+
+
+
+<h3>communications</h3>
+<ul>
+  <li>send</li>
+  <li>request</li>
+</ul>
+
+
+
+<h3>diagram</h3>
+<h3>data visualization</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--summary-->
+<h2 id="sum">Summary</h2>
+
+
+
+</body>
+</html>

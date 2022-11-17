@@ -1,0 +1,26 @@
+note on testing ccrypt
+
+use:
+$ ccrypt -e file-to-encrypt
+
+= then it prompts for the key, then modify the file to file.cpt
+
+$ ccrypt -d file-to-decrypt
+= then prompts for key, then mod the file back to its original, 
+says: file-to-encrypt
+
+can use the key file too such:
+
+$ ccrypt -e file-to-encrypt -k key-file
+
+same as decrypt
+
+! but it is like a symetric encryption, must use same key 
+for both ways, and it not read the whole private key 
+but just the first line of the keyfile.
+
+
+so, good and easy for symetric method.
+
+@mutita
+2022-09-10 09:30

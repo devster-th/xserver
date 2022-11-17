@@ -1,0 +1,764 @@
+<html>
+<head>
+<style>
+h4 {padding:0; margin:0; margin-bottom:4px ; }
+textarea {width:100%; height:90%; overflow-y:scroll}
+</style>
+</head>
+<body>
+<h4>xHtml -- a shorter & quicker html</h4> 
+<button onclick="conTem()">conTem</button>
+<button onclick="convert()">convert</button>
+<button onclick="reload()" title="reload the saved text">reload</button>
+<button onclick="save()" title="save to browser">save</button>
+<button id="saveToFile" onclick="saveFile()" title="save to file">save to file</button>
+<button onclick="reset()" title="clear everything">reset</button>
+<a href="xHtmlOutput.html" target="_blank" title="open new tab to see this web page output">see output</a>
+<textarea id="text" name="text" placeholder="write your words here"></textarea>
+
+
+
+
+<script>
+/////////////////////////////////////////////////////////
+// xHtml
+/* this program make html shorter and more easy, more flexible, may help speed up the writing of html document, or edit the plain text then convert to html.
+*/
+
+/*
+in xWords1 the pattern will change to:
+
+---
+p/.................../p for <p>..</p>
+p>c/...../p for <p style="text-align:center">...</p>
+
+/b>...<b/ for <b>..</b>
+/i>...<i/ for <i>..</i>
+/m>...<m/ for <mark>..</mark>
+/u>...<u/ for <u>..</u>
+
+can attach tags to each other like:
+
+p/b>i>m>u>...<u<m<i<b/p
+
+---
+/a>linkTarget>text that having link<a/ for <a href="..">...</a>
+
+---
+ol/
+l/list text
+l/....
+l/....
+/ol
+
+---
+ul/
+/ul
+same as ol/
+
+---
+h1/heading of the text</ for <h1>...</h1>
+the ....</ can be skip if it is end-of-line
+work for every h?, h1 to ...
+
+---
+...//... for ...<br>...
+
+--
+hr/... for <hr>
+has to start at begin of line
+
+---
+tb/
+h/name/age/sex
+d/john/22/male
+d/jane/18/female
+/tb
+for <table>...</table>
+
+---
+sel>i=idOfTheSelectionTag/
+    op/this is first
+    op/this is second
+    op/this is third
+    /sel
+for <select> and <option>
+
+---
+/tx>....<tx/
+for <textarea>...</texarea> 
+
+---
+.../sp>....</... 
+for <span>....</span>
+
+---
+.../---/... 
+for 3 spaces, can be as many as it needs
+
+---
+f/ , f>a=actionCode>i=idddd>m=method>n=name/ 
+for <form action=...>
+/f for </form>
+
+---
+/bt>xdev(x)/submit</ 
+for <button onclick="..">...</button>
+
+---
+/pic>filename>a=altText</ 
+    for <img src="filename" alt="...">
+
+---
+/ip>text>i=idddd>n=nameee>v=valueee</
+for <input type="text" id=".." ...> 
+works for these types: text,radio,checkbox,number
+
+
+
+
+*/ 
+
+let tamma=true //false //to convert tammaText turn this to 'true'
+
+
+if (localStorage.getItem("xText") !=null) reload()
+
+function convert() {
+  let round = 0 , maxSet = 5 //not run > this 
+  let found = "" 
+
+  do {
+    round++ 
+    found = false 
+    //start with false if not found any then exit
+
+//////////////////////////////////////////////////////////////////////    
+/*  /p>..............<p/
+    /p>i=idddddddd>c=classsss>n=nameeeeee>......<p/
+    /p>s=center>.... means style="text-align:center"
+*/
+    text.value = text.value.replace(
+      /(?<!\<)\/([pbiu])\>(([cins])\=(\w+)\>)?(([cins])\=(\w+)\>)?(([cins])\=(\w+)\>)?(([cins])\=(\w+)\>)?/gms,
+      //g1=tag, g3-4=att value, g6-7, g9-10, g12-13
+      (full,g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11,g12,g13)=>{
+        console.log(g2+","+g3)
+        found = true 
+
+        let output = `<${g1}`
+if (g3 !=undefined) output += ` ${attName(g3)}="${getStyleValue(g4)}"`
+if (g6 !=undefined) output += ` ${attName(g6)}="${getStyleValue(g7)}"`
+if (g9 !=undefined) output += ` ${attName(g9)}="${getStyleValue(g10)}"`
+if (g12 !=undefined) output += 
+` ${attName(g12)}="${getStyleValue(g13)}"`
+
+        output += ">"
+        return output 
+    })
+
+    //for end-tag
+    text.value = text.value.replace(
+      /\<([pbiu])\//gms, (full,g1)=>{
+        found = true
+        return `</${g1}>` 
+    })
+
+    function getStyleValue(v) {
+      if (v=="center") {
+        return "text-align:center" 
+      } else {
+        return v 
+      }
+    }
+    
+    //=done 
+    /* change algorithm to replace only head and tail not look at the whole frame of the p
+    algo=the 'p' has to be at beginning of line, or if it is '/p' then take the '/' as group1 and take 'g1' insert in the output <${g1}p>
+    */ 
+
+/////////////////////////////////////////////////////////////////////
+/*  ..../a>http://deeji.world>........<a/....
+    ..../a>.........<a/.... gets <a href="">...                    */ 
+    text.value = text.value.replace(
+      /(?<!\<)\/a\>((.+?)\>)?(.*?)\<a\//mgs,
+      //g2=href text, g3=the text that having link
+      (full,g1,g2,g3)=>{
+        found = true 
+        //console.log(g3)
+        if (g2==undefined) g2=""
+        return `<a href="${g2}">${g3}</a>`
+    })//=done
+
+
+
+////////////////////////////////////////////////////////////////////
+/*  .../b>.....<b/...
+    p>b>......<b/......./p
+    p>b>i>u........<u<i<b<p
+
+works for b,i,u                            */ 
+/*
+    text.value = text.value.replace(
+      /((?<!\<)\/|(?<=^|\>))([biu])\>(.*?)\<\2(\/|(?=\<))/mgs,
+      (full,g1,g2,g3)=>{
+        found = true 
+        return `<${g2}>${g3}</${g2}>`
+    })//=done  
+    **change to use the same block of /p> 
+*/ 
+////////////////////////////////////////////////////////////////////
+/*  .../m>....<m/... for <mark>....</mark>
+*/ 
+    text.value = text.value.replace(
+      /((?<!\<)\/|(?<=^|\>))(m)\>(.*?)\<\2(\/|(?=\<))/mgs,
+      (full,g1,g2,g3)=>{
+        found = true 
+        return `<mark>${g3}</mark>`
+    }) //=done
+
+
+////////////////////////////////////////////////////////////////////
+/*  ol/ , /ol , ul/ , /ul
+*/ 
+text.value = text.value.replace(
+      /^(\/)?([ou]l)(\/)?$/mg,
+      (full,g1,g2)=>{
+        found = true 
+        if (g1==undefined) g1=""
+        return `<${g1}${g2}>`
+    })//=done
+
+/*  l/......                                          */ 
+    text.value = text.value.replace(
+      /^l\/(.*?)$/mg,
+      (full,g1)=>{
+        found=true 
+        return `<li>${g1}</li>`
+    })//=done
+
+/////////////////////////////////////////////////////////////////
+/*  h1/... for every h? 
+*/ 
+    text.value = text.value.replace( 
+      /^(h\d)(\/|\>)(.*?)($|\<\/)/mg,
+      (full,g1,g2,g3)=>{
+        found=true 
+        return `<${g1}>${g3}</${g1}>`
+    })//=done
+
+////////////////////////////////////////////////////////////////
+/*  ...//... for break <br>
+*/ 
+    text.value = text.value.replace(
+      /(?<!htt[ps]:)\/\//mgs, ()=>{
+        found=true 
+        return "<br>" 
+    })//=done
+
+///////////////////////////////////////////////////////////////
+/*  hr/ for <hr>
+*/ 
+    text.value = text.value.replace(
+      /^hr\//mg, ()=>{
+        found=true 
+        return "<hr>"
+    })//=done
+  
+/////////////////////////////////////////////////////////////////
+/*  tb/
+    h/name/age/sex
+    d/john/22/male
+    d/jane/18/female
+    /h 
+*/
+    text.value = text.value.replace(
+      /(^|^\/)tb(\/|$)/mg, (full,g1)=>{
+        found=true 
+        if (g1==undefined) g1="" 
+        return `<${g1}table>`
+    })//=done
+
+    // h/ h> d/ d> for <tr><th>.... , <tr><td>...
+    text.value = text.value.replace(
+      /^([hd])(\/|\>)(.*?)$/mg, (full,g1,g2,g3)=>{
+        found=true 
+        let output = 
+        `<tr><t${g1}>` + 
+        g3.replace( /\//g, `</t${g1}><t${g1}>` ) + 
+        `</t${g1}></tr>`
+        return output 
+      } 
+    )//=done
+
+///////////////////////////////////////////////////////////////////    
+/* 
+    sel>i=idOfTheSelectionTag/
+    op/this is first
+    op/this is second
+    op/this is third
+    /sel
+*/ 
+    text.value = text.value.replace( 
+      /(^|\/)?sel(\>i=(\w+?))?(\/$|$)/mg, 
+      (full,g1,g2,g3)=>{
+        found=true 
+        if (g1==undefined) g1=""
+        let att =""
+        if (g2 !=undefined) {
+          att = ` id="${g3}"`
+        }
+        return `<${g1}select${att}>` 
+    })//=done
+
+    // op/.... 
+    text.value = text.value.replace( 
+      /^op\/(.+?)$/mg, (full,g1)=>{
+        found=true 
+        return `<option>${g1}</option>`
+    })//=done
+
+
+/////////////////////////////////////////////////////////////////
+/*  /tx>....<tx/
+    for <textarea>...</texarea> 
+*/      
+    text.value = text.value.replace(
+      /\/tx\>(.*?)\<(tx)?\//mgs, (full,g1)=>{
+      found=true 
+      return `<textarea>${g1}</textarea>`
+    })//=done
+
+
+///////////////////////////////////////////////////////////////////
+/*  .../sp>....</... 
+    for <span>....</span>
+*/
+    text.value = text.value.replace(
+      /\/sp\>(.*?)\<(sp)?\//mg, (full,g1)=>{
+        found=true 
+        return `<span>${g1}</span>`
+    })//=done
+
+
+////////////////////////////////////////////////////////////////////
+/*  .../---/... 
+    for 3 spaces, can be as many as it needs
+*/
+    text.value = text.value.replace(
+      /\/(\-+)\//mg,(full,g1)=> {
+      found=true 
+      let output =""
+      for (i=0; i<g1.length; i++) {
+        output += "&nbsp;"
+      }
+      return output 
+    })//=done-------------------------------------------
+    /* logic/ capture the - in the frame /---/ then find length of the --- , then replace with &nbsp; equals to the length.
+    */
+    
+/////////////////////////////////////////////////////////////////
+/*  f/ , f>a=actionCode>i=idddd>m=method>n=name/ 
+    for <form action=...>
+    /f for </form>
+*/
+    text.value = text.value.replace(
+/(^|\/)f((\>([aimn])=([^>]+))?(\>([aimn])=([^>]+))?(\>([aimn])=([^>]+))?(\>([aimn])=([^>]+))?)?(\/|$)/mg, 
+(full,g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11,g12,g13,g14)=>{
+        console.log(full)
+        //console.log("g4="+g4)
+        found=true
+
+        if (g1=="/") {
+          return "</form>" //this is /f
+
+        } else if (g2!=undefined) {   //this is option >
+
+          let output = "<form"
+if (g4 !=undefined) output +=` ${attName(g4)}="${g5}"` 
+if (g7 !=undefined) output +=` ${attName(g7)}="${g8}"`  
+if (g10 !=undefined) output +=` ${attName(g10)}="${g11}"`   
+if (g13 !=undefined) output +=` ${attName(g13)}="${g14}"` 
+          output += ">"   
+          return output 
+          
+        } else { //if no option, f/
+          return "<form>"
+        }
+    })//=done 
+
+    //works for f/ func above
+    function attName(v) {
+      switch (v) {
+        case "a":  
+          return "action"
+          break 
+        case "c":
+          return "class"
+          break 
+        case "i": 
+          return "id"
+          break
+        case "m": 
+          return "method"
+          break 
+        case "n":
+          return "name"
+          break 
+        case "s":
+          return "style"
+          break 
+        case "v": 
+          return "value"
+          break 
+        default: 
+          return ""
+      }
+    }//=done
+    /* everything works, this block of f/ , /f accepts 4 options: >a=action, >i=id, >m=method, >n=name more than this won't work.
+    
+    */ 
+
+////////////////////////////////////////////////////////////////////
+/*  /bt>xdev(x)/submit</ 
+    for <button onclick="..">...</button>     
+*/ 
+    text.value = text.value.replace(
+      /\/bt\>(.+?)?\/(.+?)\<\//mgs, (full,g1,g2)=>{
+      found=true 
+      return `<button onclick="${g1}">${g2}</button>`
+    })//=done
+
+
+////////////////////////////////////////////////////////////////////
+/*  /pic>filename>a=altText</ 
+    for <img src="filename" alt="...">
+*/
+    text.value = text.value.replace(
+    /\/pic\>(.+?)(\>a=(.+?))?\<\//mgs,
+    (full,g1,g2,g3="")=>{
+      found=true 
+      return `<img src="${g1}" alt="${g3}">`
+    })//=done------------------------------------------
+
+
+/////////////////////////////////////////////////////////////////////
+/*  /ip>text>i=idddd>n=nameee>v=valueee</
+    for <input type="text" id=".." ...> 
+    works for these types: text,radio,checkbox,number
+*/ 
+    text.value = text.value.replace(
+/\/ip\>(\w+?)(\>[inv]\=(.+?))?(\>[inv]\=(.+?))?(\>[inv]\=(.+?))?(\>(checked))?\<\//mgs,
+    (full,g1,g2,g3,g4,g5,g6,g7,g8,g9)=>{
+      //g1=type, g3=id, g5=name, g7=value, g9=checked 
+      found=true 
+
+      let output = `<input type="${g1}"`
+      if (g3 !=undefined) output += ` id="${g3}"`
+      if (g5 !=undefined) output += ` name="${g5}"`
+      if (g7 !=undefined) output += ` value="${g7}"`
+      if (g9 !=undefined) output += ` ${g9}`
+      output += ">"
+      return output 
+    })//=done
+    /* 
+    
+    isse=should attach the tag to each other like: br/input>.....=done
+    */ 
+
+///////////////////////////////////////////////////////////////////
+/*  /dv>c=classss>i=idddd>n=nameeeeee>...<dv/
+    for <div class=".." id=".." name="..">...</div>
+    this tak will take outer ring of the match not inner ring
+*/
+    text.value = text.value.replace(
+/((?<!\<)\/|\<)dv(\>|\/)(([cin])\=(\w+?)\>)?(([cin])\=(\w+)\>)?(([cin])\=(\w+)\>)?/mgs,
+    (full,g1,g2,g3,g4,g5,g6,g7,g8,g9,g10,g11)=>{
+      //g1=front sign... '/'dv or '<'dv 
+      //g2=back... dv'>' or dv'/'
+      //g4-5 =pair1, 
+      //g7-8 =pair2, 
+      //10-11 =pair3
+      
+      found=true 
+
+      if (g1=="<" && g2=="/") {
+        return "</div>"
+      } else if (g1=="/" && g2==">") {
+        //console.log(g4+","+g7+","+g10) //check
+          let output = `<div`
+if (g4 !=undefined) output += ` ${attName(g4)}="${g5}"`
+if (g7 !=undefined) output += ` ${attName(g7)}="${g8}"`
+if (g10 !=undefined) output += ` ${attName(g10)}="${g11}"`
+          output += ">"
+          return output 
+      }
+    })//=work
+    
+    
+
+
+
+
+
+    if (tamma) convertTam() //if enable tamma convert the tammaText too
+
+
+  } while (found && round <= maxSet)
+  //so keep run until it's nothing found but not > 10 rounds. The maxSet to protect the loop hang.
+
+  console.log("round = " + round)
+
+
+}//end of convert() 
+
+/////////////////////////////////////////////////////////////////////
+  
+//reload from browser
+function reload() {
+  text.value = localStorage.getItem("xText")
+}
+
+//save to browser
+function save() {
+  localStorage.setItem("xText",text.value) 
+}
+
+//clear everything
+function reset() {
+  localStorage.removeItem("xText")
+  location.reload()
+}
+
+//save to file
+function saveFile() {
+  const savFilButt = document.querySelector("#saveToFile")
+  var link = document.createElement("a")
+  var blo = new Blob([text.value],{type:"text/plain"})
+  link.setAttribute("href",URL.createObjectURL(blo))
+  link.setAttribute("download",`${Date.now()}.html`)
+  link.click()
+  URL.revokeObjectURL(link.href)
+
+}//work
+
+function convertTam() {
+    
+  text.value = text.value.replace(
+    /^\s+?(?=\[|ครั้งนั้น|สมัยหนึ่ง|พระผู้มีพระภาค|ลำดับนั้น)/gms, 
+    ()=>{
+      found=true 
+      return "<p>"
+  })
+  text.value = text.value.replace(
+    /(?<!\<p\>)ครั้งนั้น/gms, 
+    (full)=>{
+      found=true 
+      return "<p>" + full 
+  })
+  text.value = text.value.replace(
+    /\s+?ฯ$/gms, 
+    ()=>{
+      found=true 
+      return "</p>"
+  })
+  text.value = text.value.replace(
+    /\-\n\*/gms, 
+    ()=>{
+      found=true 
+      return ""
+  })
+  text.value = text.value.replace(
+    /(?<!\<\w\>)ดูกรภิกษุทั้งหลาย/gms, 
+    (full)=>{
+      found=true 
+      return `<b>"${full}`
+  })
+  text.value = text.value.replace(
+    /(\<p\>.+?)(\n)(.+?(\<\/p\>|$))/gms, 
+    (full,g1,g2,g3)=>{
+      found=true 
+      return g1 + g3 
+  })
+  text.value = text.value.replace(
+    /\.\s+$/gms, 
+    ()=>{
+      found=true 
+      return "" 
+  })
+
+
+}
+
+///////////////////////////////////////////////////////////////////
+//this func will change new way of working with template
+/*  will defind a block of [[...]] and put new conding in it
+    and that code represents a template , or can be used as new language that quickly translated into html
+*/
+function conTem() {
+
+  console.log("//RUN")
+  let foundHeadTag=false
+  let maxLoop=100 //protect overrun
+  let loopCount=0 
+
+  do {
+    //may be the headTag func getting more time so js moves to next func (tailTag) so to protect that, because we need to have js finish the headTag first, then put do-while-loop to let it finish the head first, result=work. 
+    foundHeadTag=false 
+    loopCount++
+    console.log("loopCount="+loopCount)
+
+    //find headTag
+    text.value = text.value.replace(
+/(?<!\<|\/|t[hd].*?)((?<!o)p|[abu]|div|span|mark|h[1-6]|img|input|ol|ul|li|(?<!l)i|hr|br|form|table|select|sel)(\/|\>([^/]+?)\/)/gm, 
+      (full,g1,g2,g3)=>{
+        //g1:tag, g2:'/' or '>att', g3:att whole set
+
+        console.log("//head matches")
+        foundHeadTag=true 
+        console.log(full)
+        console.log(g1)
+        console.log(g2)
+        console.log(g3)
+
+        //stretch the shortened tag
+        if (g1=="sel") g1="select"
+        
+        //dig into the attributes
+        let att=""
+        if (g3 !=undefined) {
+          if (/\,/.test(g3) ) { //has many att?
+            let attBlock = g3.split(",") //split
+            //now get inside each att
+            for (i=0; i<attBlock.length; i++) {
+              // src:file.jpg >> src="file.jpg"
+              let attUnit = attBlock[i].split(":") //will get only 2
+              let attKey = attUnit[0]
+              let attValue = attUnit[1]
+              att += " " + attKey + "=" + `"${attValue}"`
+            }                
+          } else { //has only 1 att
+              let attUnit = g3.split(":")
+              let attKey = attUnit[0]
+              let attValue = attUnit[1]
+              att += " " + attKey + "=" + `"${attValue}"`
+          }
+        }
+        return `<${g1}${att}>`
+      } 
+    )//headTag
+
+  } while (foundHeadTag==true && loopCount<=maxLoop)          
+
+
+//for table head & data >> th/.../.../.../ , td/.../.../.../
+  text.value = text.value.replace(
+    /^(t[hd])\/(.+)\/$/gm,
+    (full,g1,g2)=>{
+      //g1:th or td, g2:head or data between the /..../
+
+      console.log("//table matches")
+      console.log(full)
+      console.log(g1)
+      console.log(g2)
+
+      let row = "<tr>"
+      let columnSet = g2.split(",")
+      for (col of columnSet) {
+        row += `<${g1}>${col}</${g1}>`
+      }  
+      row += "</tr>"
+      return row 
+    }
+  )
+
+  //for op/.... ---> <option>....</option>
+  //this func will look the whole line and make both head & tail tags
+  text.value = text.value.replace(
+    /op(tion)?\/([^/]+)$/gm, (full,g1,g2)=>{
+      //g2:option text
+      console.log("//option matches")
+      console.log(full)
+      return "<option>" + g2 + "</option>"
+    }
+  )
+
+
+
+  //for tail tag, this func will simply convert '/?' into proper </?>, not more than that, simple one 
+  text.value = text.value.replace(
+/(?<!\<|t[hd]|op)\/([pabi]|div|span|mark|h[1-6]|img|ol|ul|u(?!l)|li|form|table|select|sel)/gm, 
+      (full,g1)=>{
+        console.log("//tail matches")
+        console.log(full)
+        if (g1=="sel") g1="select"
+        return `</${g1}>`
+      }
+  )
+
+ 
+
+  //auto close some tags: <li>,<option>,<h?>
+  text.value = text.value.replace(
+/\<(option|li|h\d)\>([^</option>]|[^</li>]|[^</h\d>])+?$/gm, 
+      (full,g1)=>{
+        console.log("//auto-close matches")
+        console.log(full)
+        return full + `</${g1}>`
+      }
+    //logic: look for the head along until the $ then close the line with same tag but put '/' in front of it. But inbetween the line shouldn't have any close tags otherwise it will repeat the close-tag.
+  )
+
+
+}//end of conTem() =work
+/*  mostly work, except when attach the head tags together like:
+    p/b/u/i/.... --> result not good
+
+    90+% done, will continue on {{...}} 
+
+2022-10-17  problem with a>href:http://......./
+            because there's the '/' and ':'
+            same problem as the img>    
+
+
+*/ 
+
+
+
+
+/*
+basic works
+will work more to avoid conflicts in all tags
+
+22-10-6   still bugs in many such as the conflicts of tags
+          but conceptually OK. Supports p,u,i,b,mark,h1,h2,h3,a,table,ol,ul,li
+
+          the bugs stay around the "/" , /a ... conflicts with t/a example
+
+          will do more advance like .... p/.......// don't need to put /p
+
+          fixed most of the things. Generally good now.
+
+22-10-7   need to reorder the replace codes
+22-10-8   generally work but will move to another level of pattern of the language, e.g., p>i>u>b>............<b<u<i<p
+
+          move to next version called xWords1.html
+
+22-10-10  everything works fine, should be able to use in reallife. Let's put it v0.5/prototype.
+
+          will change name to xHtml.html
+
+22-10-11  this may add into xdev(x) like: 
+            xdev({act:"read xhtml", source:xHtmlData, 
+                  output:whereToPutTheResult })   
+                  
+22-10-14  will add <div> =done
+
+22-10-15  changing new way of working with template, don't know will affect the whole thing or not, will see. 
+          -Working on readTem() today                  
+
+
+@mutita 2022-10-11
+*/
+</script>
+</body>
+</html>

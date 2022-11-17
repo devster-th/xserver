@@ -1,0 +1,66 @@
+<html>
+<head>
+<script src="/deeji/xev2.js"></script>
+<script src="/deeji/deeji2.js"></script>
+<link rel="stylesheet" href="/deeji/deeji.css">
+<style>
+
+</style>
+<body>
+<ol id="list">
+</ol>
+<select id="selec"></select>
+<table id="tabl"></table>
+<ul id="bullet"></ul>
+<div id="contentSpace"></div>
+
+
+<script>
+let listAbc = [
+  "thailand","laos","vietnam","spain","malaysia","singapore"
+]
+
+let tableAbc = [
+  {name:"jo biden",age:30,sex:"male",country:"USA"},
+  {name:"valadimir putin",age:40,sex:"male",country:"russia"},
+  {name:"jack ma",age:80,sex:"female",country:"china"},
+  {name:"xi jin ping",age:70,sex:"mix",country:"australia"},
+  {name:"someone",age:800000,sex:"yooooooo",country:"earth"}
+]
+
+let tem = 
+`div>class:contentBox>
+    img>src:{{pic}},class:fullWidth>
+    div>class:textBoxBottomLeft>
+      div>class:textTitle>{{text}}/--/span>class:label>{{label}}/span /div
+      div>class:textBrief>yo!, this is a sample text/div
+    /div
+/div`
+//BUG! ...at u/div xht() makes it the <u>
+
+let contData = [
+  {goodsProfile:"/pic/goods1.jpg", name:"This is coffee", label:"best"},
+  {goodsProfile:"/pic/goods2.jpeg", name:"This is Yen Ta Fo", label:"out of stock"},
+  {goodsProfile:"/pic/pic5.jpeg", name:"This is something", label:"checking"}
+]
+
+
+xev({append:listAbc, toList:"#list", tag:"li"})
+xev({append:listAbc, toList:"#selec", tag:"option"})
+xev({append:tableAbc, toTable:"#tabl"})
+xev({append:listAbc, toList:"#bullet", tag:"li"})
+
+//show content
+xev({ append: contData,
+      to:"#contentSpace",
+      template: tem,
+      dataMap:{pic:"goodsProfile", text:"name", label:"label"}
+      // pic = the tem var .. {{pic}}
+      // "pic" = the data value to fill in template var
+      })
+
+
+
+</script>
+</body>
+</html>

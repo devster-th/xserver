@@ -1,0 +1,80 @@
+test by following help.ubuntu.com/community/OpenSSL page
+
+the first 2 files: cacert.pem & privkey.pem is 30 days, email = mutita.org@gmail.com
+for testing
+
+command used:
+$ openssl req -x509 -newkey rsa:2048 -out cacert.pem -outform PEM -days 30
+
+
+//test aes algorithm
+password = mutita
+
+
+save in mutita-x.aes256cbc
+
+command:
+$ echo "mutita" | openssl enc -aes-256-cbc > mutita.aes 
+
+will prompts for password, put "mutita"
+
+when decrypt put -d at the same command 
+
+=works well, perfect
+
+
+//test with keys, good
+
+encrypt
+$ openssl pkeyutl -encrypt -inkey publickey.pem -pubin -in original.txt -out encrypted.txt 
+
+decrypt
+$ openssl pkeytul -decrypt -inkey privatekey.pem -in encrypted.x -out original.txt 
+
+
+
+*** good, so use : openssl -encrypt & -decrypt for keys
+
+can also work on base64 and aes256 
+
+// sign & verify
+
+openssl pkeyutl -sign -inkey "${PRIVKEY}" -in "${FILE_TO_SIGN}" -out "${OUTPUT_SIGNATURE_FILE}"
+
+openssl pkeyutl -verify -pubin -inkey "${PUBKEY}" -in "${FILE_TO_VERIFY}" -sigfile "${SIGNATURE_FILE}"
+
+=everything works, well
+
+//review encrypt & decrypt again
+
+openssl pkeyutl -encrypt -pubin -inkey "${PUBKEY}" -in "${FILE_TO_ENCRYPT}" -out "${ENCRYPTED_FILE}"
+
+openssl pkeyutl -decrypt -inkey "${PRIVKEY}" -in "${ENCRYPTED_FILE}" -out "${DECRYPTED_FILE}"
+
+
+guide = https://gist.github.com/gwpl/2c7636f0b200cbfbe82cc9d4f6338585 
+
+SUMMARY 
+using openssl is good tool, for everything
+
+//hashing
+
+$ openssl dgst -sha256 input-file.txt 
+
+work fine 
+
+in ubuntu command use:
+$ sha256sum input-file.txt
+
+// openssl new gen key
+
+gen last 2 files/keys
+
+$ openssl genpkey -algorithm RSA -out privatekeyrsa2048.pem
+
+for pub key 
+$ openssl pkey -pubout -in privatekeyrsa2048.pem -out publickey.pem
+
+
+
+

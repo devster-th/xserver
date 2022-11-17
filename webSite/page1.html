@@ -1,0 +1,53 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!--load styles here-->
+<link rel="stylesheet" href="/deeji/deeji.css">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style></style>
+
+<!--load scripts here-->
+<script src="/deeji/xev2.js"></script>
+<script src="/deeji/deeji2.js"></script>
+
+</head>
+<body>
+<h1>page1/Post form</h1>
+<p>put the form data here</p>
+<form id="formAbc" name="formAbc">
+    <p>name <input name="name" type="text" value="mutita">
+    <br>age <input name="age" type="number" value="54">
+    <br>sex <input type="radio" name="sex" value="female">female <input type="radio" name="sex" value="male">male
+    <br>citizen <input type="text" name="citizen" value="thai">
+    <br>religion <input type="text" name="religion" value="buddhism">
+    <br>language <input type="checkbox" name="language" value="thai">thai <input type="checkbox" name="language" value="english">english </p>
+</form>
+
+<button 
+onclick="xev({  sendForm:formAbc    })
+            ">Send</button>
+<!-- @deeji will read the form data automatically -->
+<p><a href="index.html">homepage</a></p>
+
+
+<script>
+//deeji("test")
+//make sure the _session is existed too
+//globalThis._session = JSON.parse(sessionStorage.getItem("_session") )
+
+</script>
+</body>
+</html>
+
+<!--this file is at: /simpleApp/webSite/page1.html 
+use to test the post method
+
+
+PROBLEM
+1-why the form data shows in the url-bar?
+2-try to save the svResp into a global-var not work
+
+
+-->

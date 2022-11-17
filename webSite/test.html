@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="test.js"></script>
+</head>
+<body>
+<h1>test page</h1>
+<form id="form100" name="formA">
+  <p>name <input type="text" name="name" value="mutita">
+  <br>age <input type="number" name="age" value="1000">
+  <br>sex <input type="radio" name="sex" value="female">female <input type="radio" name="sex" value="male">male
+
+  <br>body <input type="checkbox" name="body" value="tall">tall <input type="checkbox" name="body" value="handsome">handsome 
+  <br>note <textarea name="note">yo!</textarea></p>
+</form>
+<input type="submit" onclick="readForm(formA)">
+
+
+<script>
+async function ff() {
+  let prom = new Promise( (resolve,reject)=>{
+    setTimeout( ()=> resolve("done"), 1000 )
+  })
+  let result = await prom 
+  alert(result)
+}
+
+ff()
+
+</script>
+
+</body>
+</html>

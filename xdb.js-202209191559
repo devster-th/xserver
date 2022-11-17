@@ -1,0 +1,533 @@
+//xdb.js
+/* try to make a very simple json database
+now v0.5 ....adjust the language
+v0.6 .... covers create, add and find
+-----------------------------------------------
+
+data model
+
+    db .......xdb
+    -collection ...people, goods, order
+      -doc ...john
+        -item ...name, age, sex
+
+    xdb.people.john ... this will show all john's data
+    xdb.people.john.age ...shows john's age
+    
+    so not:
+    xdb.people[10000000000].name ----not like this any more
+
+
+* the data structure will look like this:
+
+
+
+
+the command pattern is follow:
+
+CREATE
+    {   create: "people goods order"    } //don't need to say 'collection'
+
+ADD
+*the add may support not multi-dataSet but multi-collec too
+    ^may not a good idea, makes it more complex
+
+    {   add:[
+                {nam:"john",age:22}, //if 1 doc don't put in []
+                {name:"jane",age:18}    
+            ], 
+        in:"people"                         }
+
+    * shouldn't add multi-collec in a command, too complex
+    
+
+
+
+EDIT
+so do find first then edit or delete
+edit can do multiple docs in 1 command
+and doing just update the docs, no calculation (will remove calculation)
+we want to make xDb as simple as it should
+
+    {   find:{team:"sales"},
+        edit: {note:"these guys are good", score:"500"}, 
+        in: "people"            }
+    
+FIND    
+    {   find:{name:"john"}, in:"people", 
+                output:"return/console/varName"     }
+
+    {   find:{name:"jo"},   in:"people" ...     } // 1 simple condition
+    {   find:{age:"> 20"},  in:"people" ...    } // 1 condition with compare
+    {   find:{price:"< 100"}, in:"goods" ...    }
+    {   find:{name:"! john"}, in:"people" ...   } //find not john
+    {   find:{name:"*"}, in:"people" ...        } //find all name
+    {   find:"*", in:"people"   }
+
+multi-condition
+    {   find:{group:"AA", grade:"> 60"}, in:"people" } // AND
+    {   find:{team:"AA", or_team:"BB", age:"< 35"} } // OR then &
+
+
+
+DELETE
+    {   find:{name:"john"}, delete:"note", in:"people"   } ..delete 1 ore more keys
+    {   find:{name:"noodle"}, delete:"aaa bbb ccc", in:"goods"} //delete keys
+
+COPY
+    {   find:{name:"john"}, copy:"note", to:"jane", in:"people" }
+
+MOVE
+    {   find:{name:"john"}, move:"note", to:"jane", in:"people" }
+
+
+DISABLE
+    {   find:{name:"john"}, disable:"grade", in:"people"    }
+
+*/
+
+
+//INITIALIZATION
+const   fileSys     = require("fs")
+let     xdb         = { _int:{
+                            idList:[],
+                            collecList: [],
+                            findOutput: [],
+                            lastRunTime: new Date(),
+                            log: [],
+                            version: "0.5"
+                        }} //internal use
+
+const   xdbFile     = "xdb.json"
+
+readDbFile()
+
+
+
+
+// TEST COMMAND HERE
+setTimeout( ()=> {
+   
+/*
+    xdb_({  create: "people goods order"    }) 
+
+    xdb_({  add:[
+                    {name:"dad", age:54, sex:"male"},
+                    {name:"mom", age:53, sex:"female"},
+                    {name:"john", age:22, sex:"male"},
+                    {name:"jane", age:18, sex:"female"},
+                    {name:"biden", age:54, sex:"male"},
+                    {name:"putin", age:53, sex:"female"},
+                    {name:"trudo", age:22, sex:"male"},
+                    {name:"jamica", age:18, sex:"female"}
+
+                ], // {name:"dad", age:54, sex:"male"},
+            in:"people" 
+        })
+    
+    xdb_({  add:[
+                    {name:"noodle",price:525, stock:5265},
+                    {name:"coffee",price:5454, stock:8451},
+                    {name:"rice",price:452, stock:256},
+                    {name:"phone",price:4548, stock:62145},
+                    {name:"table",price:547, stock:1258}
+                ],
+            in:"goods"
+        })
+
+    xdb_({  add:[
+                    {num:"s100",goods:"noodle",price:5000, date:"2022-09-01"},
+                    {num:"s200",goods:"steak",price:10000, date:"2022-09-02"},
+                    {num:"s526",goods:"coffee",price:300000, date:"2022-09-05"},
+                    {num:"s562",goods:"phone",price:1000000, date:"2022-09-15"},
+                    {num:"s600",goods:"table",price:30000, date:"2022-09-20"}
+                ],
+            in:"order"
+        })
+*/
+
+
+    //now work on the find command
+    /* 
+    xdb_({  find:{stock:"> 5000"}, 
+            in:"goods", 
+                       
+        })
+    */
+    
+    //xdb._int.version = "0.5"
+    //saveDbFile()
+    //xdb_({show:"status"})
+    //xdb_({show:"entire db"})
+    
+
+    //xdb_() //if no command, nothing happens
+
+    xdb_({  find:{name:"j", sex:"male", age:22, country:"xx" },
+            in:"people",
+            //edit:{currency:"thb"}
+        })
+   
+
+
+},1000)
+
+
+//PROGRAM
+function xdb_(x={}) {
+
+    //keep log
+    //xdb._int.log = []
+    xdb._int.log.push({time: new Date(), input:JSON.stringify(x) })
+
+    //create---------------------------------
+    if ("create" in x) {
+        log_("//create input------------------------------------------")
+        log_(x)
+        let collecList = [x.create]
+        if (/ /.test(collecList)) { //if multi coll?
+            collecList = x.create.split(" ")
+            //log_(collecList)
+        }       
+
+        //now crete the collec
+        for (collName of collecList) {
+            xdb[collName] = {}
+        }
+
+        //keep the collec name in _int
+        for (name_ of collecList) {
+            xdb._int.collecList.push(name_)
+        }//this part not test yet
+
+        //saveDbFile()
+        log_(xdb)
+
+    } //test=passed
+
+
+    //add-----------------------------------------------------------------------
+    if ("add" in x) {
+        log_("//add input---------------------------------------------------")
+        log_(x)
+        let docToAdd = ""
+        if (Array.isArray(x.add)) {
+            docToAdd = x.add 
+        } else {
+            docToAdd = [x.add]
+        }
+
+        
+        for (doc of docToAdd) {
+            doc._id = xuid_()
+            xdb[x.in][doc._id] = doc 
+        }
+        //saveDbFile()
+        log_(xdb[x.in])
+
+
+        //xdb[x.in][x.add[Object.keys(x.add)[0] ]] = x.add 
+        //so take first key as the dataSet key
+
+    }//test=passed
+
+
+
+    //find command--------------------------------------------------------------
+    //! find multiple keys still not work.....fix it
+    //      * the following key must be searched only in the previous key's result
+    //      { find: { name: 'john', age: 22 }, in: 'people' }
+    if ("find" in x) {
+        log_("//find input----------------------------------------------------")
+        log_(x)
+        let output = {}
+        let keyList = Object.keys(x.find) //name,age
+        log_(keyList)
+        for (i=0; i < keyList.length; i++) { //keyList block
+            log_(keyList[i])
+            if (i==0) { //this is first key search
+                output[i] = [] //output[0] = [{},{},...]
+                for (doc in xdb[x.in]) { //search the collec for matching docs
+                    //log_(doc)
+
+                   
+                    //not embed-search
+                    let firstKeyValue = new RegExp(x.find[keyList[i] ],"i")
+                    if (firstKeyValue.test(xdb[x.in][doc][keyList[i] ] ) ) { //flex search
+                        //log_(output)
+                        output[i].push(xdb[x.in][doc] ) 
+                        //log_(`'${keyList[i]}' matched`)
+                        //log_(output )
+                    } else {
+                        //log_("key[0] not found")
+                    }
+                    
+
+                    
+                }
+                log_(output[i] )
+
+            } else { //here i==1 + 
+                output[i] = [] //create output box for further keys
+                for (doc of output[i-1] ) {
+                    if (doc[keyList[i] ] == x.find[keyList[i] ] ) {
+                        output[i].push(doc)
+                    } else {
+                        //output[i].push("not found")
+                    }
+                }
+                log_(output[i] )
+
+
+            
+
+            }
+
+
+            
+            
+        } //keyList block
+
+
+
+
+/*block while testing above codes        
+        //if value="*" ......#1
+        if (valueToFind == "*") { //take the whole collec
+            for (doc in xdb[x.in] ) {
+                output.push(xdb[x.in][doc])
+            }
+        } else { //not * search
+
+            //'compare inside' loop
+            // > inside the value
+            if (/ /.test(valueToFind) ) { //do we need to search for: ><
+                let splitValue = valueToFind.split(" ")
+                //log_(splitValue)
+
+                //...#2
+                if (splitValue[0] == ">") {
+                    for (docid in xdb[x.in]) {
+                        if (xdb[x.in][docid][keyToFind] > splitValue[1] ) {
+                            output.push(xdb[x.in][docid])
+                        }
+                    }
+                } 
+
+                // #3
+                if (splitValue[0] == ">=") {
+                    for (docid in xdb[x.in]) {
+                        if (xdb[x.in][docid][keyToFind] >= splitValue[1] ) {
+                            output.push(xdb[x.in][docid])
+                        }
+                    }
+                }
+
+
+
+                //...#4
+                if (splitValue[0] == "<") {
+                    for (docid in xdb[x.in]) {
+                        if (xdb[x.in][docid][keyToFind] < splitValue[1] ) {
+                            output.push(xdb[x.in][docid])
+                        }
+                    }   
+                } 
+
+                //#5
+                if (splitValue[0] == "<=") {
+                    for (docid in xdb[x.in]) {
+                        if (xdb[x.in][docid][keyToFind] <= splitValue[1] ) {
+                            output.push(xdb[x.in][docid])
+                        }
+                    }   
+                }
+
+                //#6 ....!=not
+                if (splitValue[0] =="!") {
+                    for (docid in xdb[x.in]) {
+                        if (xdb[x.in][docid][keyToFind] != splitValue[1] ) {
+                            output.push(xdb[x.in][docid])
+                        }
+                    }
+                }//passed 
+                
+            }//compare-inside loop
+
+
+            //...#4
+            //flex search ...regexp
+            //flex search
+            //put regex func for partial find or flex find
+            let _rex = new RegExp(valueToFind,"i")
+
+            //compare
+            let i=0
+            for (docid in xdb[x.in]) {
+                if (_rex.test(xdb[x.in][docid][keyToFind]) ) {
+                    output[i] = xdb[x.in][docid]
+                    i++
+                } //*should change to array.push()
+            }
+
+      
+        }//* search loop
+
+        //check output before return
+        if (output != "") {
+            xdb._int.findOutput = output
+            log_("//find output--------------------------------------------------")
+            log_(output)
+            //log_(xdb._int.findOutput)
+        } else {
+            log_(`//find not found: ${JSON.stringify(x.find) }`)
+        }
+*/
+        
+       
+    }/*
+    basic find is work, cover = comparison
+    rex = work
+    star search = done
+    >, < = done
+    >=, <= ....now work
+    ! ...work
+
+    now the find generally work for 1 key, will work on multi-key further
+
+    now works for multi-keys 
+    >>work more on comparison within the key
+
+    */
+
+
+    //edit command----------------------------------------------------
+    //working on calculatipon within the value = done
+    //multiple edit = done
+    //next work to edit multiple keys on each doc = works now
+
+    if ("edit" in x) {
+        log_("//edit input------------------------------------------------")
+        log_(x.edit)
+        //log_(xdb._int.findOutput)
+        log_("//edit output------------------------------------------------")
+        for (doc of xdb._int.findOutput) { //loop the docs will edit
+            for (key in x.edit) { //loop all keys of this doc
+                xdb[x.in][doc._id][key] = x.edit[key] //edit
+            }
+            xdb[x.in][doc._id].lastUpdated = new Date() //stamp time
+            xdb[x.in][doc._id].note = JSON.stringify(x)  
+            log_(xdb[x.in][doc._id]) //show edited doc
+        }
+    }/*
+    work for multi-key edit .....done
+    more work .... like, edit:{stock:"stock +1"}.....done
+    1 command can edit multiple doc
+
+    */
+
+
+    //show command-----------------------------------------------------
+    // { show:"status" }
+    if ("show" in x) {
+        if (x.show == "status") {
+            log_("//show status-----------------------------------")
+            log_(xdb._int)
+        }
+
+        if (x.show == "entire db") {
+            log_("//show entire db--------------------------------")
+            log_(xdb)
+        }
+    }
+
+
+    //this part is a wrap up of the xdb_
+    if (x != {}) {
+        xdb._int.lastRunTime = new Date() //stamp time before exit
+        saveDbFile() //save every before-exit
+    }
+
+
+} //end xdb_(x)
+
+
+// microTask
+// let code = genShortCode(3)
+
+function xuid_() {
+    let xuid = Date.now()
+    while (xdb._int.idList.includes(xuid)) {
+        xuid = Date.now()
+    }
+    xdb._int.idList.push(xuid)
+    return xuid 
+    //console.log(`OUTPUT OF ${qty} XUID`)
+    //console.log(xuid)
+}//test=passed
+
+function charCode_(codeLength=1) {
+    const charSet = 'abcdefghijklmnopqrstuvwxyz'
+    let output = ''
+    const charSetLeng = charSet.length
+    for (i=0; i < codeLength; i++) {
+        output += charSet.charAt(
+            Math.floor(Math.random()*charSetLeng)
+        )
+    }
+    return output 
+}
+
+
+//read dbx.json
+function readDbFile() {
+    fileSys.readFile(xdbFile,"utf8",(error,data)=>{
+        xdb = JSON.parse(data)
+        log_("////////////////////////////////////////////////////////////////")
+        console.log(`//xdb - loaded dbx.json .........${new Date()}`)
+    })
+}//test=passed
+
+
+
+
+function saveDbFile() {
+    fileSys.writeFile( xdbFile, JSON.stringify(xdb), 
+        (error)=>{
+            if (error) throw error 
+        //console.log("//saved xdb.json")
+    } )
+
+    //save backup file to _xdb.json
+    fileSys.writeFile("_xdb.json", JSON.stringify(xdb), 
+        (error)=>{
+            if (error) throw error 
+        //console.log("//saved xdb.json")
+    } )
+
+}//test=passed
+
+//make a little bit shorter for the console.log() command
+function log_(input) {
+    return console.log(input)
+}//test=passed
+
+
+
+/*NOTE
+2022-09-14  now done create,add,find,edit in basic things
+
+            *will make xuid really unique in the db, put in the
+            _int.xuidList
+
+            she is now studying in Pitsnuloakshe is now studying in Pitsnuloak
+
+2022-09-16  **change data structure to be: db.collec.doc.item, 
+            rewrite the whole new codes
+            
+2022-09-17  create, add, find works with =,>,< and /=/            
+            now the edit works, can handle calc in the input value
+
+2022-09-19  create, add, edit, find ...works, find multi-key also work
+            now working on embed-search            
+*/

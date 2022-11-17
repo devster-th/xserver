@@ -1,0 +1,308 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/deeji/xev2.js"></script>
+<script src="/deeji/deeji2.js"></script>
+<link ref="stylesheet" href="/deeji/deeji.css">
+<link rel="stylesheet" 
+href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" 
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+/* this part will move to deeji.css afterward */
+
+/* menu */
+.menuicon { position:fixed; left:0; bottom:40%; 
+            background-color:; cursor:pointer;
+            font-size:30px; color:black; padding:14px;
+            padding-left:8px; z-index:5; }
+.menuicon:hover { background-color:gray; }            
+
+.menuBox {  position:fixed; bottom:0; left:0; width:60%; 
+            background-color:lightslategray; display:none;
+            z-index:8; }
+             
+.menuitem { font-size:26px; padding:16px; 
+            padding-left:8px; cursor:pointer; position:relative}
+
+.menuitem:hover { background-color:gray;}
+
+.menuCloseicon { font-size:; padding:8px; cursor:pointer;
+                  color:black; padding-right:16px; }
+.menuCloseicon:hover { background-color:gray; }                  
+
+.menuTail { position:absolute; right:16px; 
+            font-size:14px; }                  
+
+/*------------------------------------------------------------*/
+/* message */            
+.messageBox { display:none; width:90%; height:400px; 
+              left:0; bottom:100px; position:fixed;
+              background-color:hotpink;
+              z-index:9; }
+
+.messageHead { font-size:30px; text-align:center; 
+                margin-top:20px}              
+
+.message { font-size:20px; margin-left:8px; }
+
+.boxCloseButt { font-size:14px; padding:14px; cursor:pointer; 
+                position:absolute; bottom:0; color:brown;
+                text-align:center; border:1px solid brown;
+                margin:; width:;}
+
+.boxCloseButt:hover {background-color:lightgray;}
+
+
+/*---------------------------------------------------------*/
+.contentSpace {}
+
+/* for content style-1 , content can have many styles*/
+.contentBox { background-color:; border:; position:relative;}
+.contentPic { width:100% }
+.contentTitle { font-size:24px; font-weight:bold; width:90%; }
+.contentText { font-size:18px; width:90%; }
+.signColor { color:black }
+.tag { font-size:8px;}
+
+/* we can have many styles here */
+
+
+
+/*------------------------------------------------------------*/
+/* general text */
+
+.clearfix::after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+.logo { position:fixed; top:4px; left:4px; 
+        width:40px; height:40px; z-index:10; }
+
+.searchAction { font-size:; color:black;
+                position:fixed; bottom:16px; left:16px; 
+                cursor:pointer; z-index:5;}  
+.searchAction:hover 
+                {background-color:gray}                      
+
+
+/* text */
+.whiteText { color:white }
+
+
+
+</style>
+</head>
+<body>
+<!--------------------------------------------------------------->
+<!-- PAGE -->
+<a href="index.html"><img src="/pic/logo.png" class="logo fa-spin"></a>
+
+<!--quick action-->
+<i class="fa fa-search fa-2x searchAction"></i>
+
+
+<!-- CONTROL -->
+<div id="menuicon" class="menuicon fa fa-caret-right" 
+  onclick="xev({show:'#menuBox'})"></div>
+
+<div id="menuBox" class="menuBox">
+  <div id="menuCloseicon" 
+    class="menuCloseicon fa fa-caret-left fa-2x"
+    onclick="xev({hide:'#menuBox'})"></div>
+</div>
+
+<div id="messageBox" class="messageBox">
+  <h2 id="messageHead" class="messageHead"></h2>
+  <p id="message" class="message"></p>
+
+  <div id="boxCloseButt" class="boxCloseButt"
+    onclick="xev({hide:'#messageBox'})">close</div>
+</div>
+
+
+
+
+
+
+<!-- CONTENT -->
+<!--sample of a content style 
+<div style="position:relative; ">
+  <img src="/pic/goods3.jpg" style="width:100%"">
+  <div style="position:absolute; bottom:60px; left:8px; font-size:36px;">This is text</div>
+</div>
+-->
+
+<div id="contentSpace" class="contentSpace"></div>
+
+
+
+
+
+
+
+
+<script>
+/////////////////////////////////////////////////////////////
+
+//these codes will be moved to xdev afterward
+let session_ = { //this ob comes from server
+  initiatedTime: Date(),
+  user:{
+    loginTime:"",
+    loginid:""
+  },
+  page:{
+    appLogo:"/pic/logo.png",
+    pageStyle:"normal view",
+    contentTheme:"", //changes as user uses
+    controlTheme:"",
+    indicatorTheme:""
+  },
+  menu:{ //if there're more menu put under this
+    name:"mainMenu",
+    icon:">", //not use
+    item:[
+      {text:"sell", act:"deeji({menu:'test'})", 
+      icon:"1", openLink:"", subMenu:"sellMenu"},
+      
+      {text:"buy", act:"deeji({menu:'test'})", 
+      icon:"2", openLink:"", subMenu:"buyMenu"},
+      
+      {text:"auction", act:"deeji({menu:'test'})", 
+      icon:"3", openLink:"", subMenu:""},
+      
+      {text:"report", act:"deeji({menu:'test'})", 
+      icon:"4", openLink:"", subMenu:"reportMenu"},
+      
+      {text:"setting", act:"deeji({menu:'test'})", 
+      icon:"5", openLink:"", subMenu:""},
+      
+      {text:"exit", act:"deeji({menu:'exit'})", 
+      icon:"6", openLink:"", subMenu:""}
+    ]
+  },
+  indicator:{
+    alert:{
+      icon:"",
+      toolTip:""
+    }, 
+  },
+  quickAction:{},
+  message:{},
+  content:[
+    { id:1000,
+      title:"Coffee",
+      text:"this is a good coffee, the world will like this coffee very very much, I guarantee. Whatever you do you have to drink it, drink it now, please, please, please.",
+      textPosition:"bottom",
+      textColor:"white",
+      pic:"/pic/goods1.jpg",
+      sign:{
+        star:true,
+        love:false
+      },
+      tag:"BEST OF THE WORLD",
+      link:"/goods.html",
+      price:100.45,
+      template:"text in pic"
+    },
+
+    { id:2000,
+      title:"เย็นตาโฟ",
+      text:"เย็นตาโฟที่อร่อยที่สุดในโลก ว๊าว ต้องลงกินเนสบุคแล้ว ใครเคยไปกินบ้าง ที่ร้านนี้ ไม่กินถือว่าผิดนะ โอยๆๆๆ",
+      textPosition:"bottom",
+      textColor:"",
+      pic:"/pic/goods2.jpeg",
+      sign:{
+        star:true,
+        love:false
+      },
+      tag:"DON'T MISS",
+      link:"/goods.html",
+      price:80.50,
+      template:"text in pic"
+    },
+
+    { id:3000,
+      title:"Cake",
+      text:"very very very good taste cake you ever tried before. This is special special superb special, yoooooooooooooooo",
+      textPosition:"top",
+      textColor:"",
+      pic:"/pic/goods3.jpg",
+      sign:{
+        star:false,
+        love:false
+      },
+      tag:"OUT OF STOCK",
+      link:"/goods.html",
+      price:500.25,
+      template:"text in pic"
+    }
+  ]
+}//end of session_ define 
+
+//document.querySelector("#menuicon").innerHTML = session_.menu.icon 
+loadMenu()
+loadContent()
+
+function loadMenu() {
+  //create menu
+  for (ii of session_.menu.item) {
+    let newitem = document.createElement("div")
+    newitem.className = "menuitem"
+
+    let sign =""
+    if (ii.subMenu !="") {
+      sign = "fa fa-angle-down"
+    }
+    newitem.innerHTML =`${ii.icon} &nbsp;${ii.text} <span class="menuTail ${sign}"></span>`  
+    newitem.setAttribute("onclick",ii.act)
+    document.querySelector("#menuBox").append(newitem)
+  }
+}
+
+//the func that loads content is the one that actually show the stuff
+//that how it shows, the layout, color, so on. Together with the class.
+function loadContent() {
+  for (ii of session_.content) {
+    let newContent = document.createElement("div")
+    newContent.className = "contentBox"
+
+    //text position in the contentBox
+    let position = ""
+    if (ii.textPosition=="top") {
+      position = "top:5%"
+    } else if (ii.textPosition=="bottom") {
+      position = "bottom:5%"
+    }
+
+    //text color
+    let textColorClass =""
+    if (ii.textColor=="white") textColorClass = "whiteText"  
+
+    //sign
+    let starSign =""
+    if (ii.sign.star==true) {
+      starSign = "<i class='signColor fa fa-star'></i>"
+    }
+
+    //tag
+    //let tag="yo!"
+
+
+    newContent.innerHTML = 
+    `<img class="contentPic" src=${ii.pic}>
+    <div style="position:absolute; left:4px; ${position};">
+      <div class="contentTitle ${textColorClass}"><a href=${ii.link}>${ii.title}</a>&nbsp;&nbsp;${starSign} <span class="tag w3-tag">${ii.tag}</span> <span class="tag w3-tag">THB ${ii.price}</span></div>
+      <div class="contentText ${textColorClass}">${ii.text}</div>
+    </div>`
+    
+    document.querySelector("#contentSpace").append(newContent)
+  }
+}
+
+</script>
+</body>
+</html>

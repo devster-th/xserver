@@ -1,0 +1,184 @@
+<html>
+<head>
+<style>
+textarea {width:90%; height:80px; font-size:large}
+.savedNote {font-size:large ;}
+.time {font-size:small; font-style:italic; color:gray}
+.screenName {font-weight:bold; font-size:large; color:Coral}
+.label {font-size:x-small; text-transform:uppercase; background-color:black; color:white; }
+.controlBox {position:fixed; top:0; background-color:white; width:100%}
+.right {text-align:right;}
+</style>
+</head>
+<body>
+<div class="controlBox">
+  <span class="screenName">verySimpleNote -- vsn 0.1</span>
+  <br>
+  <div>your name <input id="namee" type="text" size="10">&nbsp;&nbsp;tag <input id="tagg" type="text" size="15">
+  </div>
+  <textarea id="notee" placeholder="put your note here..."></textarea>
+  <button onclick="save()">save</button> <button onclick="search()">search</button>
+  <br><br><span class="label">latest top</span>
+</div>
+<div id="noteList"></div>
+
+<script>
+publish(loxx()) 
+
+function publish(obj) {
+  //this f publish objects into html
+  //input should be []
+  if (obj) {
+    for (eachDoc of obj) {
+      let newEl = document.createElement("div")
+      newEl.className = "savedNote"
+      newEl.innerHTML = 
+        "@"+ eachDoc.name + "/ " + eachDoc.note + ` -- #${eachDoc.tag}
+        <br><span class="time">${eachDoc.time}</span><hr>`
+      document.querySelector("#noteList").prepend(newEl)
+      // so the above ^ is the template (template=html codes)
+    }
+
+  } //if noteObj==null, do nothing
+}
+
+
+function save() {
+ 
+  let noteObj = 
+    { name: namee.value, 
+      tag:  tagg.value, 
+      note: notee.value, 
+      time: new Date()
+    }
+
+
+  let newText = document.createElement("div")
+  newText.className = "savedNote"
+  newText.innerHTML = 
+    "@"+ namee.value + "/ " + notee.value + ` -- #${tagg.value}
+    <br><span class="time">${noteObj.time}</span><hr>`
+  //publish each note 
+  document.querySelector("#noteList").prepend(newText)
+  notee.value = ""
+
+  loxx(noteObj)
+}//work
+
+
+
+function search() {
+  let searchFor = {
+    name: namee.value,
+    tag: tagg.value,
+    note: notee.value 
+    }
+  console.log(searchFor)
+  
+  let wholeNote = loxx()
+  let continuee = true  
+
+  //try name first
+  let output = []
+  if (searchFor.name !="") {
+    let nameKey = new RegExp(searchFor.name,"i")
+    for (eachDoc of wholeNote) {
+      if (eachDoc.name.match(nameKey)) output.push(eachDoc)
+    }
+    if (output=="") continuee = false //nothing ound since beginning 
+  }
+  
+
+  //check the tag
+  if (continuee && searchFor.tag !="") {
+    let inputt = ""
+    if (output !="") inputt = output  
+    else if (searchFor.name=="") inputt = wholeNote 
+    output =[]
+    let tagKey = new RegExp(searchFor.tag,"i")
+    for (eachDoc of inputt) {
+      if (eachDoc.tag.match(tagKey)) output.push(eachDoc)
+    }
+    if (output=="") continuee = false 
+  }
+  
+
+  //check the note
+  if (continuee && searchFor.note !="") {
+    let inputt = ""
+    if (output !="") inputt = output 
+    else if (searchFor.tag=="") inputt = wholeNote 
+    output =[]
+    let noteKey = new RegExp(searchFor.note,"i")
+    for (eachDoc of inputt) {
+      if (eachDoc.note.match(noteKey)) output.push(eachDoc)
+    }  
+    //don't need to flag the continuee 
+  }
+
+
+  //got output, now time to publish
+  document.querySelector("#noteList").innerHTML =""
+  if (output !="") publish(output)
+  else alert("nothing found")
+
+
+}//work
+/*ISSUE
+  100 --each search uses the previouse output as its input, so if no search key in such field then it does nothing.
+  >> need more condition to check
+
+  >>now generally work for all 3 keys search, work more on complex terms
+
+
+*/
+
+
+//make thing simimlars to xess but this is for localStorage
+/*will create localStorage named locx 
+
+USE
+loxx() --read the whole data in object type
+loxx({...}) --save object into locx, if there's some object there just add the new ones like add records in db
+loxx([{..},{..}, ...])
+
+so we regard the loxx as an array of objects
+*/
+function loxx(v) {
+  if (v==undefined) {//read mode
+    return JSON.parse(localStorage.getItem("loxx")) 
+  
+  //below is write mode    
+  } else {//there's input
+
+    //if loxx not existed yet
+    if (localStorage.getItem("loxx")==undefined) {
+      if (Array.isArray(v)) {//v should be array
+        localStorage.setItem("loxx",JSON.stringify(v))
+      } else { //if v not array, make it array
+        localStorage.setItem("loxx",JSON.stringify([v]))
+      }
+
+    //if loxx exists
+    } else { 
+      let loxx_ = JSON.parse(localStorage.getItem("loxx") )
+      //if v is array, loop it to add to existing
+      if (Array.isArray(v)) {
+        for (item of v) {
+          loxx_.push(item)
+        }
+      } else {
+        //if v not array just attach as another data set
+        loxx_.push(v)
+      }      
+      localStorage.setItem("loxx",JSON.stringify(loxx_))
+    }
+  }
+}//work
+/*  add data, read data = works
+    should add 
+*/ 
+
+</script>
+</body>
+</html>

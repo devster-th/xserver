@@ -1,0 +1,32 @@
+<html>
+<style>
+body {}
+input {}
+textarea {width:100%;height:50px}
+</style>
+<body>
+<h1 contenteditable="true">Please discuss on this topic</h1>
+<div id="publish"></div>
+<br>
+your name: <input type="text" id="nam">
+<textarea id="inpu"></textarea>
+<button onclick="pub()">post</button>
+
+<script>
+let count=0 
+function pub() {
+  count++
+  let newPost = document.createElement("div")
+  newPost.innerHTML = count + "/" + nam.value + ": " + inpu.value + "<hr>"
+  document.querySelector("#publish").appendChild(newPost)
+  inpu.value =""
+}
+
+
+
+</script>
+
+
+
+</body>
+</html>

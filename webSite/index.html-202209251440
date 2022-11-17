@@ -1,0 +1,48 @@
+<html>
+<head>
+<script src="/deeji/deeji2.js"></script>
+</head>
+<body>
+<h1>homepage</h1>
+
+<form action="/get">
+    <p>Your request: <input name="request" size="35"><br>
+    <!-- Your message: <input name="message" value="yesssssss"><br>
+    -->
+    <input type="submit" value="SUBMIT"></p>
+</form>
+
+
+<p><a href="page1.html">Go to page1</a></p>
+
+
+<script>
+deeji("test")
+
+//globalThis.BROWS = {}
+
+//if no saved var, create new
+if (!sessionStorage.getItem("_session")) {
+    globalThis._session = {
+        appName: "deeji",
+        startTime: Date.now(),
+        commu: {}
+    } 
+    sessionStorage.setItem("_session",JSON.stringify(_session))
+} else {
+    //if var exists, load the var
+
+    _session = JSON.parse(sessionStorage.getItem("_session"))
+}
+    console.log(_session)
+
+
+</script>
+
+
+</body>
+</html>
+
+<!--this file is at: /simpleApp/webSite/index.html 
+for testing GET method
+-->

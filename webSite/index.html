@@ -1,0 +1,96 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!--load styles here-->
+<link rel="stylesheet" href="/deeji/deeji.css">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style></style>
+
+<!--load scripts here-->
+<script src="/deeji/xev2.js"></script>
+<script src="/deeji/deeji2.js"></script>
+
+</head>
+<body>
+<h1>homepage/Get form</h1>
+
+<form action="/get_">
+    <!--
+    <p>request <input name="request" size="35"><br>
+     Your message: <input name="message" value="yesssssss"><br>
+    -->
+    <textarea name="request" rows="4" cols="40"></textarea>
+    <br><input type="submit" value="Send">
+
+</form>
+
+
+<p><a href="page1.html">Post form</a>
+<br><a href="fullWidth.html">full width content</a>
+<br><a href="halfWidth.html">half width content</a>
+<br><a href="testTemplate.html">test template</a>
+<br><a href="deeji.html">deeji page</a>
+<br><a href="xht1.html">xht</a></p>
+<button onclick="console.log(xev({gen:'xuid'}))">gen xuid</button>
+<button onclick="test()">test</button>
+
+
+<script>
+//deeji("test")
+
+//if no saved var, create new
+//this block may put into deeji2.js
+/*
+if (!sessionStorage.getItem("_session")) {
+    //if no session, create new and save to sessionStorage
+    globalThis._session = {
+        appName: "deeji",
+        sessid: Date.now(),
+        content: [],
+        control: {
+            menu: {},
+            indicator: {},
+            message: {}
+        },
+        commu: {
+            in:"", out:""
+        },
+        user: {} //must be encrypted in real-use
+    } 
+    sessionStorage.setItem("_session",JSON.stringify(_session))
+} else {
+    //if session exists, loads from sessStor
+    globalThis._session = JSON.parse(sessionStorage.getItem("_session"))
+}
+*/ 
+
+
+function test() {
+  //rewrite the xuid
+  let init = Date.now() //this code will make sure that we won't dupplicate with the previouse code
+  let xuid = Date.now()
+  while (xuid==init) {
+    xuid = Date.now()
+  } 
+  console.log(xuid) //so code2 is the real xuid
+}//work
+
+
+
+
+
+
+
+
+
+</script>
+
+
+</body>
+</html>
+
+<!--this file is at: /simpleApp/webSite/index.html 
+for testing GET method
+-->

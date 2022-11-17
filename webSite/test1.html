@@ -1,0 +1,31 @@
+<head>
+<style>
+.butt1 {padding:20px; background-color:green}
+.butt2 {padding:20px; background-color: aqua;}
+</style>
+</head>
+<button class="butt1" 
+onclick="prom()">Ask me something</button>
+
+<br><button class="butt2" 
+onclick="conf()">Please confirm this</button>
+
+<script>
+//test prompt
+function prom() {
+  let passw = prompt("yo! please put your password")
+  if (passw=="") alert("you not key a pass")
+  else if (passw !=null) {
+    alert(passw)
+  }
+  //if null don't do anything, null=cancel
+}
+
+function conf() {
+  let conf = confirm("Are you confirmed?")
+  if (conf) alert("THANKS, you've confirmed")
+  else alert("sorry, you not confirm :'( ")
+}
+
+
+</script>

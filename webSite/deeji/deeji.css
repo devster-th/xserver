@@ -1,0 +1,112 @@
+/* deeji.css 
+this file provides css classes for the deeji.html and related.
+*/
+
+/* general */
+body {margin:0; padding:0}
+p,b,u,i,span,th,td,a,li,select,option,textarea,input,button  {font-size:x-large; margin-left:8px; margin-right:8px; }
+div {font-size:x-large;}
+table,th,td {border:1px solid black; border-collapse:collapse;}
+table,textarea {width:100%; margin-left:8px; margin-right:8px}
+button {padding:16px; font-size:20px; border:1px solid gray; background-color:lightskyblue; cursor:pointer; margin-left:8px; margin-right:8px; }
+button:hover {background-color:orange ;}
+
+/* for content item */
+.contentBox {position:relative }
+.fullWidth {width:100%;}
+.halfWidth {width:50%}
+.textBoxBottomLeft {position:absolute; left:8px; bottom:30px} 
+.textTitle {font-weight:bold; font-size:36px; }   
+.textBrief {font-size:18px; }
+
+/* color */
+.textWhite {color:white}
+
+
+/* label */
+.label {font-size:small; color:white; background-color:black; text-transform:uppercase;}
+
+
+
+
+/* copy from fullWidth.html */
+
+/* menu 
+.menuicon { position:fixed; left:0; bottom:40%; 
+  background-color:; cursor:pointer;
+  font-size:30px; color:black; padding:14px;
+  padding-left:8px; z-index:5; }
+.menuicon:hover { background-color:gray; }            
+
+.menuBox {  position:fixed; bottom:0; left:0; width:60%; 
+  background-color:lightslategray; display:none;
+  z-index:8; }
+   
+.menuitem { font-size:26px; padding:16px; 
+  padding-left:8px; cursor:pointer; position:relative}
+
+.menuitem:hover { background-color:gray;}
+
+.menuCloseicon { font-size:; padding:8px; cursor:pointer;
+        color:black; padding-right:16px; }
+.menuCloseicon:hover { background-color:gray; }                  
+
+.menuTail { position:absolute; right:16px; 
+  font-size:14px; }                  
+
+/*------------------------------------------------------------*/
+/* message             
+.messageBox { display:none; width:90%; height:400px; 
+    left:0; bottom:100px; position:fixed;
+    background-color:hotpink;
+    z-index:9; }
+
+.messageHead { font-size:30px; text-align:center; 
+      margin-top:20px}              
+
+.message { font-size:20px; margin-left:8px; }
+
+.boxCloseButt { font-size:14px; padding:14px; cursor:pointer; 
+      position:absolute; bottom:0; color:brown;
+      text-align:center; border:1px solid brown;
+      margin:; width:;}
+
+.boxCloseButt:hover {background-color:lightgray;}
+
+
+/*---------------------------------------------------------
+.contentSpace {}
+
+/* for content style-1 , content can have many styles
+.contentBox { background-color:; border:; position:relative;}
+.contentPic { width:100% }
+.contentTitle { font-size:24px; font-weight:bold; width:90%; }
+.contentText { font-size:18px; width:90%; }
+.signColor { color:black }
+.tag { font-size:8px;}
+
+/* we can have many styles here */
+
+
+
+/*------------------------------------------------------------*/
+/* general text 
+
+.clearfix::after {
+content: "";
+clear: both;
+display: table;
+}
+
+.logo { position:fixed; top:4px; left:4px; 
+width:40px; height:40px; z-index:10; }
+
+.searchAction { font-size:; color:black;
+      position:fixed; bottom:16px; left:16px; 
+      cursor:pointer; z-index:5;}  
+.searchAction:hover 
+      {background-color:gray}                      
+
+
+/* text 
+.whiteText { color:white }

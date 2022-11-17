@@ -1,0 +1,253 @@
+<html>
+<head>
+<style>
+h4 {padding:0; margin:0; margin-bottom:4px ; }
+textarea {width:100%; height:90%; overflow-y:scroll}
+</style>
+</head>
+<body>
+<h4>xht -- a cleaner html</h4> 
+<button onclick="readOnlyBlock()" title="read only in the blck">block</button>
+<button onclick="xht_.value=xht(xht_.value)" title="read the whole text space">trans</button>
+<button onclick="tam()" title="translate tamma">tam</button>
+<button onclick="save()" title="save to browser">save</button>
+<button id="savToFil" onclick="saveFile()">saveFile</button>
+<button onclick="reload()" title="reload from browser">reload</button>
+<button onclick="remov()" title="remove browser data">remov</button>
+<button onclick="save();window.open('xhtOutput.html')" title="open new tab to see output in html">output</button>
+
+<textarea id="xht_" placeholder=""></textarea>
+
+<script>
+/* HEAD
+xht will simplify the html coding so it converts the simpler version to the full html. May be good for templating and alike.
+
+
+
+pattern:
+
+    tag/............/tag
+    tag>att:vvvv,att:vvvv>.........../tag
+    hr/
+    br/
+
+some tags can be auto-closing like: h1-6, option, li
+some can be shortenned like: sel for select, opt for option
+
+the table will use:
+th/column,col,col,col,..../
+td/col,col,col,..../
+so save a lot of time
+
+there's a var-field, takes: {{var}}
+
+example of a complex one:
+
+  img>src:{{pic}},class:contPic>
+  div>class:contTitle>{{title}}/div
+
+**so in overall, saves a lot of time from typing the full codes of html
+
+*/ 
+
+function readOnlyBlock() {
+  let blockOnly = xht_.value.match(/^.*\[\[(.*)\]\].*$/ms)
+  let converted = xht(blockOnly[1])
+  blockOnly[0] = blockOnly[0].replace(
+    /(?<=\[\[).*(?=\]\])/ms, converted)
+  xht_.value = blockOnly[0] //put it back
+}
+
+
+
+function xht(vv) {
+  console.log("RUN")
+
+  //the head
+  vv = vv.replace(
+/(?<!\<.*)(p|h[1-6]|div|li|[uo]l|button|but|form|mark|span|table|select|sel|input|hr|br|img|div|option|opt|a|b|i|u)(\/|\>([^\s]+?)\>)/gm,
+    (full,g1,g2,g3)=>{
+      //g1:tag, g2: / or option, g3:attribute-block inside the option
+      console.log("//head")
+      console.log(full)
+      console.log(g1)
+      console.log(g2)
+      console.log(g3)
+
+      if (g1=="but") g1="button"
+      if (g1=="opt") g1="option"
+      if (g1=="sel") g1="select"
+
+      let headTag = `<${g1}`
+      
+      //work on option/attributes
+      if (g3 !=undefined) { //has option
+        let att = ""
+        if (g3.includes(",")) { //if has > 1 att
+          let attBlock = g3.split(",") 
+          attBlock.forEach(item => {
+            let colon = item.indexOf(":")
+            att += ` ${item.slice(0,colon)}` + `="${item.slice(colon+1)}"`
+          })
+
+        } else {
+          let colon = g3.indexOf(":")
+          att += ` ${g3.slice(0,colon)}` + `="${g3.slice(colon+1)}"`
+        }
+        return headTag + att + ">"
+      } else {
+          return `<${g1}>`
+      }
+    }
+  )//work
+  
+  
+  //table 
+  vv = vv.replace(
+    /^(?<!\<)(t[hd])\/([^/]+)\/$/gm, (full,g1,g2)=>{
+      console.log(full)
+      console.log(g1) //tag: th, td
+      console.log(g2) //the row body like: name,age,sex
+
+      let row ="<tr>" //start the row  
+      let rowBlock = g2.split(",") //if manay column will split by ,
+      for (item of rowBlock) {
+        row += `<${g1}>` + item + `</${g1}>`
+      }
+      return row + "</tr>" 
+    }
+  )
+
+
+  //the tail
+  vv = vv.replace(
+/(?<!\<|\-)\/(p|h[1-6]|div|li|ul|ol|button|but|form|mark|span|table|select|sel|option|opt|a|b|i|u)(?!.*\")/gm, 
+    (full,g1)=>{
+
+      if (g1=="but") g1="button"
+      if (g1=="opt") g1="option"
+      if (g1=="sel") g1="select"
+      return `</${g1}>`
+}
+  )//work
+
+
+  //auto close tag.....not work yet
+  vv = vv.replace(
+    /^\<(li|option|h[1-6])\>((?!\<\/(li|option|h[1-6])\>).)+$/gm, 
+      (full,g1)=>{
+        console.log("//auto-close")
+        console.log(full)
+        console.log(g1)
+        
+        return full + `</${g1}>` 
+      }
+  )//work 
+
+
+  //the var-field {{vvv}}
+  //following for test
+  let pic="/pic/goods1.jpg" 
+  let title="This is best product"
+  let text="if you never buy this, do it now!"
+
+  vv = vv.replace(
+    /\{\{(\w+)\}\}/gm, (full,g1)=>{
+     try {
+      return eval(g1) //the text in the {{..}} will become var 
+     } catch(error) {
+      //got error, may be the var not exist
+      console.log(error) //notify error 
+      return full //not change anything 
+     }
+  })//work
+  /*  */
+
+
+  //the blank-space : ......./---/...... this for 3 spaces
+  vv = vv.replace(
+    /\/(\-+)\//gm, (full,g1)=>{
+      console.log(full)
+      console.log(g1)
+      spaceSet = ""
+      for (count=0; count < g1.length; count++) {
+        spaceSet += "&nbsp;"
+      }
+      return spaceSet 
+    }
+  )//work
+
+
+
+
+  return vv 
+
+}//end of xht()
+
+
+
+
+function tam() {
+  if (!/^\<\!\-\-tam\-\-\>/) {
+    xht_.value = xht_.value.trim() //trim head & tail
+    xht_.value = xht_.value.replace(/\n/gm,"") //delete newline-char 
+    xht_.value = xht_.value.replace(/^/,"<!--tam-->\n<p>") //mark 
+    xht_.value = xht_.value.replace(/$/,"</p>\n<!--tam-->\n") //mark 
+  }
+  xht_.value = xht_.value.replace(/\[/gm,"\n<p>$&")
+  xht_.value = xht_.value.replace(/ครั้งนั้น|ลำดับนั้น/gm,"\n<p>$&")
+
+}//work
+
+
+function save() {
+  localStorage.setItem("xht",xht_.value)
+}//work
+
+
+function reload() {
+  xht_.value = localStorage.getItem("xht")
+}//work
+
+
+function remov() {
+  localStorage.removeItem("xht")
+  xht_.value = ""
+  /*  if name the func clear() may be it conflicts with the js, so 
+      not work as we think. Then rename it to remov(), work now.
+  */ 
+}//work
+
+
+function saveFile() {
+  const savFilButt = document.querySelector("#savToFil")
+  var link = document.createElement("a")
+  var blo = new Blob([xht_.value],{type:"text/plain"})
+  link.setAttribute("href",URL.createObjectURL(blo))
+  link.setAttribute("download",`xht${Date.now()}.html`)
+  link.click()
+  URL.revokeObjectURL(link.href)
+}//work
+
+/* END NOTE
+2022-10-18  now everything seems fine, can work within only the [[...]] block, or the whole text space. Don't find bug yet. Will test more.
+
+oct19       add button, but, works fine.
+
+
+
+*/
+
+/* BUG
+#100   when put blank space in the option like: p>  >...../p it takes the space to form attributes. >>the prog must kill spaces before translate 
+        =solved, put [^\s] in the option group
+
+
+
+*/
+
+
+
+</script>
+</body>
+</html>

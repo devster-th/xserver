@@ -1,0 +1,375 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/deeji/xev2.js"></script>
+<link rel="stylesheet" 
+href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" 
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Fjalla+One|Libre+Baskerville">
+<style>
+/* all these css should be put in deeji.css */
+body {margin:0; padding:0}
+.contBox {position:relative}
+.contPic {width:100%}
+.textFrame {position:absolute; left:8px; bottom:30px;}
+.contTitle {font-size:48px; color:white; 
+  font-family:"Fjalla One",serif;
+  background-color:black; cursor:pointer;}
+.contBrief {font-size:24px}
+.whiteText {color:White}
+.conticon  {position:absolute; top:20px; 
+              right:20px; font-size:48px}
+.contLabel {position:absolute; top:80px; right:4px; 
+  font-size:20px; background-color:black; text-transform:uppercase; 
+  color:white; font-family:"Fjalla One",sans-serif}
+.priceTag {position:absolute; top:110px; right:4px;
+  font-size:20px; background-color:black; text-transform:uppercase;
+  color:white; font-family:"Fjalla One",sans-serif}   
+              
+/* control */
+.appLogo { position:fixed; top:4px; left:4px; 
+  font-size:32px; color:darkred; z-index:10; width:40px; }
+.menuicon {position:fixed; left:8px; bottom:43%; font-size:32px;
+  z-index:8; cursor:pointer; color:darkred; 
+  padding:8px 14px 8px 16px; margin:0; }
+.menuicon:hover {background-color:white}     
+.posticon {position:fixed; left:290px; bottom:40px; font-size:32px;
+  z-index:5; cursor:pointer; color:black; padding:8px;
+  border:1px solid gray;}
+.posticon:hover {background-color:white;}  
+.searchicon {position:fixed; left:40px; cursor:pointer;
+  bottom:40px; font-size:32px; z-index:5; padding:8px; 
+  color:black; border:1px solid gray}
+.searchicon:hover {background-color:white}  
+.searchBox {display:none; position:fixed; left:0; bottom:40px;
+  background-color:; font-size:125%; z-index:9;
+  width:; height:}
+.searchinput {background-color:white; font-size:32px}
+.filtericon {position:fixed; bottom:40px; left:120px; z-index:5;
+  font-size:32px; padding:8px; color:black; cursor:pointer;
+  border:1px solid gray}   
+.filtericon:hover {background-color:white} 
+.layouticon {position:fixed; bottom:40px; left:200px; z-index:5;
+  font-size:32px; padding:8px; color:black; cursor:pointer;
+  border:1px solid gray}
+.layouticon:hover {background-color:white}
+.menuBox {display:none; position:fixed; z-index:9;
+  left:0; bottom:0; font-size:36px; font-family:sans-serif;
+  background-color:gray; width:60%}
+.menuitem {padding:8px; cursor:pointer; font-family:"Fjalla One",sans-serif; font-weight:lighter }
+.menuitem:hover {background-color:lightgray;}
+.menuCloser {padding:8px 16px 8px 8px; cursor:pointer;}
+.menuCloser:hover {background-color:lightgray;}
+.alerticon {display:; position:fixed; left:14px; bottom:50%; 
+  font-size:32px; z-index:10; cursor:pointer; color:DarkRed}
+.alertBox {display:none; position:fixed; left:0; width:70%;
+  top:50%; background-color:lightyellow; z-index:10; 
+  font-size:140%; border:3px solid black}
+.alertText {margin-left:10px; margin-right:10px; font-family:sans-serif;}
+.boxCloser {padding:12px 14px 10px 12px; cursor:pointer; 
+  font-family:;}
+.boxCloser:hover {background-color:lightgray;}
+.smallText {font-family:"Fjalla One",sans-serif; font-size:small}
+.titleFont {font-family:"Fjalla One",serif}
+</style>
+</head>
+
+<body>
+<div id="controlSpace">
+
+  <img src="/pic/logo.png" class="appLogo fa fa-spin"></i>
+
+  <i class="fa fa-caret-right menuicon" 
+      onclick="xev({show:'#menuBox'})"></i>
+
+  <i class="posticon fa fa-pencil"
+    onclick="alert('show box for user to write a post')"></i>
+
+  <i class="searchicon fa fa-search"
+      onclick="xev({show:'#searchBox'})"></i>
+
+  <div id="searchBox" class="searchBox">
+    <span class="boxCloser fa fa-close"
+      style="margin:0; padding:8px 10px 8px 8px"
+      onclick="xev({hide:'#searchBox'})"></span> <input type="search" class="searchinput" 
+      placeholder="search keys"
+      id="searchField" name="searchField">
+  </div>
+
+  <i class="layouticon fa fa-th-large"
+      onclick="alert('YO! no search yet')"></i>
+
+  <i class="filtericon fa fa-filter"
+      onclick="alert('YO! no search yet')"></i>
+
+
+  <!-- menuBox -->
+  <div id="menuBox" class="menuBox">
+    <div class="menuitem" onclick="alert('test')">1. home</div>
+    <div class="menuitem">2. my Sales</div>
+    <div class="menuitem">3. my Purchase</div>
+    <div class="menuitem">4. my items</div>
+    <div class="menuitem">5. pending Task</div>
+    <div class="menuitem">6. Customers</div>
+    <div class="menuitem">7. Partners</div>
+    <div class="menuitem">deeji*</div>
+    <span class="menuCloser fa fa-caret-left"
+      onclick="xev({hide:'#menuBox'})"> <span class="smallText">CLOSE</span></span>
+
+  </div>
+
+  <!-- alert -->
+  <i id="alerticon" class="alerticon fa fa-info-circle"
+    onclick="xev({show:'#alertBox'});xev({hide:'#alerticon'})"></i>
+  
+  <div id="alertBox" class="alertBox">
+    <h1 class="alertText titleFont">This is an alert</h1>
+    <p class="alertText">This is the alert's body. thai malaysia vietnam singapore laos brunei puthan malaysia russia USA udornthani bangkok lampang chiangmai.</p>
+    <span class="smallText alertText" 
+    style="color:slateblue; ">SERIOUSNESS: <span data-text="seriousness">NORMAL</span></span>
+    <br><span class="boxCloser fa fa-close"
+      onclick="xev({hide:'#alertBox'})"> <span class="smallText">CLOSE</span></span>
+  </div>
+
+
+</div>
+
+
+
+
+<div id="contentSpace"></div>
+
+<div id="otherSpace">
+  <div data-tex="111">
+    <div data-tex="222">
+      <div data-tex="333">
+        <div data-text="444"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+//this is data from server
+const ob = [
+  { productName:"Latte",
+    productBrief:"WOW!, what a great coffee....., let's try it",
+    mainPic:"/pic/goods1.jpg",  
+    productid: 1000,
+    whiteText: true,
+    badge: "star",
+    label: "HOT ITEM",
+    unitPrice: "thb 300.56" 
+  },
+  { productName:"Yen Taa Fo",
+    productBrief:"Have you ever tried this kind of food in Thailand? If not, do it!",
+    mainPic:"/pic/goods2.jpeg",
+    productid: 2000,
+    unitPrice: "thb 856.58"
+  },
+  { productName:"What a cake",
+    productBrief:"This cake is just out from the oven, quick quick quick!",
+    mainPic:"/pic/goods3.jpg",
+    productid: 3000,
+    badge: "star",
+    label: "PROMOTION",
+    unitPrice: "thb 59876.52"
+  },
+  { productName:"Very very BIG Burger",
+    productBrief:"Welll, this probably delicius burger in the world. Don't wait until it's all gone. Com'on!",
+    mainPic:"/pic/pic4.jpeg",
+    productid: 4000,
+    label: "OUT OF STOCK",
+    unitPrice: "thb 745659.52",
+    whiteText: true 
+  },
+  { productName:"This is pork",
+    productBrief:"yeahhhhhhhhhhhhh, yoooooooooooooooooo, yoarrrrrrrrrrrr",
+    mainPic:"/pic/pic7.jpeg",
+    unitPrice: "thb 8456215.25" 
+  },
+  { productName:"Don't know how to call it",
+    productBrief:"It's nice and ummmmmmmmmmmm, sounds good, WOOOOOOAAAAA",
+    mainPic:"/pic/pic5.jpeg",
+    badge:"star",
+    unitPrice: "thb 8546.85" 
+  }
+]
+// for the whiteText property the app should auto decide it
+
+
+
+const detailData = {
+  name:"This is a page of XYZ product",
+  productid:"123456789",
+  description:"xxxxxxxxxxxxxxxxxxxxxxxxx yyyyyyyyyyyy zzzzzzzzzzzz aaaaaaaaaaa bbbbbbbbbbbbbbbc cccccccccccccc dddddddddddd eeeeeeeeee fffffffffffff ggggggggggg hhhhhhhhhhhhhhh iiiiiiiiiiiiiiiiii jjjjjjjjjjjjjjjjj kkkkkkkkkk lllllllll mmmmmm nnnnnnnnnn oooooooooo ppppppppp qqqqqqqqqqq rrrrrrrr sssssssss tttttttt uuuuuuuu vvvvvvvv wwwwwwwwwww xxxxxxxxxxxx yyyyyyyy zzzzz",
+  productPic:"/pic/goods.jpg"
+}
+
+
+
+detailTem = {
+  tag:"div",
+  class:"detailPage",
+  innerHTML:`
+  <h1 data-text="name" class="productName"></h1>
+  <img data-src="pic" class="detailPic">
+  <p data-test="des" class="detailText"></p>
+  `
+}
+
+
+
+
+//this is template to display on html              
+let tem = {
+  name:"list of products",
+  tag:"div",
+  temid:"aaaaaaaaaaaaaaa",
+  attribute:"",
+  class:"contBox",
+  innerHTML:`
+  <img data-src="image" class="contPic">
+  <i data-class="icon" class="conticon"></i>
+  <span class="contLabel" data-text="label"></span>
+  <span class="priceTag" data-text="price"></span>
+  <div class="textFrame">
+    <span class="contTitle" data-text="name"
+      onclick="openDetail()"></span>
+    <div class="contBrief" data-text="brief"></div>
+  </div>`
+}
+  
+
+
+//this func takes data from object, applies template
+publis( tem,ob,
+        { image:"mainPic", 
+          name:"productName", 
+          brief:"productBrief", 
+          icon:"badge",
+          label:"label", 
+          price:"unitPrice"  
+        },
+        "#contentSpace" )
+
+
+function publis(tem,dat,mapping,publishAt) {
+
+  // 1. create var from mapping, set initial value to ""
+  for (varName in mapping) {
+    eval("globalThis." + varName + " ='' " )
+  }
+
+  // 2. loop data object
+  for (eachOb of dat) {
+
+    //if (eachOb.whiteText) clog("white")
+
+    // 2.1 fill var from the object
+    for (eachVar in mapping) { 
+      this[eachVar] = eachOb[mapping[eachVar]] // image = dat.mainPic
+      //clog(this[eachVar])
+    }
+
+    // 2.2 create element & apply template
+    var newEl = document.createElement(tem.tag)
+    newEl.id = "con" + xuid() //this is content id
+    newEl.className = tem.class 
+    newEl.innerHTML = tem.innerHTML 
+
+    // 2.3 loop children of newEl, find the embeded var, and live it
+    for (eachChild of newEl.children) {
+
+      checkVar(eachChild, eachOb.whiteText) //2.3.1
+
+      // 2.3.2 if eachChild has baby, loop baby too
+      if (eachChild.hasChildNodes()) { // how deep we should go?
+        //clog(eachChild.children)
+        for (baby of eachChild.children ) {
+          checkVar(baby, eachOb.whiteText)
+        }
+      }
+
+    }
+
+    // 2.4 append to #contentSpace
+    el(publishAt).append(newEl)
+
+  }
+
+  // check & make var from attribute: data-???
+  function checkVar(el,whiteText) { // for now just take 1 opt whiteText first, may adjust in future
+    
+    if (el.hasAttribute("data-src")) {
+      el.setAttribute("src", eval(el.dataset.src)) //image
+    }
+
+    if (el.hasAttribute("data-text")) {
+      el.textContent = eval(el.dataset.text) //title
+      if (whiteText) el.classList.add("whiteText")
+    }
+
+    if (el.hasAttribute("data-class")) {
+      //for class it is all user-defined, so that we have to look at each value that passed in the var
+
+      let varr = eval(el.dataset.class) //this case the varr is not the standard html var so we keep the value in varr, unlike src,
+      //clog(varr)
+      
+      if (varr=="star") { // varr = image = "star"
+        el.classList.add("fa") // if use fa, need to add at least twice
+        el.classList.add("fa-star")
+      } 
+      // add more icon ...
+    
+    }
+
+    // add more check ...
+
+  }
+
+
+/* 
+issue -- the text show at the same position //solved
+100 -if the var is not in mapping, error will crash the display
+
+*/ 
+
+
+} //end of publis()
+
+
+// try make a func that read all deep of the data-??? attribute
+function htmlVar(el) {
+
+  //read this element
+  if (el.hasAttribute("data-src")) clog(el.outerHTML)
+  if (el.hasAttribute("data-text")) clog(el.outerHTML)
+  if (el.hasAttribute("data-html")) clog(el.outerHTML)
+  if (el.hasAttribute("data-class")) clog(el.outerHTML)
+
+  //if there's children go through all children and find var
+  if (el.children.length > 0) {
+    for (baby of el.children) {
+      htmlVar(baby)
+    }
+  }
+} // tested=work 
+
+
+
+function openDetail() {
+  contentSpace.innerHTML = ""
+  let newEl = document.createElement(detailTem.tag)
+  newEl.className = detailTem.class
+}
+
+
+
+
+</script>
+</body>
+</html>

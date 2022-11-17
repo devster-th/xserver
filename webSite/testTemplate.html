@@ -1,0 +1,78 @@
+<!--test how template work-->
+<head>
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<style>
+.pool {position:;}
+.itemBox {position:relative; width:50%; float:left;}
+.itemPic {width:100%; height:250px}
+.itemText {position:absolute; left:0; bottom:0; font-size:20px; color:white; background-color:black;}
+</style>
+</head>
+<body>
+<div id="pool"></div> 
+<div id="dum"></div>
+
+
+<script>
+//assume we got this object from server
+let contObj = [
+  { id:4000,
+    pic:"/pic/pic4.jpeg",
+    text:"This is pic4"},
+  { id:5000,
+    pic:"/pic/pic5.jpeg",
+    text:"This is pic5"},
+  { id:6000,
+    pic:"/pic/pic6.jpeg",
+    text:"This is pic6"},
+    { id:7000,
+    pic:"/pic/pic7.jpeg",
+    text:"This is pic7"},
+  { id:8000,
+    pic:"/pic/pic8.jpeg",
+    text:"This is pic8"}
+]
+
+let template = 
+`<img class="itemPic" src="{{pic}}">
+<div class="itemText">{{text}}</div>`
+//the template can be many and each can be complex as it forms a content that having many elements.
+
+
+
+//loop the contObj and fill into the #pool
+for (cc of contObj) {
+  //1. create ele
+  let newCon = document.createElement("div")
+
+  //2. add stuff
+  newCon.className = "itemBox"
+  newCon.id = cc.id 
+
+  //3. apply template
+  let pic = cc.pic 
+  let text = cc.text
+  let apply = template.replace(/\{\{(.+)\}\}/gm, (full,g1)=>{
+    return eval(g1)
+  })
+  newCon.innerHTML = apply 
+
+
+  //4. append to the pool
+  pool.appendChild(newCon)
+
+}
+
+//how to check if an element has child?
+
+
+
+
+/*
+will change to manupulate the template rather than handle each element.
+*/
+
+</script>
+</body>
+
+
