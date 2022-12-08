@@ -1,0 +1,58 @@
+<html>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/3.3.1/jsencrypt.min.js"></script>  
+</head>
+<body>
+<h1>test jsencrypt</h1>
+<p>Put your important message here:</p>
+<textarea id="inputt" cols="50" rows="4"></textarea>
+<br><button onclick="xen()">Run</button>
+<p>ENCRYPTED DATA:</p>
+<p id="enOut"></p>
+<p>DECRYPTED DATA:</p>
+<p id="deOut"></p>
+
+<script>
+function xen() {
+  var sec = new JSEncrypt()
+  sec.setKey(`-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC+8WyvL53eR+QFbrl/KNOO/t1O
+ld7VEr3xTEqjjFtBStq6lC3O52SLCH+/iEB8X8yg6yEbyZAkCSJMKFV6Pr9jVNbn
+nOl0WkYnQbuq+Q0+u3uVZ3ftZhSU6FQdbD9vPFnDHuDJs07zW+3Mbfcf9KCPG6fZ
+LxfPDKE5fdf86PfiBwIDAQAB
+-----END PUBLIC KEY-----`)
+
+  enOut.textContent =  sec.encrypt(inputt.value)
+
+  sec.setKey(`-----BEGIN PRIVATE KEY-----
+MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAL7xbK8vnd5H5AVu
+uX8o047+3U6V3tUSvfFMSqOMW0FK2rqULc7nZIsIf7+IQHxfzKDrIRvJkCQJIkwo
+VXo+v2NU1uec6XRaRidBu6r5DT67e5Vnd+1mFJToVB1sP288WcMe4MmzTvNb7cxt
+9x/0oI8bp9kvF88MoTl91/zo9+IHAgMBAAECgYBRX95rwqVLB+RblFalpKaUuHVk
+emae8//TCCp/DOAPMXGKNoBXPzIQNq0K2WxyFPnGUq6ngv1U/jeJsV7MXFV/qMbo
+JNYTCPcL5+66J8bF0itHecz3n3HjF+qREZ1a4ua/UxAYo0FvSLsO7pwW/9w73G9o
+IEFkyYUhljZ78dcuEQJBAO2SCOkdRo1LK0m3TNEtT6ufYgfi/AYiRzLA2WJx4kPu
+RG/kYPafgp4uabNRrdX6q12dCE0nWB4jqeqqVtIA4KUCQQDNwWfvQ1p7xVtD+igE
+ogzcQ95qQ9lyxwlC11vB9S3KaTzuFqTxm5nItOvjhCjGkmyQF38JC355z5pJW0ZJ
+POw7AkEA6YDS70WOFcxfVMosX6D4oMg8U2Ifsmu4rULtp5wl9/zWGWBQibcIbC9U
+RyMuCJakHpP9F9BnBOCq3vLj+O9R3QJAe0+3J4j5OIZuDQ5mX2hzRqsSKCOjtYsd
+vMZuwo5bNBzgHFzL29UCVGxBlyhEe8WTdMPwKY6O7RgDgoVGWWw+swJAGl7DGJHL
+QOAM3ovsi4c4wV4OEV9daQY6jBRJSgbyusf0r7iuLrHrxAdgdLukocGnXlpu44Ul
+ipnHtsW/N1s0HQ==
+-----END PRIVATE KEY-----`)
+
+  //decrypt
+  deOut.textContent = sec.decrypt(enOut.textContent) 
+
+}
+
+/*
+TEST NOTE
+--all done/work.
+
+*/
+
+
+</script>
+
+</body>

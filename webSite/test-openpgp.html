@@ -1,0 +1,69 @@
+<html>
+<head>
+<script src="/deeji/openpgp.min.js"></script>
+</head>
+<body>
+<h1>test OpenPGP</h1>
+
+<!--keys-->
+<p>Please put your info to gen keys:</p>
+<p>Your name <input type="text" id="uname" value="mutita">
+<br>Your email <input type="text" id="email" value="m@mutita.org">
+<br>Your pass phrase <input type="text" id="pass" value="steps to the wisdom age."></p>
+<button onclick="genKeyPair()">Gen key pair</button>
+<p id="pri"></p>
+<p id="pub"></p>
+<p id="cert"></p>
+
+<hr>
+
+<!--encrypt, decrypt-->
+<p>Please put a text you want to encrypt:</p>
+<textarea id="textForEn" cols="50" rows="4"></textarea>
+<button onclick="xencrypt()">Encrypt</button>
+<p id="enOutput"></p>
+<button onclick="xdecrypt()">Decrypt</button>
+<p id="deOutput"></p>
+
+<script>
+async function genKeyPair() {
+    const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
+        type: 'ecc', // Type of the key, defaults to ECC
+        curve: 'curve25519', // ECC curve name, defaults to curve25519
+        userIDs: [{ name: uname.value, email: email.value }], // you can pass multiple user IDs
+        passphrase: pass.value, // protects the private key
+        format: 'armored' // output key format, defaults to 'armored' (other options: 'binary' or 'object')
+    });
+
+    pri.textContent = privateKey     // '-----BEGIN PGP PRIVATE KEY BLOCK ... '
+    pub.textContent = publicKey      // '-----BEGIN PGP PUBLIC KEY BLOCK ... '
+    cert.textContent = revocationCertificate // '-----BEGIN PGP PUBLIC KEY BLOCK ... '
+}
+
+async function xencrypt() {
+  const pubArmor = pub.textContent 
+  const priArmor = pri.textContent 
+  const passPhrase = pass.value  
+  const pubKey = await openpgp.readKey({ armoredKey:pubArmor })
+
+  const priKey = await openpgp.decryptKey({ 
+    privateKey: await openpgp.readPrivateKey(
+      { armoredKey:priArmor }), 
+    
+    passPhrase // !--problem : the option unrecognized
+  }) 
+
+  const encrypted = await openpgp.encrypt({
+    message: await openpgp.createMessage({ 
+      text: textForEn.value 
+    }),
+    encryptionKeys: pubKey,
+    signingKeys: priKey 
+  })
+  enOutput.textContent = encrypted 
+}
+
+</script>
+
+</body>
+</html>

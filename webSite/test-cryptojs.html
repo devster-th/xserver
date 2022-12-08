@@ -1,0 +1,46 @@
+<html>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/aes.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/sha256.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/md5.js"></script>
+</head>
+<body>
+<h1>test CryptoJS</h1>
+<textarea id="inputt" cols="50" rows="4"></textarea>
+<br><button onclick="xencrypt()">Encrypt</button>
+<p id="outputt"></p>
+<button onclick="xdecrypt()">Decrypt</button>
+<p id="decOut"></p>
+<hr>
+<button onclick="xmd5()">MD5</button>
+<button onclick="xhash()">SHA-256</button>
+<p id="hashOut"></p>
+
+
+
+<script>
+function xencrypt() {
+  var inputt_ = inputt.value 
+  var passw = "mutita"
+  var encry = CryptoJS.AES.encrypt(inputt_,passw)
+  document.querySelector("#outputt").textContent = encry
+}
+function xdecrypt() {
+  var inputt_ = outputt.textContent
+  var passw = "mutita"
+  var decry = CryptoJS.AES.decrypt(inputt_,passw)
+  document.querySelector("#decOut").textContent = 
+    decry.toString(CryptoJS.enc.Utf8) 
+}
+function xhash() {
+  document.querySelector("#hashOut").textContent = 
+    CryptoJS.SHA256(inputt.value)
+}
+function xmd5() {
+  document.querySelector("#hashOut").textContent =
+    CryptoJS.MD5(inputt.value)
+}
+
+</script>
+</body>
+</html>

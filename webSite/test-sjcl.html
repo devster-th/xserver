@@ -1,0 +1,28 @@
+<html>
+<head>
+<script src="/deeji/sjcl.js"></script>
+</head>
+<body>
+<h1>test sjcl crypto library</h1>
+<textarea rows="5" cols="50" id="inn" onkeyup="encry()"></textarea>
+<p id="outt"></p>
+
+
+<br><button onclick="decry()">Decrypt</button>
+<p id="origi"></p>
+
+<script>
+function encry() {
+  document.querySelector("#outt").textContent = 
+  sjcl.encrypt("deeji",inn.value)
+}
+
+function decry() {
+  document.querySelector("#origi").textContent = 
+  sjcl.decrypt("deeji",outt.textContent)
+}
+
+</script>
+
+</body>
+</html>

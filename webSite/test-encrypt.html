@@ -1,0 +1,39 @@
+<html>
+<head>
+<SCRIPT src="//cdn.jsdelivr.net/npm/simple-crypto-js@2.5.0/dist/SimpleCrypto.min.js"></SCRIPT>
+<script src="/deeji/md5.min.js"></script>
+</head>
+<body>
+<h1>test simple-crypto-js</h1>
+<textarea id="userinput" cols="40" rows="5"
+  onkeyup="encryp()"></textarea>
+<p id="encOutput"></p>
+
+<button onclick="md55()">Gen MD5</button>
+
+<button onclick="decryp()">Decrypt</button>
+<p id="decOutput"></p>
+
+
+<script>
+const secKey = "deeji"
+const sc = new SimpleCrypto(secKey)
+
+function encryp() {
+  let outputt = sc.encrypt(userinput.value)
+  document.querySelector("#encOutput").textContent = outputt 
+}
+
+function decryp() {
+  let outputt = sc.decrypt(encOutput.textContent)
+  document.querySelector("#decOutput").textContent = outputt
+}
+
+function md55() {
+  document.querySelector("#decOutput").textContent = 
+  md5(userinput.value)
+}
+
+</script>
+</body>
+</html>
