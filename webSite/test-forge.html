@@ -1,0 +1,52 @@
+<html>
+<head>
+<script src="https://cdn.jsdelivr.net/npm/node-forge@1.0.0/dist/forge.min.js"></script>
+</head>  
+<body>
+<h2>test forge, a sec lib</h2>
+<div>HASH</div>
+<select id="hashAlgo">
+  <option value="md5">MD5</option>
+  <option value="sha256">SHA-256</option>
+</select>
+<br><label>message to hash:</label>
+<textarea rows="2" cols="45" id="msgHash"></textarea>
+<br><label>key:</label>
+<textarea rows="1" cols="45" id="key"></textarea>
+<br><button 
+  onclick="xhash(msgHash.value, hashAlgo.value)"
+  >Hash</button>
+<button 
+  onclick="xhmac(msgHash.value, hashAlgo.value, key.value)"
+  >HMAC</button>
+<textarea id="hashOutput" cols="45" rows="2" disabled></textarea>
+
+<br><button onclick="b64conv(msgHash.value)">Convert to Base64</button>
+<textarea id="b64" rows="2" cols="45" disabled></textarea>
+<br><button onclick="b64toText(b64.value)">Convert b64 > text</button>
+<textarea id="toText" rows="2" cols="45"></textarea>
+
+
+<script>
+function xhash(msg,algo) {
+    var md = forge.md[algo].create()
+    md.update(msg)
+    hashOutput.value = md.digest().toHex()  
+}
+function xhmac(msg,algo,key) {
+  var hmac = forge.hmac.create()
+  hmac.start(algo,key)
+  hmac.update(msg)
+  hashOutput.value = hmac.digest().toHex()
+}
+function b64conv(msg) {
+  b64.value = btoa(msg)
+}
+function b64toText(b64code) {
+  toText.value = atob(b64code)
+}
+
+
+</script>
+</body>
+</html>

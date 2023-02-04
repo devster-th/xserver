@@ -1,0 +1,136 @@
+<html>
+<body>
+<h1 id="head">test xdb 0.2</h1>
+
+<script>
+function xdb(v) {
+
+  // 0-stage, nothing so if read the db will show 'no xdb' message
+  if (typeof _xdb=='undefined' && v==undefined) {
+    console.log('no xdb yet')
+  } 
+  
+  // db exists but no v, = show entire db
+  else if (typeof _xdb=='object' && v==undefined) {
+    // xdb() .........read whole db
+    return _xdb 
+  } 
+  
+  //if _xdb still inexisted, create new 
+  else if (typeof _xdb=='undefined' && typeof v=='object') {
+    globalThis._xdb = v 
+    //return _xdb 
+
+    //localStorage.setItem('_xdb' , toJson(_xdb) )
+    save()
+  } 
+  
+  //add to existing db 
+  else if (typeof _xdb=='object' && typeof v=='object') { //new db, add
+    //the _xdb is already existed, and now we got new object to add in
+    // _xdb = v 
+
+    //1) check if it's to add to collection or just an object/doc
+    // xdb({ user: {....} })
+    for (inputKey in v) {
+      if (inputKey in _xdb) _xdb[inputKey].push(v[inputKey])
+      else {
+        _xdb[inputKey] = v[inputKey]
+      }
+    } 
+    save()
+  } 
+
+  //read db
+  else if (typeof _xdb=='object' && typeof v=='string') { 
+
+    // xdb('user.name:john')
+
+    if (v.includes('.')) {
+      let commandPart = v.split('.')
+      trimAr(commandPart)
+      let collec = commandPart[0]
+      let key = undefined
+      let value = undefined 
+
+      if (commandPart[1].includes(':')) {
+        [key,value] = commandPart[1].split(':')
+      }    
+      /*
+      if (collec in _xdb) {
+        for (doc of _xdb[collec]) {
+          if ( doc[key].includes(value) ) return doc           
+        }
+      }
+      */ 
+      
+
+      let _val = new RegExp(value,'i')
+      let outputt = _xdb[collec].filter(
+          doc => doc[key].toString().match(_val)
+        )
+      return outputt 
+
+
+    } else {
+      //this case no key specified, only collec supplied
+      return _xdb[ v.trim() ]
+    }
+
+
+  }//now basic read works: string, number values
+  
+
+}//end of xdb() ---------------------------------------
+
+
+// HELPER FUNC
+function trimAr(array) {
+  for (i=0 ; i < array.length ; i++) {
+    array[i] = array[i].trim()
+  }
+}
+
+function toJson(ob) {
+  return JSON.stringify(ob)
+}
+
+function fromJson(json) {
+  return JSON.parse(json)
+}
+
+function save() {
+  localStorage.setItem('_xdb', toJson(_xdb) )
+}
+
+function read() {
+  return fromJson( localStorage.getItem('_xdb') )
+}
+
+
+
+//create db at very first
+xdb({user:[
+        {name:'john',age:23,sex:'male',national:'Thai'},
+        {name:'jane',age:19,sex:'female',national:'Thai'},
+        {name:'dad',age:55,sex:'male',national:'Thai'},
+        {name:'mom',age:54,sex:'female',national:'Thai'},
+        {name:'jo biden',age:52365,sex:'male',national:'USA'},
+        {name:'jack ma',age:52154,sex:'male',national:'Chinese'},
+        
+
+      ],
+    item:[
+      {name:'noodle',price:100.00,stock:234543,category:'food'},
+      {name:'steak',price:652365,stock:456879,category:'food'},
+      {name:'coffee',price:45687,stock:45613212,category:'food'},
+      {name:'phad gra prao',price:85454521,stock:87946521,category:'food'},
+      {name:'table',price:6666,stock:8888,category:'furniture'}
+
+    ]
+
+    })
+
+</script>
+
+</body>

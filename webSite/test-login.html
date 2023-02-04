@@ -1,0 +1,144 @@
+<html>
+<head>
+  
+
+</head>
+<body>
+<h1>test login</h1>
+<p>The good login form must not keep any character of the password at all, so anyone cannot find the password from the form.</p>
+
+<br><form>
+<label for="userNameField">userName</label> <input type="text" value="mutita" id="usrname">
+<br><label for="password">password</label> <input 
+  type="password" 
+  id="passw"
+  oninput="getPass(event)">
+</form>
+<button onclick="getLogin()">LOG IN</button>
+
+<br><a rel="me" href="https://mastodon.world/@mutita">Mastodon</a>
+
+<script>
+var secret = ''
+
+//test var
+var xdb = {
+  _sys: {
+    sk: _toBase64('thisissuperkey')
+  },
+  deeji: {
+    people: [],
+    item: [],
+    transac: [],
+    match: []
+  }
+}
+
+xdb.deeji.people.push( 
+  _toBase64(
+    _toJson({name:'john',age:22,sex:'male'})
+  ) 
+)
+xdb.deeji.people.push( 
+  _toBase64(
+    _toJson({name:'jane',age:18,sex:'female'})
+  ) 
+)
+
+var _xdb = _toBase64( _toJson(xdb) )
+
+_clog('---TEST XDB ENCRYPTION IDEA---')
+_clog(_xdb)
+_clog(
+  _rdJson(
+    _rdBase64(_xdb)
+  )
+)
+
+
+
+
+
+
+
+
+
+
+function getPass(event) {
+  secret += event.data
+  passw.value = passw.value.replace(/.$/,'*')
+  //_clog(event.data)
+}
+
+
+function getLogin() {
+  _clog(usrname.value)
+  _clog(passw.value)
+  _clog(secret)
+  _clog(btoa(secret))
+}
+
+
+
+
+// little tool
+function _el(v) {
+  return document.querySelector(v)
+}
+
+function _clog(v) {
+  return console.log(v)
+}
+
+function _xlert(v) {
+  if (typeof v == 'object' && !Array.isArray(v)) {
+    alert( JSON.stringify(v) )
+  } else {
+    alert(v)
+  }
+}
+
+function _xess(v) {
+  let xess 
+  if (typeof v == 'object') {
+    sessionStorage.setItem('xess', JSON.stringify(v))
+  } else {
+    return JSON.parse( sessionStorage.getItem('xess') )
+  }
+}
+
+function _toJson(v) {
+  return JSON.stringify(v)
+}
+
+function _rdJson(v) {
+  return JSON.parse(v)
+}
+
+function _toBase64(v) {
+  return btoa(v)
+}
+
+function _rdBase64(v) {
+  return atob(v)
+}
+
+function _xrandom(n_digit) {
+  return Math.floor(Math.random()*eval(`1e${n_digit}`))
+}
+
+function _xuuid() {
+  var id0 = Date.now()
+  var xuuid = Date.now()
+  while (xuuid==id0) {
+    xuuid = Date.now()
+  }
+  return xuuid 
+}
+
+
+</script>
+
+
+</body>
+</html>

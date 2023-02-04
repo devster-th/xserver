@@ -47,20 +47,23 @@ function xev(x="") {
       
       //_session.commu.out = prepData                    
 
-      fetch("/post_", { //may be we can 'take the path as a code' too
+      fetch("/post_", 
+        { //may be we can 'take the path as a code' too
           method:"POST",
-  headers:{"Content-Type":"application/json;charset=utf-8"},
+          headers: {
+            "Content-Type":"application/json;charset=utf-8"
+          },
           body: JSON.stringify(prepData) 
-      }).then( 
-          svResp => { return svResp.json() 
-      }).then( 
-          svResp => {
+        }
+      ).then( svResp => { return svResp.json() }
+      ).then( svResp => {
           //the svResp is actually the object
           //_session.commu.in = svResp
           //sessionStorage.setItem("_session",JSON.stringify(_session) )
           //console.log(_session)
           clog(svResp) 
-      })
+        }
+      )
     }
     //work
 

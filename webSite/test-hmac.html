@@ -1,0 +1,40 @@
+<html>
+<head>
+
+</head>
+<body>
+<h1>test hmac</h1>
+<label>Put your key</label> <input type="text" id="key">
+<br><label>Your message:</label>
+<br><textarea id="msg" cols="45" rows="5"></textarea>
+<button onclick="hmacSha256Hex(key.value, msg.value)">Get HMAC</button>
+<textarea id="hmacOut" cols="45" rows="4" disabled></textarea>
+
+
+<script>
+
+async function hmacSha256Hex(secret, message) {
+  const enc = new TextEncoder("utf-8");
+  const algorithm = { name: "HMAC", hash: "SHA-256" };
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    algorithm,
+    false, ["sign", "verify"]
+  );
+  const hashBuffer = await crypto.subtle.sign(
+    algorithm.name, 
+    key, 
+    enc.encode(message)
+  );
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(
+      b => b.toString(16).padStart(2, '0')
+  ).join('');
+
+  //return hashHex;
+  hmacOut.value = hashHex 
+}
+</script>
+</body>
+</html>

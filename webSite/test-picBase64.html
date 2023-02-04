@@ -1,0 +1,30 @@
+<html>
+<body>
+<h1>test pic > base64</h1>
+<input type="file" onchange="convPic(this)">
+<img id="pic" style="width:100%">
+
+<script>
+
+
+
+function convPic(element) {
+  var file = element.files[0];
+  var reader = new FileReader();
+  reader.onloadend = function() {
+    console.log(reader.result)
+    pic.src = reader.result 
+  }
+  reader.readAsDataURL(file);
+}
+
+/* TEST NOTE
+work --27/12/2022
+
+*/
+
+
+
+</script>
+</body>
+</html>

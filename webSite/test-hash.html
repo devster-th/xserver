@@ -1,0 +1,54 @@
+<html>
+<head>
+<style>
+* {font-family: sans-serif}
+</style>
+</head>
+<body>
+<h1>test repeating hash</h1>
+Text to hash <input id="inn" type="text" value="mutita"> <button onclick="run()">Run</button>
+<br>Output = 
+<br><textarea id="out" cols="40" rows="3"></textarea>
+
+
+<script>
+
+async function run() {
+  var in2 = inn.value 
+  var out2 = ''
+  for (i=0 ; i<1 ; i++) {
+    out2 = await hash(in2)
+    //console.log(i, out2)
+    in2 = out2 
+  }
+  out.textContent = out2 
+}
+
+
+async function hash(text) {
+  const msgUint8 = new TextEncoder().encode(text)
+  const hashBuf = await crypto.subtle.digest('SHA-256', msgUint8)
+
+  //make hex
+  const hashArray = Array.from(new Uint8Array(hashBuf))
+  const hashHex = hashArray.map( (b) => b.toString(16).padStart(2, '0')).join('')
+  console.log(hashHex)
+
+  //make b64
+  const b64 = btoa(
+    String.fromCharCode(...new Uint8Array(hashArray) )
+  )
+  console.log(b64)
+
+  return hashHex 
+  //return b64 
+}
+
+//hash('mutita').then(hh => console.log(hh))
+
+//test 
+
+
+</script>
+</body>
+</html>

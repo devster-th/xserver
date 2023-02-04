@@ -7,6 +7,27 @@
  *    --box (box is collection of docs)
  *      --doc (each object)
  *        --data (key:value set of data)
+ * 
+ * EXAMPLE OF COMMAND
+ * 
+ * xdb({create: {
+ *    dbName:
+    *    collec1: [
+    *       {
+    *         name: 'text',
+    *         'age: 'num',
+    *         'sex': 'male/female/unspecified',
+    *         ...
+    *       },
+    *    ],
+    *    collec2: [...], 
+    *     ...
+ *    }
+ *  }
+ * })
+ * 
+ * 
+ * 
  */
 
 const fileManager = require('fs')

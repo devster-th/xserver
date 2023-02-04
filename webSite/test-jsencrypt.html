@@ -4,27 +4,34 @@
 </head>
 <body>
 <h1>test jsencrypt</h1>
-<p>Put your important message here:</p>
-<textarea id="inputt" cols="50" rows="4"></textarea>
-<br><button onclick="xen()">Run</button>
-<p>ENCRYPTED DATA:</p>
-<p id="enOut"></p>
-<p>DECRYPTED DATA:</p>
-<p id="deOut"></p>
+<label>Put your important message here:</label>
+<textarea id="inputt" cols="50" rows="3"></textarea>
+<br><button 
+  onclick="xen('enc', kx, inputt.value, '#enOut')"
+  >encrypt</button>
+<textarea id="enOut" cols="50" rows="5" disabled></textarea>
+
+<br><button 
+  onclick="xen('dec', ki, enOut.value, '#deOut')"
+  >decrypt</button>
+<textarea id="deOut" cols="50" rows="3" disabled></textarea>
+
+
+<h2>encrypt with private key, and dec with pub</h2>
+<button 
+  onclick="xen('enc', ki, inputt.value, '#enOut2')"
+  >encrypt with private key</button>
+<textarea id="enOut2" cols="50" rows="5" disabled></textarea>
+
+<button 
+  onclick="xen('dec', kx, enOut2.value, '#deOut2')"
+  >decrypt with public key</button>
+<textarea id="deOut2" cols="50" rows="5" disabled></textarea>
+
+
 
 <script>
-function xen() {
-  var sec = new JSEncrypt()
-  sec.setKey(`-----BEGIN PUBLIC KEY-----
-MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC+8WyvL53eR+QFbrl/KNOO/t1O
-ld7VEr3xTEqjjFtBStq6lC3O52SLCH+/iEB8X8yg6yEbyZAkCSJMKFV6Pr9jVNbn
-nOl0WkYnQbuq+Q0+u3uVZ3ftZhSU6FQdbD9vPFnDHuDJs07zW+3Mbfcf9KCPG6fZ
-LxfPDKE5fdf86PfiBwIDAQAB
------END PUBLIC KEY-----`)
-
-  enOut.textContent =  sec.encrypt(inputt.value)
-
-  sec.setKey(`-----BEGIN PRIVATE KEY-----
+const ki = `-----BEGIN PRIVATE KEY-----
 MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAL7xbK8vnd5H5AVu
 uX8o047+3U6V3tUSvfFMSqOMW0FK2rqULc7nZIsIf7+IQHxfzKDrIRvJkCQJIkwo
 VXo+v2NU1uec6XRaRidBu6r5DT67e5Vnd+1mFJToVB1sP288WcMe4MmzTvNb7cxt
@@ -39,10 +46,29 @@ RyMuCJakHpP9F9BnBOCq3vLj+O9R3QJAe0+3J4j5OIZuDQ5mX2hzRqsSKCOjtYsd
 vMZuwo5bNBzgHFzL29UCVGxBlyhEe8WTdMPwKY6O7RgDgoVGWWw+swJAGl7DGJHL
 QOAM3ovsi4c4wV4OEV9daQY6jBRJSgbyusf0r7iuLrHrxAdgdLukocGnXlpu44Ul
 ipnHtsW/N1s0HQ==
------END PRIVATE KEY-----`)
+-----END PRIVATE KEY-----`
+
+const kx = `-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC+8WyvL53eR+QFbrl/KNOO/t1O
+ld7VEr3xTEqjjFtBStq6lC3O52SLCH+/iEB8X8yg6yEbyZAkCSJMKFV6Pr9jVNbn
+nOl0WkYnQbuq+Q0+u3uVZ3ftZhSU6FQdbD9vPFnDHuDJs07zW+3Mbfcf9KCPG6fZ
+LxfPDKE5fdf86PfiBwIDAQAB
+-----END PUBLIC KEY-----`
+
+
+function xen(act, key, msg, showAt) {
+  var sec = new JSEncrypt()
+  sec.setKey(key)
+
+  if (act =='enc') {
+    document.querySelector(showAt).value =  sec.encrypt(msg)
+  }
+  if (act =='dec') {
+    document.querySelector(showAt).value = sec.decrypt(msg) 
+  }
+  
 
   //decrypt
-  deOut.textContent = sec.decrypt(enOut.textContent) 
 
 }
 

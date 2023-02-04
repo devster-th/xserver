@@ -1,0 +1,195 @@
+<html>
+<head>
+<style>
+div {font-size:20px; font-weight:bold; 
+    color:blue; font-family: sans-serif }
+</style>
+</head>
+<body>
+<h3>--test dataSec web api--</h3>
+
+<div>1. GENERATE KEYS</div>
+<label>which key?</label>
+<select id="sel" name="sel">
+  <option value="rsa">RSA-OAEP</option>
+  <option value="ecdsa">ECDSA</option>
+  <option value="hmac">HMAC</option>
+  <option value="aes">AES-GCM</option>
+</select>
+<button onclick="xGenKey(sel.value)">Gen keys</button>
+<br><label>private key:</label>
+<textarea id="priKey" cols="45" rows="10" disabled></textarea>
+<br><label>publick key:</label>
+<textarea id="pubKey" cols="45" rows="10" disabled></textarea>
+
+<br><br><div>2. ENCRYPT / DECRYPT</div>
+<label>message to encrypt:</label>
+<textarea id="msg" cols="45" rows="3"></textarea>
+<button onclick="xEncrypt(msg.value)">Encrypt</button>
+<br><label>encrypted message:</label>
+<textarea id="enMsg" cols="45" rows="15" disabled></textarea>
+<button onclick="xDecrypt()">Decrypt</button>
+<br><label>decrypted message:</label>
+<textarea id="deMsg" cols="45" rows="3" disabled></textarea>
+
+<br><br><div>3. SIGN / VERYIFY</div>
+<label>message to sign:</label>
+<textarea id="msgToSign" cols="45" rows="3"></textarea>
+<button onclick="xSign(msgToSign.value)">Sign</button>
+<br><label>signature:</label>
+<textarea id="signature" cols="45" rows="3" disabled></textarea>
+<button onclick="xVerify(signature.value)">Verify</button>
+<br><label>verified code:</label>
+<textarea id="verifiedCode" cols="45" rows="3" disabled></textarea>
+
+<br><br><div>4. DIGEST</div>
+<label>message to hash:</label>
+<textarea id="msgToHash" cols="45" rows="2"></textarea>
+<button onclick="xHash(msgToHash.value)">Hash SHA-256</button>
+<br><label>hash code:</label>
+<textarea id="hashCode" cols="45" rows="2" disabled></textarea>
+
+
+<script>
+var keys =''
+var encrypted_ =''
+var decrypted_ =''
+xGenKey(sel.value)
+
+
+// GEN KEY
+
+async function xGenKey(algo) {
+
+  if (algo=='rsa') {
+    let keyPair = await window.crypto.subtle.generateKey(
+    {
+      name: "RSA-OAEP",
+      modulusLength: 4096,
+      publicExponent: new Uint8Array([1,0,1]),
+      hash: "SHA-256"
+    },
+    true,
+    ["encrypt","decrypt"]
+    )
+    keys = keyPair
+    //console.log(keyPair)
+    priKey.value = await exportPriKey(keyPair.privateKey)
+    pubKey.value = await exportPubKey(keyPair.publicKey)
+
+  } else {
+    alert('Hold hold hold, not doing yet!')
+  }
+  
+}
+
+//convert buffer to string
+function ab2str(buf) {
+  return String.fromCharCode.apply(null, new Uint8Array(buf))
+}
+
+
+async function exportPriKey(priKey) {
+  const exported = await window.crypto.subtle.exportKey(
+    "pkcs8",
+    priKey
+  )
+  const exportedAsString = ab2str(exported)
+  const exportedAsBase64 = window.btoa(exportedAsString)
+  const pemExported = `-----BEGIN PRIVATE KEY-----\n${exportedAsBase64}\n-----END PRIVATE KEY-----`
+  //console.log(pemExported)
+  return pemExported
+}
+
+async function exportPubKey(pubKey) {
+  const exported = await window.crypto.subtle.exportKey(
+    "spki",
+    pubKey
+  )
+  const exportedAsString = ab2str(exported)
+  const exportedAsBase64 = window.btoa(exportedAsString)
+  const pemExported = `-----BEGIN PUBLIC KEY-----\n${exportedAsBase64}\n-----END PUBLIC KEY-----`
+  return pemExported
+}
+
+
+// ENCRYPT , DECRYPT
+
+async function xEncrypt(msg) {
+  let enc = new TextEncoder()
+  let encoded = enc.encode(msg)
+
+  let encrypted = await window.crypto.subtle.encrypt(
+    {
+      name: "RSA-OAEP",
+    },
+    keys.publicKey,
+    encoded 
+  )
+
+  //console.log( base64(encrypted) )
+  enMsg.value = base64(encrypted)
+  encrypted_ = encrypted 
+}
+
+
+//convert ArrayBuffer to Base64
+function base64(buff) {
+  return btoa(String.fromCharCode(...new Uint8Array(buff)))  
+}
+
+//convert ArrayBuffer to string
+function stringBuff(buff) {
+  let td = new TextDecoder
+  let ua = new Uint8Array(buff)
+  return td.decode(ua)
+}
+
+async function xDecrypt() {
+  let decrypted = await window.crypto.subtle.decrypt(
+    {name: "RSA-OAEP"},
+    keys.privateKey,
+    encrypted_
+  )
+  decrypted_ = decrypted 
+  console.log(decrypted)
+  deMsg.value = stringBuff(decrypted)
+}
+
+
+// SIGN , VERIFY
+
+async function xSign(msg) {
+  let enc = new TextEncoder()
+  let encoded = enc.encode(msg)
+  let signature = await window.crypto.subtle.sign(
+    {
+      name: "RSA-PSS",
+      saltLength: 32
+    },
+    keys.privateKey,
+    encoded
+  )
+  console.log(signature)
+}
+
+// DIGEST
+
+async function xHash(msg) {
+  const msgUint8 = new TextEncoder().encode(msg)
+  const hashBuffer = await crypto.subtle.digest(
+    'SHA-256',
+    msgUint8
+  )
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const hashHex = hashArray.map(
+    (b) => b.toString(16).padStart(2,'0'))
+    .join('')
+    console.log(hashHex)
+    hashCode.value = hashHex 
+}
+
+
+</script>
+</body>
+</html>

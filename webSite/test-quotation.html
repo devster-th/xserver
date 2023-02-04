@@ -1,0 +1,324 @@
+<html>
+<head>
+<script src="/deeji/xev2.js"></script>
+<style>
+* {font-family: sans-serif;}
+h1 {position:sticky; top:26px; color:darkred }
+.menu {position:fixed; top:0; left:0; background-color: white;}
+.client { }
+.issuer { }
+table {border:1px solid gray; 
+  border-collapse:collapse; width:100%; max-width: 500px;
+  background-color: cornsilk;}
+th,td {border:1px solid gray; }
+.rr {text-align: right;}
+.cc {text-align: center;}
+.confirm {background-color: orangered; cursor: pointer;}
+.status {background-color: gray; 
+  color:white; font-size: x-small; padding:4px}
+input {width: auto;}
+.someAct {cursor: pointer; color:gray; font-size: 26px;}
+</style>
+</head>
+<body>
+<div class="menu">
+  <button>New</button><button>Save</button><button>Approve</button><button>Send to client</button><button>Setting</button>
+</div>
+
+<h1>Quotation #<span id="docNum"></span></h1>
+<br>
+
+<div class="client">
+  <b>For client:</b> <select id="client" name="client" onchange="fillClient()">
+    <option>ABC company</option>    
+    <option>XYZ company</option>
+    <option>Someone</option>
+    <option>I don't know</option>
+    <option>[+] add more</option>
+  </select> 
+
+  <br>Contact: <span id="clientContact"></span>
+  <br>Email: <span id="clientEmail"></span>
+  <br>Web: <span id="clientWeb"></span>
+  <br>Address: <span id="clientAddress"></span>
+</div>
+<hr>
+<div class="issuer">
+<b>Issuer:</b> XYZ company &nbsp; <span class="someAct" title="change">&acd;</span>
+<br>id: <a href="#">http://entity.info/nexworld</a>
+<br>Contact: Jack
+<br>Email: <a href="mailto:#">jack@abc.def</a> 
+<br>Web: <a href="#">http://nexworld.co</a> 
+<br>Address: 19 moo 5, Hnong din dang, Petgasem road, Nakorn pathom 73000, Thailand 
+</div>
+
+<hr>
+<div class="detail">
+<b>Product detail:</b>
+<table id="productTable">
+  <tr><th>N#</th><th>Description</th><th>Quantity</th><th>Unit price</th><th>Total price</th></tr>
+
+  <tr>
+    <td>1</td>
+    <td contenteditable="true">
+      <select onchange="console.log(this.value)">
+        <option>Some product ABC</option>
+        <option>Some product DEF</option>
+        <option>Some product GHI</option>
+        <option>Some product JKL</option>
+      </select>
+    </td>
+    <td id="d1qty" class="rr" contenteditable="true">10</td>
+    <td id="d1up" class="rr" contenteditable="true">1000</td>
+    <td id="d1tp" class="rr" >10000</td>
+  </tr>
+  
+  <tr>
+    <td>2</td>
+    <td contenteditable="true">something to sell</td>
+    <td id="d2qty" class="rr" contenteditable="true">10</td>
+    <td id="d2up" class="rr" contenteditable="true">1000</td>
+    <td id="d2tp" class="rr" >10000</td>
+  </tr>
+
+  <tr><td colspan="4" class="cc">Sub total</td><td id="subTotal"  class="rr">20000</td></tr>
+  <tr><td colspan="4" class="cc">
+    <select>
+      <option>VAT 7%</option>
+      <option>WHT 3%</option>
+      <option>else</option> 
+    </select>
+  </td><td id="tax"  class="rr">20000</td></tr>
+  <tr><td colspan="4" class="cc">Net price</td><td id="net"  class="rr">20000</td></tr>
+
+</table>
+
+  <!--actions below table-->
+  <div class="someAct"><span title="Add table row" 
+    onclick="addRow()">&plus; </span> &nbsp; <span title="Delete table row" 
+    onclick="delRow()">&minus;</span> &nbsp; <span title="Clear table content" 
+    onclick="clearTable()">&times;</span> &nbsp; <span title="Calculate price" 
+    onclick="calc()">&equals;</span>
+  </div>
+
+</div>
+
+<div class="terms">
+<br>
+<b>Terms & conditions:</b>
+<br> &nbsp;&nbsp; template <select>
+  <option>Standard Net-30</option>
+  <option>Milestone</option>
+  <option>Monthly fees</option>
+</select>
+<ol>
+  <li contenteditable="true">Currency is THB exluded VAT 7%</li>
+  <li contenteditable="true">Payment is net-30</li>
+  <li contenteditable="true">Validity 30 days</li>
+</ol>
+</div>
+<hr>
+<div >
+<b style="color:green">Guide for client:</b>
+<br>If you decided to buy, please fill form below and click [Confirm] button.
+
+<p>a) Your name <input type="text">
+<br>b) Are you confirmed this quotation #<span id="quNo"></span>? 
+  <br> &nbsp;&nbsp; <input type="radio" name="conf"> YES 
+  <br> &nbsp;&nbsp; <input type="radio" name="conf"> NO 
+<br>c) Your special note: <textarea></textarea>
+<br><br><button class="confirm" onclick="conf()">CONFIRM THIS QUOTATION</button> <span style="font-size:small">-- ! this button will show you our message after your confirmation, on our website.</span>
+</p>
+</div>
+<hr>
+
+<div>
+<b style="color:hotpink">Disclaimer:</b> Claims about this doc .........
+</div>
+
+<hr>
+<div class="ref">
+<b style="color:darkslateblue">Reference of this document:</b>
+<br>Date: <span id="docDate"></span>
+<br>Doc# <span id="docNum2"></span>
+<br>Status: <span class="status">DRAFT</span> by James 
+<br>See official info about this doc, click this <a href="#">http://sssssss.info</a> 
+</div>
+
+
+<script>
+var dd = new Date()
+docDate.textContent = dd.toISOString()
+
+var dn = getDocNum()
+docNum.textContent = dn 
+docNum2.textContent = dn 
+quNo.textContent = dn 
+
+fillClient()
+
+//separate 1,000
+d1tp.textContent = sepNum(d1tp.textContent)
+d2tp.textContent = sepNum(d2tp.textContent)
+subTotal.textContent = sepNum(subTotal.textContent)
+tax.textContent = sepNum(tax.textContent)
+net.textContent = sepNum(net.textContent)
+
+//table edit watch
+//var chg = document.querySelector('#d1qty')
+calc()
+
+d1qty.addEventListener('input', ()=> calc(), false)
+d1up.addEventListener('input', ()=> calc(), false)
+d2qty.addEventListener('input', ()=> calc(), false)
+d2up.addEventListener('input', ()=> calc(), false)
+
+
+function fillClient() {
+  if (client.value == 'ABC company') {
+    clientContact.textContent = 'Jacky Chan'
+    clientWeb.textContent ='sssssssssss'
+    clientEmail.textContent ='ssssssssssssss'
+    clientAddress.textContent = 'ssssssssssssssssssss'
+  } else {
+    clientContact.textContent = ''
+    clientWeb.textContent =''
+    clientEmail.textContent =''
+    clientAddress.textContent = ''
+  }
+}
+
+function addRow() {
+  let newRow = document.createElement('tr')
+  productTable.appendChild(newRow)
+}//working
+
+
+function delRow() {
+  var whichRow = prompt("Delete which row?")
+  //alert(whichRow)
+}
+
+
+
+
+function clearTable() {
+  let clearYes = confirm("Are you sure to clear the table?")
+}
+
+function calc() {
+  d1tp.textContent = sepNum(
+    (Number(d1qty.textContent) * Number(d1up.textContent)).toFixed(2)
+  )
+  
+  d2tp.textContent = sepNum(
+    (Number(d2qty.textContent) * Number(d2up.textContent)).toFixed(2)
+  )
+  
+  subTotal.textContent = sepNum(
+    ( Number(d1tp.textContent.replace(/,/g,'') ) + 
+      Number(d2tp.textContent.replace(/,/g,'') ) 
+    ).toFixed(2)
+  )
+
+  tax.textContent = sepNum(
+    ( Number(subTotal.textContent.replace(/,/g,'') ) * 0.07
+    ).toFixed(2)
+  )
+  
+  net.textContent = sepNum(
+    ( Number(subTotal.textContent.replace(/,/g,'') ) + 
+      Number(tax.textContent.replace(/,/g,'') )
+    ).toFixed(2)
+  )
+
+  
+
+}
+
+
+
+function conf() {
+  alert(
+`You've confirmed this order #${dn}. 
+Total Net price = ${net.textContent}
+Thank you.`
+)
+}
+
+function getDocNum() {
+  //this func gives the num of sec of today up until now 
+  //let now = new Date()
+  let today = new Date()
+  today = today.setHours(0,0,0,0)
+  let docNum = Math.floor( (dd - today)/1000 )
+  //console.log(docNum)
+  return docNum 
+}
+
+function sepNum(strin) { //put d1tp.textContent
+
+  if (strin.includes('.')) {
+    var ss = strin.split('.')
+    ss[0] = mark(ss[0])
+    strin = ss.join('.')    
+  } else {
+    strin = mark(strin)
+  }
+  return strin
+
+  function mark(st) {
+    var long = st.length 
+    var sep = long/3
+    if (Number.isInteger(sep)) sep = Math.floor(sep - 1)
+    else sep = Math.floor(sep)
+
+    var aa = []
+    var a = long - 3 ; b = long 
+    for (i=sep ; i > -1 ; i--) {
+      //console.log(a,b)
+      aa[i] = st.slice(a, b)
+      //console.log(aa)
+      if (a < 3) a = 0
+      else a = a-3 
+      b = b-3 
+    }
+    return aa.toString()
+  }
+
+}
+sepNum('123456789.45') //gets 123,456,789
+
+function thaiYear(y) {
+  return y + 543  
+}
+
+
+function turn(ori, round) {
+  var inp = ori
+  var out = '' 
+  for (i = 0 ; i < round ; i++) {
+    out = btoa(inp)
+    //console.log(i, out)
+    inp = out 
+  }
+  return out  
+}
+
+function retur(code, round) {
+  var inp = code
+  var out = ''
+  for (i = 0 ; i < round ; i++) {
+    out = atob(inp)
+    //console.log(i, out)
+    inp = out 
+  }
+  return out 
+}
+
+
+
+</script>
+
+</body>
+</html>

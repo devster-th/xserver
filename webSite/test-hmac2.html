@@ -1,0 +1,87 @@
+<html>
+<head>
+<style>
+div {font-size:20px; font-weight:bold;}
+</style>
+</head>
+<body>
+<h1>test hmac/web api</h1>
+<div>SIGN</div>
+<label>json web key:</label>
+<textarea rows="5" cols="45" id="jwk" disabled></textarea>
+<br><label>message:</label>
+<br><textarea cols="45" rows="3" id="msg"></textarea>
+<br><button onclick="getHmac(jwk.value, msg.value, '#hmacOut')">get HMAC v</button>
+<br><textarea cols="45" rows="3" id="hmacOut" disabled></textarea>
+<hr>
+
+<div>VERIFY</div>
+<label>key:</label>
+<br><textarea id="verKey" cols="45" rows="5"></textarea>
+<br><label>message to verify:</label>
+<br><textarea cols="45" rows="3" id="verMsg"></textarea>
+<br><button 
+  onclick="getHmac(verKey.value, verMsg.value, '#verOut')"
+  >VERIFY v</button>
+<br><textarea id="verOut" cols="45" rows="3"></textarea>
+
+<hr>
+<div>RESULT = <span id="result">...</span></div>
+
+
+<script>
+
+//gen jwk
+async function genJwk() {
+  const key = await window.crypto.subtle.generateKey(
+  {name:"HMAC", "hash":"SHA-256"},
+  true,
+  ["sign","verify"]
+  )
+  jwk.value = JSON.stringify(
+    await window.crypto.subtle.exportKey("jwk",key)
+  )
+}
+genJwk() 
+
+
+//gen hmac
+function buf2hex(buf) {
+  return Array.prototype.map.call(new Int8Array(buf),
+    x=>(('00'+x.toString(16)).slice(-2))).join('') 
+}
+
+async function getHmac(keyRaw, message, showAt) {
+  //import key
+  const key = await window.crypto.subtle.importKey(
+    "jwk",
+    JSON.parse(keyRaw),
+    {name:"HMAC","hash":"SHA-256"},
+    true,
+    ["sign","verify"]
+  )
+
+
+  const buf = new TextEncoder("utf-8").encode(message)
+  const sig = await window.crypto.subtle.sign("HMAC",key,buf)
+  //return buf2hex(sig)
+  //hmacOut.value = buf2hex(sig)
+  document.querySelector(showAt).value = buf2hex(sig)
+  
+  if (showAt == '#verOut') {
+    isMatch()
+  }
+}
+
+//matching
+function isMatch() {
+  if (hmacOut.value == verOut.value) {
+    result.textContent = "PASS"
+  } else {
+    result.textContent = "REJECT"
+  }
+}
+
+</script>  
+</body>
+</html>

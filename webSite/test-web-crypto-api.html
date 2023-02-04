@@ -7,16 +7,16 @@
 <button onclick="genRandom()">1. Gen random =></button> <span id="ranOut"></span>
 
 <br><button onclick="genUuid()">2. Gen UUID</button>
-<p id="uuidOut"></p>
+<textarea id="uuidOut" rows="1" cols="45" disabled></textarea>
 
 <p>3. Put text to encrypt or hash:</p>
-<textarea cols="40" rows="3" id="inn" 
+<textarea cols="45" rows="3" id="inn" 
   ></textarea>
 <br><button onclick="hash256()">SHA-256</button>
-<p id="outt"></p>
+<textarea id="outt" cols="45" rows="4" disabled></textarea>
 
 <br><button onclick="genKey()">Gen key pair</button>
-<p id="ki"></p>
+<textarea id="ki" cols="45" rows="20" disabled></textarea>
 <p id="kx"></p>
 
 <script>
