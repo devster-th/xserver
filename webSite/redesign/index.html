@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://www.w3schools.com/lib/w3.js"></script>
+
+  <script src="./module/xdev.js"></script>
+  <script src="_config.js"></script>
+  <script src="core.js"></script>
+  <script src="./module/sales.js"></script>
+  <script src="./module/products.js"></script>
+  
+  
+
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    /* the default style is for mobile */
+
+    /* for laptop, desktop, notebook */
+    @media screen and (min-width: 1000px) {
+      #sidebar {display: block; width: 15% }
+      #pageContent {margin-left: 15% }
+      #mobileMenuBox {display: none }
+      #mobileMenu_icon {display: none}
+    }
+
+    /* for very wide screen or big external-monitor */
+    @media screen and (min-width: 1300px) {
+      #sidebar {width: 10%}
+      #pageContent {margin-left: 10%}
+    }
+  </style>
+</head>
+<body onresize="menuAct('updateMenu')">
+
+
+<!-------------------------- CONTROL ---------------------------------->
+
+<div id="pageControl" class="w3-display-container">
+
+
+  <!-- mobile menu icon -->
+  <i id="mobileMenu_icon"
+    class="fa fa-caret-right w3-left" 
+    style="font-size: 28px; color: darkred; cursor: pointer; z-index: 15; position: fixed; left: 8px; top: 50%; " 
+    onclick="mobileMenuBox.hidden=false"></i>
+    <!--position: fixed; left: 8px; top: 50%;"-->
+
+  <!-- mobile menu box -->
+  <div id="mobileMenuBox"  
+    class="w3-grey w3-bar-block"
+    style="width: 60%; position: fixed; left: 0; bottom: 0; z-index: 20"
+    hidden >
+
+    <button 
+      class="w3-bar-item w3-button w3-xlarge w3-border-bottom"
+      onclick="mobileMenuBox.hidden=true"><i 
+      class="fa fa-caret-left"></i> Close</button>
+      
+    <button 
+      class="w3-bar-item w3-button w3-xlarge"
+      onclick="menuAct(this)">Sales</button>
+    <button 
+      class="w3-bar-item w3-button w3-xlarge"
+      onclick="menuAct(this)">Marketing</button>
+    <button 
+      class="w3-bar-item w3-button w3-xlarge"
+      onclick="menuAct(this)">Products</button>
+    <button 
+      class="w3-bar-item w3-button w3-xlarge"
+      onclick="menuAct(this)">Warehouse</button>
+    <button 
+      class="w3-bar-item w3-button w3-xlarge w3-border-bottom"
+      onclick="menuAct(this)">Delivery</button>
+
+    <button 
+      class="w3-bar-item w3-button w3-xlarge"
+      onclick="menuAct(this)">Purchase</button>
+    <button 
+      class="w3-bar-item w3-button w3-xlarge"
+      onclick="menuAct(this)">Finance</button>
+    <button 
+      class="w3-bar-item w3-button w3-xlarge"
+      onclick="menuAct(this)">Accounting</button>
+    <button 
+      class="w3-bar-item w3-button w3-xlarge"
+      onclick="menuAct(this)">Manufacturing</button>
+    <button 
+      class="w3-bar-item w3-button w3-xlarge"
+      onclick="menuAct(this)">Maintenance</button>
+    <button 
+      class="w3-bar-item w3-button w3-xlarge"
+      onclick="menuAct(this)">Assets</button>
+
+    <button 
+      class="w3-bar-item w3-button w3-xlarge w3-border-top"
+      onclick="menuAct(this)"><i class="fa fa-user-circle-o"></i> User setting</button>
+    <button 
+      class="w3-bar-item w3-button w3-xlarge"
+      onclick="menuAct(this)"><i class="fa fa-sliders"></i> Admin</button>
+    <button 
+      class="w3-bar-item w3-button w3-xlarge w3-border-bottom"
+      onclick="menuAct(this)"><i class="fa fa-book"></i> Learn</button>
+
+    <button 
+      class="w3-bar-item w3-button w3-xlarge"
+      onclick="menuAct(this)"><i class="fa fa-sign-out"></i> Log out</button>
+
+  </div>
+
+
+
+  <!-- sidebar for wide screen -->
+  <div id="sidebar"
+    class="w3-sidebar w3-grey w3-bar-block"
+    hidden >
+
+    <span>MODULES</span>
+
+    <button class="w3-bar-item w3-button"
+      onclick="menuAct(this)">Sales</button>
+    <button class="w3-bar-item w3-button"
+      onclick="menuAct(this)">Marketing</button>
+    <button class="w3-bar-item w3-button"
+      onclick="menuAct(this)">Products</button>
+    <button class="w3-bar-item w3-button"
+      onclick="menuAct(this)">Warehouse</button>
+    <button class="w3-bar-item w3-button w3-border-bottom"
+      onclick="menuAct(this)">Delivery</button>
+
+    <button class="w3-bar-item w3-button"
+      onclick="menuAct(this)">Purchase</button>
+    <button class="w3-bar-item w3-button"
+      onclick="menuAct(this)">Finance</button>
+    <button class="w3-bar-item w3-button"
+      onclick="menuAct(this)">Accounting</button>
+    <button class="w3-bar-item w3-button"
+      onclick="menuAct(this)">Manufacturing</button>
+    <button class="w3-bar-item w3-button"
+      onclick="menuAct(this)">Maintenance</button>
+    <button class="w3-bar-item w3-button"
+      onclick="menuAct(this)">Assets</button>
+
+    <button class="w3-bar-item w3-button w3-border-top"
+      onclick="menuAct(this)"><i class="fa fa-user-circle-o"></i> User setting</button>
+    <button class="w3-bar-item w3-button"
+      onclick="menuAct(this)"><i class="fa fa-sliders"></i> Admin</button>
+    <button class="w3-bar-item w3-button w3-border-bottom"
+      onclick="menuAct(this)"><i class="fa fa-book"></i> Learn</button>
+
+    <button class="w3-bar-item w3-button"
+      onclick="menuAct(this)"><i class="fa fa-sign-out"></i> Log out</button>
+  </div>
+
+  
+
+
+</div><!--end of pageControl section-->
+
+
+
+<!---------------------------- CONTENT --------------------------------->
+
+<div id="pageContent" class="w3-display-container">
+
+  <!-- messageBox -->
+  <!--the messageBox has to be in the Content section because the w3-display-container can control the box's middle position. If not it won't be at the center of the screen.-->
+  <div id="messageBox" 
+    class="w3-display-middle w3-yellow w3-card-4 w3-container" 
+    style="width: 65%; z-index: 20; " 
+    hidden>
+
+    <h3>You've got a message</h3>
+    <p>This is a message that the user will see but it changes the color and the texts based on each situation.</p><br>
+
+    <div class="w3-bar w3-center w3-margin-bottom">
+      <button 
+        class="w3-button w3-light-grey" 
+        onclick="xe({ cancelTimer: X1.message.timer }); 
+        xe({
+          replaceClass: 'w3-light-grey', 
+          with: 'w3-grey', 
+          onEl: this
+        })"
+        >Hold</button> <button 
+        class="w3-button w3-light-grey" 
+        onclick="xe({ hideThis: '#messageBox' })"
+        >Close</button>
+    </div>
+  </div>
+
+
+
+  <!--each module will replace from below div-->
+  <div id="salesModule" hidden></div>
+  <div id="marketingModule" hidden></div>
+  <div id="productsModule" hidden></div>
+  <div id="warehouseModule" hidden></div>
+  
+
+
+</div><!--end of pageContent-->
+
+
+
+
+<script>
+////////////////////////////////////////////////////////////////////////
+//initially, loads Sales module
+/*
+salesModule.setAttribute('w3-include-html','./module/sales-module.html')
+w3.includeHTML( () => {
+    menuAct('updateMenu') //first load sets to 'Sales' menu
+    tabAct(salesTab.children[0]) //default tab for Sales module
+  }
+)
+*/ 
+
+init()
+
+// DEV NOTE
+/*
+M: now everything mostly done, basic, both menus, the mobile & sidebar synced.
+when refresh page, the default is Sales, 
+
+*/ 
+
+
+
+</script>
+</body>
+</html>
