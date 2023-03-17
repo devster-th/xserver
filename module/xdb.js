@@ -90,7 +90,7 @@ DISABLE
 
 
 // program ////////////////////////////////////////////////////////
-exports.b = function (x={}) {
+exports.run = function (x={}) {
 
     const fileSys = require("fs")
     //let     xdb = {} //internal use
@@ -564,5 +564,6 @@ exports.b = function (x={}) {
 2022-09-27  working to config into the simpleApp  
             =seems work, so make the read file the big one and put everything inside it
 
+2023-2-20   M/changed exports.b to exports.run to let the call command to: xdb.run(...)
 
 */

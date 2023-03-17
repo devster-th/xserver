@@ -26,9 +26,9 @@ const app       = express()
 //const mongo     = require("mongodb").MongoClient 
 //const crypto    = require("crypto")
 //const uuid      = require("uuid")
-const cor = require("./core.js")
-const xde = require("./module/xev.js")
-const xd = require("./module/xdb.js")
+const core = require("./core.js")
+//const xdev = require("./module/xev.js")
+//const xdb = require("./module/xdb.js")
 
 //setting
 app.use(express.static("webSite"))
@@ -48,79 +48,17 @@ The server talks to external via GET & POST here and then send 'command' to the 
 
 app.get("/get_", (req,resp)=>{
     //log_(req.ip)
-    console.log(req.method)
-    console.log(req.query)
+    //console.log(req.method)
+    //console.log(req.query)
     
-    //this part is the new language, may be called... the slashLang 
-    /* style is... //aaaaa/bbbbb/cccc/dddd//  ...............*/
-/*
-    if (req.query.request != "" 
-        && /^\/\/.+\/\/$/.test(req.query.request)) {
-        //gen a code
-        /*
-        let approvCode = Date.now()
-        let approvText = 
-            req.query.request.replace(/\/\/$/,
-                `/deeji-${approvCode}//`)  
-        console.log(approvText)
-        */
-       /*
-        resp.send(  `<p>Your request is:<br>
-                    ${req.query.request}</p>`)
-
-        //in real mode we send command to xdev
-        // _x.do({act:"...", data})
-        //so we invent new language for the Get, e.g.,
-        //.... //----/----/-----//
-        //the language starts with // and end with // with commands in between
-        //like: //send/3000$dm/to@john/from@dad//
-        //we make this because it will be easiest for typical user to 
-        //put in the browser bar or in an input box.
-        //the Get may accept 2 languages, the easyLang & objectLang
-
-    } else {
-        resp.send("you put wrong command, try again...")
-    }//-----------------------------------------------------------
-*/
-    //all Get-job comes here
-
-    //test to let user put xdev lang via the Get
-    //resp.redirect("/")
     
-    /* this block works
-    let getinput = JSON.parse(req.query.request) 
-    log_(getinput)
-    xde.v(getinput) //work now, the input must be json format
-    */
-    //if want user to easily type on the url bar, we should have some prep on
-    //input data
-
-    //try let user just fill in xLang, like: .... '{act:"read file",...}' 
-    //log_(req.query.request)
-    //log_(typeof req.query.request)
-    //eval("convToObj =" + req.query.request) //this line works
-    //log_(convToObj)
-    //log_(typeof convToObj)
-    //let xLang = convertToX(req.query.request)
-    //log_(/^\{act\:.*\}$/.test(req.query.request))
-
-    /*
-    if (typeof req.query.request !="undefined" 
-            && /^\{act\:.*\}$/.test(req.query.request) ) {
-      let xLang = xde.v({
-        act:"convert to xLang", 
-        input: req.query.request    })
-      //log_(xLang) 
-      let output = JSON.stringify(xde.v(xLang) ) //for gen-xuid works, but for find-xdb this line has problem !!BUG
-      resp.json(output) //work now
-    }//work, only '{act:...}' will pass the if screening
-    */
 
     //pass to cor.e(method,inputData)
-    cor.e("get",req.query.request)
+    //most of work will be done in the core module
+    core.run(req.query, 'get')
 
-    //for now just say 'thank you first'
-    resp.send("thank you :-) \n" + Date() )
+    //for testing just return something to B
+    resp.send("@deeji : received data at " + Date() )
 
 
 })//mostly work
@@ -135,49 +73,17 @@ this generally OK, because just test, will need to work more on real stuff after
 // 3 - Post works ///////////////////////////////////////////////////////
 app.post("/post_", (req,resp)=> {
     //console.log(req)
-    console.log(req.method)
-    console.log(req.body)
+    //console.log(req.method)
+    //console.log(req.body)
 
-    /*
-    if (req.body.act !="" && req.body.data !="") { //validate input
-        
-        /*pass validated input to cor.e() here
-
-
-        */
-    /*
-        //after get output from cor.e(), prep data below then reply back to requestor
-        let svResp = {  act: "reply",
-                        from:"deeji",
-                        note:"ok, got your message",
-                        secureKey:5000,
-                        data:"",
-                        time: Date.now(),
-                        transacid:"" //id of this transac
-                    }
-        //resp.send(svResp)
-        resp.json(svResp)
-        //console.log("svResp:")
-        console.log(svResp)
-
-    } else { //wrong input response
-        let svResp = {  act:"reply",
-                        from:"deeji",
-                        note:"wrong command",
-                        secureKey:5000,
-                        data:"",
-                        time: Date.now()
-                    }
-    }//--------------------------------------------------
-   */
+    
 
     //pass input to cor.e(method,inputData)
-    cor.e("post",req.body)
+    core.run(req.body, 'post')
 
     //just send message 'thank you' for now
-    resp.json({note:"thank you :-) \n" + Date()})
+    resp.json({ note:"@deeji : received data at " + Date() })
 
-    //all Post-job comes here
 })
 
 
@@ -191,7 +97,7 @@ app.listen(_server.port, ()=>{
     -- @mutita 
     v0.2 / Sep 30, 2022
     `)
-    console.log("//ready...")
+    console.log("@deeji is ready...")
     //cor.e()
     testScript()
 })
@@ -228,7 +134,7 @@ function testScript() {
   //xde.v({act:"read file", fileName:"xdb.json", convert:"toObject"})
 
   //xd.b({find:"*",in:"people"})
-  cor.e("test")
+  core.run("test")
 }
 
 
@@ -266,6 +172,6 @@ devper = @mutita
 
 2022-9-30   changed paths to '/get_', '/post_' to avoid conflict of html pages
 
-
+2023-2-20   M/touch little
 
 */
