@@ -2,18 +2,19 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://www.w3schools.com/lib/w3.js"></script>
+  <script src="/standard_lib/w3/w3.js"></script>
 
   <script src="./module/xdev.js"></script>
   <script src="_config.js"></script>
   <script src="core.js"></script>
   <script src="./module/sales.js"></script>
+  <script src="./module/marketing.js"></script>
   <script src="./module/products.js"></script>
   
   
 
-  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/standard_lib/w3/w3.css">
+  <link rel="stylesheet" href="/standard_lib/font-awesome/all.css">
   <style>
     /* the default style is for mobile */
 
@@ -32,7 +33,7 @@
     }
   </style>
 </head>
-<body onresize="menuAct('updateMenu')">
+<body onresize="core.menuAct('updateMenu')">
 
 
 <!-------------------------- CONTROL ---------------------------------->
@@ -43,9 +44,10 @@
   <!-- mobile menu icon -->
   <i id="mobileMenu_icon"
     class="fa fa-caret-right w3-left" 
-    style="font-size: 28px; color: darkred; cursor: pointer; z-index: 15; position: fixed; left: 8px; top: 50%; " 
+    style="font-size: 28px; color: darkred; cursor: pointer; z-index: 15; position: fixed; left: 4px; top: 50%; " 
     onclick="mobileMenuBox.hidden=false"></i>
-    <!--position: fixed; left: 8px; top: 50%;"-->
+    <!--position: fixed; left: 8px; top: 50%;"
+        keep: fa fa-caret-right-->
 
   <!-- mobile menu box -->
   <div id="mobileMenuBox"  
@@ -53,59 +55,59 @@
     style="width: 60%; position: fixed; left: 0; bottom: 0; z-index: 20"
     hidden >
 
-    <button 
+    <button id="moClose"
       class="w3-bar-item w3-button w3-xlarge w3-border-bottom"
       onclick="mobileMenuBox.hidden=true"><i 
       class="fa fa-caret-left"></i> Close</button>
       
-    <button 
+    <button id="moSales"
       class="w3-bar-item w3-button w3-xlarge"
-      onclick="menuAct(this)">Sales</button>
-    <button 
+      onclick="core.menuAct(this)">Sales</button>
+    <button id="moMarketing"
       class="w3-bar-item w3-button w3-xlarge"
-      onclick="menuAct(this)">Marketing</button>
-    <button 
+      onclick="core.menuAct(this)">Marketing</button>
+    <button id="moProducts"
       class="w3-bar-item w3-button w3-xlarge"
-      onclick="menuAct(this)">Products</button>
-    <button 
+      onclick="core.menuAct(this)">Products</button>
+    <button id="moWarehouse"
       class="w3-bar-item w3-button w3-xlarge"
-      onclick="menuAct(this)">Warehouse</button>
-    <button 
+      onclick="core.menuAct(this)">Warehouse</button>
+    <button id="moDelivery"
       class="w3-bar-item w3-button w3-xlarge w3-border-bottom"
-      onclick="menuAct(this)">Delivery</button>
+      onclick="core.menuAct(this)">Delivery</button>
 
-    <button 
+    <button id="moPurchase"
       class="w3-bar-item w3-button w3-xlarge"
-      onclick="menuAct(this)">Purchase</button>
-    <button 
+      onclick="core.menuAct(this)">Purchase</button>
+    <button id="moFinance"
       class="w3-bar-item w3-button w3-xlarge"
-      onclick="menuAct(this)">Finance</button>
-    <button 
+      onclick="core.menuAct(this)">Finance</button>
+    <button id="moAccounting"
       class="w3-bar-item w3-button w3-xlarge"
-      onclick="menuAct(this)">Accounting</button>
-    <button 
+      onclick="core.menuAct(this)">Accounting</button>
+    <button id="moManufacturing"
       class="w3-bar-item w3-button w3-xlarge"
-      onclick="menuAct(this)">Manufacturing</button>
-    <button 
+      onclick="core.menuAct(this)">Manufacturing</button>
+    <button id="moMaintenance"
       class="w3-bar-item w3-button w3-xlarge"
-      onclick="menuAct(this)">Maintenance</button>
-    <button 
+      onclick="core.menuAct(this)">Maintenance</button>
+    <button id="moAssets"
       class="w3-bar-item w3-button w3-xlarge"
-      onclick="menuAct(this)">Assets</button>
+      onclick="core.menuAct(this)">Assets</button>
 
-    <button 
+    <button id="moUserSetting"
       class="w3-bar-item w3-button w3-xlarge w3-border-top"
-      onclick="menuAct(this)"><i class="fa fa-user-circle-o"></i> User setting</button>
-    <button 
+      onclick="core.menuAct(this)"><i class="fa fa-user-circle-o"></i> User setting</button>
+    <button id="moAdmin"
       class="w3-bar-item w3-button w3-xlarge"
-      onclick="menuAct(this)"><i class="fa fa-sliders"></i> Admin</button>
-    <button 
+      onclick="core.menuAct(this)"><i class="fa fa-sliders"></i> Admin</button>
+    <button id="moLearn"
       class="w3-bar-item w3-button w3-xlarge w3-border-bottom"
-      onclick="menuAct(this)"><i class="fa fa-book"></i> Learn</button>
+      onclick="core.menuAct(this)"><i class="fa fa-book"></i> Learn</button>
 
-    <button 
+    <button id="moLogOut"
       class="w3-bar-item w3-button w3-xlarge"
-      onclick="menuAct(this)"><i class="fa fa-sign-out"></i> Log out</button>
+      onclick="core.menuAct(this)"><i class="fa fa-sign-out"></i> Log out</button>
 
   </div>
 
@@ -118,39 +120,54 @@
 
     <span>MODULES</span>
 
-    <button class="w3-bar-item w3-button"
-      onclick="menuAct(this)">Sales</button>
-    <button class="w3-bar-item w3-button"
-      onclick="menuAct(this)">Marketing</button>
-    <button class="w3-bar-item w3-button"
-      onclick="menuAct(this)">Products</button>
-    <button class="w3-bar-item w3-button"
-      onclick="menuAct(this)">Warehouse</button>
-    <button class="w3-bar-item w3-button w3-border-bottom"
-      onclick="menuAct(this)">Delivery</button>
+    <button id="sidSales"
+      class="w3-bar-item w3-button"
+      onclick="core.menuAct(this)">Sales</button>
+    <button id="sidMarketing"
+      class="w3-bar-item w3-button"
+      onclick="core.menuAct(this)">Marketing</button>
+    <button id="sidProducts"
+      class="w3-bar-item w3-button"
+      onclick="core.menuAct(this)">Products</button>
+    <button id="sidWarehouse"
+      class="w3-bar-item w3-button"
+      onclick="core.menuAct(this)">Warehouse</button>
+    <button id="sidDelivery"
+      class="w3-bar-item w3-button w3-border-bottom"
+      onclick="core.menuAct(this)">Delivery</button>
 
-    <button class="w3-bar-item w3-button"
-      onclick="menuAct(this)">Purchase</button>
-    <button class="w3-bar-item w3-button"
-      onclick="menuAct(this)">Finance</button>
-    <button class="w3-bar-item w3-button"
-      onclick="menuAct(this)">Accounting</button>
-    <button class="w3-bar-item w3-button"
-      onclick="menuAct(this)">Manufacturing</button>
-    <button class="w3-bar-item w3-button"
-      onclick="menuAct(this)">Maintenance</button>
-    <button class="w3-bar-item w3-button"
-      onclick="menuAct(this)">Assets</button>
+    <button id="sidPurchase"
+      class="w3-bar-item w3-button"
+      onclick="core.menuAct(this)">Purchase</button>
+    <button id="sidFinance"
+      class="w3-bar-item w3-button"
+      onclick="core.menuAct(this)">Finance</button>
+    <button id="sidAccounting"
+      class="w3-bar-item w3-button"
+      onclick="core.menuAct(this)">Accounting</button>
+    <button id="sidManufacturing"
+      class="w3-bar-item w3-button"
+      onclick="core.menuAct(this)">Manufacturing</button>
+    <button id="sidMaintenance"
+      class="w3-bar-item w3-button"
+      onclick="core.menuAct(this)">Maintenance</button>
+    <button id="sidAssets"
+      class="w3-bar-item w3-button"
+      onclick="core.menuAct(this)">Assets</button>
 
-    <button class="w3-bar-item w3-button w3-border-top"
-      onclick="menuAct(this)"><i class="fa fa-user-circle-o"></i> User setting</button>
-    <button class="w3-bar-item w3-button"
-      onclick="menuAct(this)"><i class="fa fa-sliders"></i> Admin</button>
-    <button class="w3-bar-item w3-button w3-border-bottom"
-      onclick="menuAct(this)"><i class="fa fa-book"></i> Learn</button>
+    <button id="sidUserSetting"
+      class="w3-bar-item w3-button w3-border-top"
+      onclick="core.menuAct(this)"><i class="fa fa-user-circle-o"></i> User setting</button>
+    <button id="sidAdmin"
+      class="w3-bar-item w3-button"
+      onclick="core.menuAct(this)"><i class="fa fa-sliders"></i> Admin</button>
+    <button id="sidLearn"
+      class="w3-bar-item w3-button w3-border-bottom"
+      onclick="core.menuAct(this)"><i class="fa fa-book"></i> Learn</button>
 
-    <button class="w3-bar-item w3-button"
-      onclick="menuAct(this)"><i class="fa fa-sign-out"></i> Log out</button>
+    <button id="sidLogOut"
+      class="w3-bar-item w3-button"
+      onclick="core.menuAct(this)"><i class="fa fa-sign-out"></i> Log out</button>
   </div>
 
   
@@ -177,15 +194,15 @@
     <div class="w3-bar w3-center w3-margin-bottom">
       <button 
         class="w3-button w3-light-grey" 
-        onclick="xe({ cancelTimer: X1.message.timer }); 
-        xe({
+        onclick="x_({ cancelTimer: X1.message.timer }); 
+        x_({
           replaceClass: 'w3-light-grey', 
           with: 'w3-grey', 
           onEl: this
         })"
         >Hold</button> <button 
         class="w3-button w3-light-grey" 
-        onclick="xe({ hideThis: '#messageBox' })"
+        onclick="x_({ hideThis: '#messageBox' })"
         >Close</button>
     </div>
   </div>
@@ -197,6 +214,7 @@
   <div id="marketingModule" hidden></div>
   <div id="productsModule" hidden></div>
   <div id="warehouseModule" hidden></div>
+  <module id="test_module" hidden></module>
   
 
 
@@ -207,17 +225,9 @@
 
 <script>
 ////////////////////////////////////////////////////////////////////////
-//initially, loads Sales module
-/*
-salesModule.setAttribute('w3-include-html','./module/sales-module.html')
-w3.includeHTML( () => {
-    menuAct('updateMenu') //first load sets to 'Sales' menu
-    tabAct(salesTab.children[0]) //default tab for Sales module
-  }
-)
-*/ 
 
-init()
+
+core.init()
 
 // DEV NOTE
 /*

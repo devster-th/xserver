@@ -1,5 +1,8 @@
 //products.js 
+const products = {
+  profile: {}
+}
 
-function initProducts() {
-  tabAct(productsTab.children[1])
+products.init = function () {
+  core.tabAct(productsTab.children[0])
 }

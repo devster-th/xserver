@@ -1,0 +1,85 @@
+<!-- head note
+put all your note about this module here
+-->
+
+<!--config-->
+<conf
+  module="mmm"
+  default-tab="0"
+></conf>
+
+<!--tabs-->
+<tab>
+  <button _space="mmm_aaa">AAA</button><button _space="mmm_bbb">BBB</button><button _space="mmm_ccc">CCC</button><button _space="mmm_ddd">DDD</button>
+</tab>
+
+<!--workspaces-->
+<space id="mmm_aaa">
+  <indicator>
+    <alert-icon></alert-icon>
+  </indicator>
+  <space-name>This is a workspace name</space-name>
+  <space-brief>This is a brief of this space</space-brief>
+  <search-icon></search-icon>
+  <space-block>
+    <space-column>
+      <!--put things here-->
+    </space-column>
+    <space-column>
+      <!--put things here-->
+    </space-column>
+  </space-block>
+  <space-act>
+    <button _main onclick="">OK</button> &nbsp; <button _careful  onclick="">Cancel</button> &nbsp; <button _careful1 onclick="">Reset</button>
+  </space-act>
+</space>
+
+<!--workspace as many as you need-->
+<space id="mmm_bbb"></space>
+<space id="mmm_ccc"></space>
+<space id="mmm_ddd"></space>
+
+
+<!--
+the idea of ui is here:
+
+
+
+AAA | BBB | CCC | DDD |______________________________________
+This is the space name
+This is the space brief to provide a short explainatin about this space.
+
+( ) ...this can be tools like search icon or else
+
+------------------this is space-block--------------------------
+| ___________________________________________________________ |
+||  this is space-column     |     another space-column      ||
+||                           |                               ||
+||                           |                               ||
+||                           |                               || 
+||                           |                               || 
+||                           |                               || 
+||                           |                               || 
+|-------------------------------------------------------------|
+---------------------------------------------------------------
+
+             [ OK ]  [Cancel]  [Reset]  [Help]
+
+
+
+The above drawing explains idea about the module's ui comprised of: tabs, workspace-name, space-brief, space-block, space-column, and space-act.
+
+Put all your ui in this file and keep the file under your module folder like: /module/module_folder/. <--files here
+
+the files in the module_folder gernally are:
+ -module.js
+ -module.html
+ -pic & other files you can organize the folder structure as you need but the module.js & module.html should be in the root of the module_folder
+
+When design your module ui, uses the tags in this template to construct it and when it loads, the core will automatically put the classes into them so you don't need to worry about the styles of it.
+
+If your module name = 'sales' and the tab name = 'Home', you must put the space id = 'sales_home' so when you click on the tab 'Home' it will open the space 'sales_home'.
+
+The doc about this will be available in http://x-app.info
+
+-->

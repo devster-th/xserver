@@ -1,4 +1,8 @@
-marketing.js
-function initMarketing() {
-  //has no tab
+//marketing.js
+const marketing = {
+  profile: {}
+}
+
+marketing.init = function () {
+  
 }

@@ -1,0 +1,110 @@
+<html>
+<head>
+<link rel="stylesheet" href="/standard_lib/w3/w3.css">
+<style>
+  sp-column,sp-block {height:200px}
+</style>
+</head>
+<body>
+
+<module id="module_a">
+  <tab>
+    <button>AAA</button><button onclick="a_space2.hidden=true;a_space1.hidden=false">BBB</button><button onclick="a_space1.hidden=true;a_space2.hidden=false">CCC</button>
+  </tab>
+
+  <space id="a_space1">
+    <sp-name>This is a workspace name</sp-name>
+    <sp-brief>this is a brief of this space</sp-brief>
+    <sp-group>
+      <sp-column>
+        <label>Name:</label> <input type="text">
+        <label>Email:</label> <input type="text">
+        <label>Music:</label> <select>
+          <option>Jazz</option>
+          <option>Rock</option>
+          <option>Pop</option>
+          <option>Thai</option>
+        </select>
+      </sp-column>
+      <sp-column>
+        <label>Sex:</label><br>
+        <input type="radio" name="nnn"> <label>Female</label><br>
+        <input type="radio" name="nnn"> <label>Male</label><br>
+
+        <label>Foods:</label><br>
+        <input type="checkbox"> <label>Noodle</label><br>
+        <input type="checkbox"> <label>Coffee</label><br>
+        <input type="checkbox"> <label>Steak</label>
+
+      </sp-column>
+    </sp-group>
+      
+    <sp-action>
+      <button _main>OK</button> &nbsp; <button _cautious>Cancel</button> &nbsp; <button _danger>Reset</button> &nbsp; <button _low-priority>Help</button>
+    </sp-action>
+
+
+  </space>
+
+  <space id="a_space2" hidden>
+    <sp-name>Space 2</sp-name>
+    <sp-block></sp-block>
+  </space>
+
+</module>
+
+<script>
+document.querySelector('module').className = 'w3-block'
+document.querySelector('tab').className = 'w3-bar w3-black w3-block'
+document.querySelectorAll('tab > button')[0].className = 'w3-button w3-small'
+document.querySelectorAll('tab > button')[1].className = 'w3-button w3-small w3-white'
+document.querySelectorAll('tab > button')[2].className = 'w3-button w3-small'
+
+
+
+
+document.querySelectorAll('sp-name')[0].className = 'w3-text-blue w3-block w3-xlarge w3-container'
+document.querySelectorAll('sp-name')[1].className = 'w3-text-blue w3-block w3-xlarge w3-container'
+
+document.querySelector('sp-brief').className = 'w3-block w3-large w3-container'
+
+
+document.querySelector('sp-group').className = 'w3-row w3-container w3-block'
+document.querySelectorAll('sp-column')[0].className = 'w3-half w3-border w3-container'
+document.querySelectorAll('sp-column')[1].className = 'w3-half w3-border w3-container'
+
+
+document.querySelector('sp-action').className = 'w3-bar w3-center  w3-padding w3-block'
+document.querySelectorAll('sp-action > button[_main]')[0].className = 'w3-blue w3-button'
+document.querySelectorAll('sp-action > button[_cautious]')[0].className = 'w3-button w3-yellow'
+document.querySelectorAll('sp-action > button[_danger]')[0].className = 'w3-button w3-red'
+document.querySelectorAll('sp-action > button[_low-priority]')[0].className = 'w3-button w3-light-grey'
+
+
+document.querySelectorAll('sp-block')[0].className = 'w3-block w3-container w3-pale-green w3-border w3-container'
+
+
+let textinput = document.querySelectorAll('input[type="text"]')
+for (el of textinput) {
+  el.className = 'w3-input'
+}
+
+let selectinput = document.querySelectorAll('select')
+for (el of selectinput) {
+  el.className = 'w3-select'
+}
+
+let radio_input = document.querySelectorAll('input[type="radio"]')
+for (el of radio_input) {
+  el.className = 'w3-radio'
+}
+
+let checkinput = document.querySelectorAll('input[type="checkbox"]')
+for (el of checkinput) {
+  el.className = 'w3-check'
+}
+
+
+</script>
+</body>
+</html>

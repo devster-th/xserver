@@ -1,35 +1,39 @@
 //core.js
 //the core of the entire app is here
 
+var core = {}
+
 //replace pagex with X1
-function init() {
+core.init = function () { 
 
   globalThis.X1 = {
     activeMenu: 'Sales',
     activeTab: 'Home',
     menu: {
-      menuitem: [
-        {text: 'Sales', position:'', icon:'', section:'', run:''},
-        {text: 'Marketing', position:'', icon:'', section:'', run:''},
-        {text: 'Products', position:'', icon:'', section:'', run:''},
-        {text: 'Warehouse', position:'', icon:'', section:'', run:''},
-        {text: 'Delivery', position:'', icon:'', section:'', run:''},
-        {text: 'Purchase', position:'', icon:'', section:'', run:''},
-        {text: 'Finance', position:'', icon:'', section:'', run:''},
-        {text: 'Accounting', position:'', icon:'', section:'', run:''},
-        {text: 'Manufacturing', position:'', icon:'', section:'', run:''},
-        {text: 'Maintenance', position:'', icon:'', section:'', run:''},
-        {text: 'Assets', position:'', icon:'', section:'', run:''},
-        {text: 'User setting', position:'', icon:'', section:'', run:''},
-        {text: 'Admin', position:'', icon:'', section:'', run:''},
-        {text: 'Learn', position:'', icon:'', section:'', run:''},
-        {text: 'Log out', position:'', icon:'', section:'', run:''},
+      item: [
+        {text: 'Sales', position:1, icon:'', section:'', run:''},
+        {text: 'Marketing', position:2, icon:'', section:'', run:''},
+        {text: 'Products', position:3, icon:'', section:'', run:''},
+        {text: 'Warehouse', position:4, icon:'', section:'', run:''},
+        {text: 'Delivery', position:5, icon:'', section:'', run:''},
+        {text: 'Purchase', position:6, icon:'', section:'', run:''},
+        {text: 'Finance', position:7, icon:'', section:'', run:''},
+        {text: 'Accounting', position:8, icon:'', section:'', run:''},
+        {text: 'Manufacturing', position:9, icon:'', section:'', run:''},
+        {text: 'Maintenance', position:10, icon:'', section:'', run:''},
+        {text: 'Assets', position:11, icon:'', section:'', run:''},
+      ],
+      defaultitem:[
+        {text:'User setting', position:16, icon:'', section:'', run:''},
+        {text:'Admin', position:17, icon:'', section:'', run:''},
+        {text:'Learn', position:18, icon:'', section:'', run:''},
+        {text:'Log out', position:19, icon:'', section:'', run:''},
       ],
       sidebaritemClass: 'w3-bar-item w3-button',
       sidebarClass: 'w3-sidebar w3-grey w3-bar-block',
       mobileMenuClass: 'w3-grey w3-bar-block',
       mobileMenuitemClass: 'w3-bar-item w3-button w3-xlarge w3-border-bottom',
-      defaultAction: 'menuAct(this)',
+      defaultAction: 'core.menuAct(this)',
     },
     module: {
       sales: {
@@ -78,6 +82,7 @@ function init() {
       }
     },
     user: {
+      accessid: x_({genXuuid:1}),
       rights: {
         module: ['Sales','Marketing','Products','Warehouse','Delivery','Purchase','Finance','Accounting','Manufacturing','Maintenance','Assets']
       },
@@ -109,20 +114,27 @@ function init() {
     }
   } 
 
-  //show menu based on user-rights
-  xe({
+  //show menu based on user-rights, so not all user see the full menus
+  x_({
     showTheseEl: X1.user.rights.module,
     fromAllEl: mobileMenuList,
     exceptEl: ['User setting','Admin','Learn']
   })
 
-  xe({
+  x_({
     showTheseEl: X1.user.rights.module,
     fromAllEl: sidebarList,
     exceptEl: ['User setting','Admin','Learn']
   })
 
-  menuAct('updateMenu') //first load sets to 'Sales' menu
+  core.menuAct('updateMenu') //first load sets to 'Sales' menu
+
+  //test module template
+  x_({
+    loadHtmlFile:'./module/template/module-template.html',
+    intoEl:'module#test_module'
+  })
+
 
 }//end init() ....the core's init
 
@@ -132,14 +144,14 @@ function init() {
 // from this down, copied from index.html
 
 ////////////////////////////////////////////
-function tabAct(el) {
+core.tabAct = function (el) { 
   //when user click tab, change color that tab to white, the rest to black. And then show the tab-space, the rest hide
 
   //change color
-  xe({  replaceClass: 'w3-white', 
+  x_({  replaceClass: 'w3-white', 
         with: 'w3-black', 
         onEl: el.parentElement    })
-  xe({  replaceClass: 'w3-black',
+  x_({  replaceClass: 'w3-black',
         with: 'w3-white',
         onEl: el                  })
 
@@ -150,10 +162,10 @@ function tabAct(el) {
   //show tab-space
   if (X1.activeMenu.match(/Sales|Marketing|Products/)) {
 
-    xe({  showEl: this[ X1.activeMenu.toLowerCase() + 
-      X1.activeTab] ,
-      hide: 'the rest',
-      allEl:  eval(`X1.module.${X1.activeMenu.toLowerCase()}.contentElList`)
+    x_({  showEl: eval( X1.activeMenu.toLowerCase() + 
+                    X1.activeTab) , 
+          hide: 'the rest',
+          allEl:  eval(`X1.module.${X1.activeMenu.toLowerCase()}.contentElList`)
       })
   }
 
@@ -164,8 +176,9 @@ function tabAct(el) {
 }//m:ok
 
 
+
 ////////////////////////////////////////
-function menuAct(el) {
+core.menuAct = function (el) { 
 
   //1) MAKE ARRAY OF MENU ITEMS
   let mobileList = []
@@ -185,7 +198,7 @@ function menuAct(el) {
   //m:ok
 
 
-  //2) SET COLOR ON MENU
+  //2) HIGHLIGHT THE ACTIVE MENU
   if (el == 'updateMenu') {
     //update to get both menus active in the same item
     
@@ -211,17 +224,22 @@ function menuAct(el) {
   //new ver >> use xdev instead
   
   //if module content already loaded, not do, if not loaded, load
-  if (
-    eval(`X1.module.${X1.activeMenu.toLowerCase()}.moduleEl.innerHTML`)) {
-      //already loaded, not load again
-  } else {
-    //still not load
-    xe({
-      loadHtmlFile: eval(`X1.module.${X1.activeMenu.toLowerCase()}.htmlFile`),
-      intoEl: eval(`X1.module.${X1.activeMenu.toLowerCase()}.moduleEl`),
-      thenRun: this['init' + X1.activeMenu]
-    })
+  try {
+    if (
+      eval(`X1.module.${X1.activeMenu.toLowerCase()}.moduleEl.innerHTML`)) {
+        //already loaded, not load again
+    } else {
+      //still not load
+      x_({
+        loadHtmlFile: eval(`X1.module.${X1.activeMenu.toLowerCase()}.htmlFile`),
+        intoEl: eval(`X1.module.${X1.activeMenu.toLowerCase()}.moduleEl`),
+        thenRun: eval( X1.activeMenu.toLowerCase() + '.init') // sales.init()
+      })
+    }
+  } catch {
+    console.log('! menuAct/something wrong in the load module content')
   }
+  
 
   //show the active moduleEl, hide the rest
   let moduleEleList = []
@@ -231,105 +249,37 @@ function menuAct(el) {
     )
   }
 
-  xe({
-    showEl: eval(`X1.module.${X1.activeMenu.toLowerCase()}.moduleEl`),
-    allEl: moduleEleList 
-  })
-
-
-
-
-  function setActiveMenu(menuBoxToSet) {
-    //change color of the menu
-
-    //reset all menu's color
-    xe({
-      replaceClass: 'w3-light-grey',
-      with: 'w3-grey',
-      onEl: menuBoxToSet
+  try {
+    x_({
+      showEl: eval(`X1.module.${X1.activeMenu.toLowerCase()}.moduleEl`),
+      allEl: moduleEleList 
     })
+  } catch {
+    console.log('! menuAct/something wrong in the show module content')
+  }
+  
+    //this f inside the menuAct()
+    function setActiveMenu(menuBoxToSet) {
+      //change color of the menu
 
-    //set color for the active menu
-    for (l of menuBoxToSet) {
-      if (l.textContent.trim() == X1.activeMenu) {
-        xe({ 
-          replaceClass:'w3-grey', 
-          with:'w3-light-grey', 
-          onEl: l 
-        })
+      //reset all menu's color
+      x_({
+        replaceClass: 'w3-light-grey',
+        with: 'w3-grey',
+        onEl: menuBoxToSet
+      })
+
+      //set color for the active menu
+      for (l of menuBoxToSet) {
+        if (l.textContent.trim() == X1.activeMenu) {
+          x_({ 
+            replaceClass:'w3-grey', 
+            with:'w3-light-grey', 
+            onEl: l 
+          })
+        }
       }
-    }
-  }//m:ok
+    }//m:ok
 
 }//m:ok, 2023-3-15
 
-/* use xdev.js instead
-
-function savePageX() {
-  //prevent data loss when user refresh browser
-  sessionStorage.setItem('_pagex', JSON.stringify(pagex) )
-}
-
-
-function autoHide(el,millisec) {
-  //auto hide the msg-box
-  _autoHide = setTimeout( () => el.hidden = true, millisec)
-}
-
-function setColor(el,oldColor,newColor) {
-  //change color class
-  el.classList.replace(oldColor,newColor)
-}
-
-
-
-function xshow(el,time) {
-  //show for a period then hide 
-
-  if (typeof el == 'string') {
-    //so user put string in
-    el = document.querySelector(el)
-    el.hidden = false 
-  } else if (typeof el.hidden == 'boolean') {
-    //this is html el
-    el.hidden = false 
-  } else {
-    return false //bad input
-  }
-
-  //auto hide
-  if (!time) {
-    //if not set time, make default
-    _autoHide = setTimeout(
-      () => el.hidden = true, 2000  
-    ) 
-  } else if (time) {
-    _autoHide = setTimeout(
-      () => el.hidden = true, time 
-    )
-  } else if (time == 'stay') {
-    //let it stay as long as it needs
-  } else {
-    return false //bad time input 
-  }
-}
-
-
-function xhide(el) {
-  if (typeof el == 'string') {
-    document.querySelector(el).hidden = true 
-  } else if (typeof el.hidden == 'boolean') {
-    el.hidden = true 
-  } else {
-    return false //false input 
-  }
-}
-
-function xcancel(autoV) {
-  //clear auto task, e.g., xcancel(_autoHide)
-  clearTimeout(autoV)
-}
-
-
-
-*/

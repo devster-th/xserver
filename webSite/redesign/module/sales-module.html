@@ -1,44 +1,42 @@
-<!--
-  This is the Sales module that will cover all sales functions. So put description and all info about the module here.
--->
+<!--This is the Sales module that will cover all sales functions. So put description and all info about the module here.-->
+
 <conf
-  module-name="Sales"
-  version="1.0"
-  desc="covers all sales functions"
-  default-tab="Home"
-  developer="john"
-  source-code="http://somewhere"
-  doc="http://module-web-page"
+  module="sales"
+  html-file="sales-module.html"
+  init-func="sales.init"
+  tab="home,report,customer,quotation"
+  default-tab="home"
+  space="sales_home,sales_report,sales_customer,sales_quotation"
 ></conf>
 
 <!-- tab -->
 <div id="salesTab" class="w3-bar w3-black">
   <button 
     class="w3-bar-item w3-button w3-small w3-white" 
-    onclick="tabAct(this)">Home</button>
+    onclick="core.tabAct(this)">Home</button>
   <button 
     class="w3-bar-item w3-button w3-small" 
-    onclick="tabAct(this)">Report</button>
+    onclick="core.tabAct(this)">Report</button>
   <button 
     class="w3-bar-item w3-button w3-small"   
-    onclick="tabAct(this)">Customer</button>
+    onclick="core.tabAct(this)">Customer</button>
   <button 
     class="w3-bar-item w3-button w3-small"   
-    onclick="tabAct(this)">Quotation</button>
+    onclick="core.tabAct(this)">Quotation</button>
 </div>
 
 <!-- Home space -------------------------------------------------------->
-<div id="salesHome" class="w3-display-container w3-container">
+<div id="salesHome" class="w3-display-container w3-container" hidden>
 
   <!-- indicator -->
-  <div id="indicator" 
+  <div id="sales_home_indicator" 
     class="w3-display-topright"
     style="margin-top: 4px; margin-right: 12px "
     title="the indicator is good to alert the user that there's something happens and she needs to pay attention with">
     <i 
       class="fa fa-exclamation-circle w3-xlarge" 
       style="color: red; cursor: pointer"
-      onclick="xe({
+      onclick="x_({
         showThis: '#messageBox',
         forLong: 2000 
       }); 
@@ -46,7 +44,7 @@
   </div>
 
   <!-- space title -->
-  <h1 class="w3-text-brown">Sales dashboard</h1>
+  <h1 _space-title class="w3-text-brown">Sales dashboard</h1>
   <p>This can be a short/sufficient description that explains what this screen for, to the user.</p>
 
   <!-- tools -->
@@ -58,6 +56,7 @@
       onclick="spaceSearch.hidden? spaceSearch.hidden=false : spaceSearch.hidden=true"
       ></i>&nbsp;&nbsp;<input id="spaceSearch" type="text" style="width: 300px" hidden 
       onblur="this.hidden=true">
+      <!--fa fa-search-->
   </div>
 
   <div class="w3-row">
@@ -108,7 +107,7 @@
 
 <!-- Report space --------------------------------------------------->
 <div id="salesReport" class="w3-container" hidden>
-  <h1 class="w3-text-blue">Report</h1>
+  <h1 class="w3-text-blue" _space-title>Report</h1>
   <p>this is space you can put all your design, layouts into it</p>
 
   <div class="w3-responsive">
@@ -128,7 +127,7 @@
 
 <!-- Customer space -------------------------------------------------->
 <div id="salesCustomer" class="w3-container" hidden>
-  <h1 class="w3-text-orange">Customer data</h1>
+  <h1 class="w3-text-orange" _space-title>Customer data</h1>
   <p>this is space you can put all your design, layouts into it</p>
 
   <div class="w3-row">
@@ -145,7 +144,7 @@
 
 <!-- Quotation space ------------------------------------------------->
 <div id="salesQuotation" class="w3-container" hidden>
-  <h1 class="w3-text-green">Quotation</h1>
+  <h1 class="w3-text-green" _space-title>Quotation</h1>
   <p>this is space you can put all your design, layouts into it</p>
 </div>
 
