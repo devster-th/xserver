@@ -4,40 +4,42 @@ put all your note about this module here
 
 <!--config-->
 <conf
-  module="mmm"
-  default-tab="0"
+  module="sales"
+  default-tab="Home"
 ></conf>
 
 <!--tabs-->
 <tab>
-  <button _space="mmm_aaa">AAA</button><button _space="mmm_bbb">BBB</button><button _space="mmm_ccc">CCC</button><button _space="mmm_ddd">DDD</button>
+  <button _space="sales_home">Home</button><button _space="sales_quotation">Quotation</button><button _space="sales_order">Order</button><button _space="sales_checkstock">Check stock</button>
 </tab>
 
 <!--workspaces-->
-<space id="mmm_aaa">
+<workspace id="sales_home">
   <indicator>
     <alert-icon></alert-icon>
   </indicator>
-  <space-name>This is a workspace name</space-name>
-  <space-brief>This is a brief of this space</space-brief>
+  <ws-name>This is a workspace name</space-name>
+  <p>This is a brief of this space</p>
   <search-icon></search-icon>
-  <space-block>
-    <space-column>
+  <block>
+    <column>
       <!--put things here-->
-    </space-column>
-    <space-column>
+      <label>Name:</label> <input type="text">
+    </column>
+    <column>
       <!--put things here-->
-    </space-column>
-  </space-block>
-  <space-act>
+      <label>Note:</label> <textarea></textarea>
+    </column>
+  </block>
+  <act-bar>
     <button _main onclick="">OK</button> &nbsp; <button _careful  onclick="">Cancel</button> &nbsp; <button _careful1 onclick="">Reset</button>
-  </space-act>
-</space>
+  </act-bar>
+</workspace>
 
 <!--workspace as many as you need-->
-<space id="mmm_bbb"></space>
-<space id="mmm_ccc"></space>
-<space id="mmm_ddd"></space>
+<workspace id="sales_quotation"></workspace>
+<workspace id="sales_order"></workspace>
+<workspace id="sales_checkstock"></workspace>
 
 
 <!--
@@ -46,14 +48,14 @@ the idea of ui is here:
 
 
 AAA | BBB | CCC | DDD |______________________________________
-This is the space name
-This is the space brief to provide a short explainatin about this space.
+This is the ws-name
+This is the ws-brief briefs about this workspace...
 
 ( ) ...this can be tools like search icon or else
 
-------------------this is space-block--------------------------
+------------------this is ws-block--------------------------
 | ___________________________________________________________ |
-||  this is space-column     |     another space-column      ||
+||           column          |         another column        ||
 ||                           |                               ||
 ||                           |                               ||
 ||                           |                               || 

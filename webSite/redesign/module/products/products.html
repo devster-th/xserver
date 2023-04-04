@@ -1,0 +1,93 @@
+<conf  
+  module-name="products"
+  init-program="/module/products/products.js"
+  init-func=""
+></conf>
+
+<!-- tab -->
+<tab>
+  <button 
+    class="w3-bar-item w3-button w3-small w3-white"
+    _space="products_category" 
+    onclick="core.tabAct(this)">Category</button><button 
+    
+    class="w3-bar-item w3-button w3-small" 
+    _space="products_performance"
+    onclick="core.tabAct(this)">Performance</button><button 
+    
+    _first-tab
+    class="w3-bar-item w3-button w3-small"   
+    _space="products_newitem"
+    onclick="core.tabAct(this)">New items</button>
+</tab>
+
+    <!-- Home space -------------------------------------------------------->
+<workspace id="products_category">
+
+  <!-- indicator -->
+  <indicator id="products_category_indicator"> 
+    <i 
+      class="fa fa-exclamation-circle w3-xlarge" 
+      style="color: red; cursor: pointer"
+      onclick="x_({
+        showThis: 'message-box',
+        forLong: 2000
+      }); this.className='w3-hide'" ></i>
+  </indicator>
+
+  <!-- space title -->
+  <ws-name class="w3-text-brown">Category</ws-name>
+  <p>sssssssssssssss</p>
+
+
+
+  <block>
+    <!-- column 1 -->
+    <column>
+      sssssssssssssssssssssssssssss<br>
+      sssssssssssssssssssssssssssssssssssssss<br>
+      sssssssssssssssssssssssssssss<br>
+      ssssssss
+    </column>
+
+    <!-- column 2 -->
+    <column>
+      xxxxxxxxxxxxxxxxxx<br>
+      ddddddddddddddddddddddd<br>
+      ffffffffffffffffffffffff<br>
+
+    </column>
+  </block>
+  
+  
+  <hr>
+
+  <!-- tab space action -->
+  <act-bar>
+      <button 
+        class="w3-button w3-blue"
+        onclick="productsOk('yo!, this is from the productsModule')">OK</button> <button class="w3-button w3-border">Cancel</button> <button class="w3-button w3-border w3-pale-yellow">Reset</button> <button class="w3-button w3-border">Do some more things</button>
+  </act-bar>
+
+</workspace>
+
+
+<!-- Setting --------------------------------------------------->
+<workspace id="products_performance">
+  <ws-name>Performance</ws-name>
+  <p>this is space you can put all your design, layouts into it</p>
+
+  
+  
+</workspace>
+
+<!-- Report -------------------------------------------------->
+<workspace id="products_newitem">
+  <ws-name>New items</ws-name>
+  <p>this is space you can put all your design, layouts into it</p>
+
+  
+
+</workspace>
+
+   

@@ -1,0 +1,156 @@
+<!--This is the Sales module that will cover all sales functions. So put description and all info about the module here.-->
+
+<conf
+  something=""
+></conf>
+
+<!-- tab -->
+<tab class="w3-bar w3-black">
+  <button 
+    _first-tab
+    _space="sales_home" 
+    class="w3-bar-item w3-button w3-small w3-white" 
+    onclick="core.tabAct(this)">Home</button><button
+
+    _space="sales_report"
+    class="w3-bar-item w3-button w3-small" 
+    onclick="core.tabAct(this)">Report</button><button 
+
+    _space="sales_customer"
+    class="w3-bar-item w3-button w3-small"   
+    onclick="core.tabAct(this)">Customer</button><button
+     
+    _space="sales_quotation"
+    class="w3-bar-item w3-button w3-small"   
+    onclick="core.tabAct(this)">Quotation</button>
+</tab>
+
+<!-- Home space -------------------------------------------------------->
+<workspace id="sales_home" 
+  class="w3-block w3-display-container w3-container" 
+  hidden>
+
+  <!-- indicator -->
+  <indicator id="sales_home_indicator" 
+    class="w3-display-topright"
+    style="margin-top:4px; margin-right:12px"
+    title="the indicator is good to alert the user that there's something happens and she needs to pay attention with">
+    <i 
+      class="fa fa-exclamation-circle w3-xlarge" 
+      style="color: red; cursor: pointer"
+      onclick="x_({
+        showThis: 'message-box',
+        forLong: 2000 
+      }); 
+      this.className='w3-hide'" ></i>
+  </indicator>
+
+  <!-- space title -->
+  <ws-name class="w3-xxlarge w3-text-brown">Sales dashboard</ws-name>
+  <p>This can be a short/sufficient description that explains what this screen for, to the user.</p>
+
+  <!-- tools -->
+  <div 
+    title="the tool is shown in case it is complex form such as this search icon can help user search for specific data that she wants to see.">
+    <i 
+      class="fa fa-search w3-large w3-text-grey" 
+      style="cursor: pointer;"
+      onclick="sales_home_searchbox.hidden? sales_home_searchbox.hidden=false : spaceSearch.hidden=true"
+      ></i>&nbsp;&nbsp;<input id="sales_home_searchbox" type="text" style="width: 300px" hidden 
+      onblur="this.hidden=true">
+      <!--fa fa-search-->
+  </div>
+
+  <block class="w3-row">
+    <!-- column 1 -->
+    <column class="w3-container w3-half">
+      <p>Your name <input type="text" class="w3-input w3-border"></p>
+      <p>Your sex:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="sex" class="w3-radio"> Female<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="sex" class="w3-radio"> Male<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="sex" class="w3-radio"> Something else</p>
+      <p>Your age <input type="number" class="w3-input w3-border"></p>
+    </column>
+
+    <!-- column 2 -->
+    <column class="w3-container w3-half">
+      <p>Your city:<br>
+        <select class="w3-select">
+          <option>Bangkok</option>
+          <option>London</option>
+          <option>New York</option>
+          <option>Sydney</option>
+        </select></p>
+
+      <p>You like which musics:<br>
+        <input type="checkbox" class="w3-check"> Jazz &nbsp;&nbsp;<input type="checkbox" class="w3-check"> Rock & Roll &nbsp;&nbsp;<input type="checkbox" class="w3-check"> Guitar</p>        
+
+      <p>Your note:<br>
+        <textarea class="w3-input w3-border" rows="3" style="width: 100%"></textarea></p>
+
+      <p>Note:<br>
+      Please carefully provide information to this form because it is very important. Thank you.</p>
+    </column>
+  </block>
+  
+  
+  <hr>
+
+  <!-- tab space action -->
+  <act-bar 
+    class="w3-bar w3-margin-bottom" 
+    title="this is called the Space Action where we can put any action into it to act on the user's inputs.">
+    
+      <button _main class="w3-button w3-blue">OK</button> <button class="w3-button w3-border">Cancel</button> <button class="w3-button w3-border w3-pale-yellow">Reset</button> <button class="w3-button w3-border">Do some more things</button>
+  </act-bar>
+
+</workspace>
+
+
+<!-- Report space --------------------------------------------------->
+<workspace id="sales_report" class="w3-container" hidden>
+  <ws-name class="w3-xxlarge w3-text-blue">Report</ws-name>
+  <p>this is space you can put all your design, layouts into it</p>
+
+  <div class="w3-responsive">
+    <table class="w3-table-all">
+      <tr><th>Name</th><th>Age</th><th>Sex</th><th>Country</th></tr>
+      <tr><td>John</td><td>23</td><td>Male</td><td>Thailand</td></tr>
+      <tr><td>Jane</td><td>19</td><td>Female</td><td>Australia</td></tr>
+      <tr><td>Greta</td><td>20</td><td>Female</td><td>Sweden</td></tr>
+      <tr><td>Luise</td><td>253</td><td>Male</td><td>France</td></tr>
+      <tr><td>Latte</td><td>423</td><td>Something</td><td>Switzerland</td></tr>
+      <tr><td>Brian</td><td>45</td><td>Female</td><td>Canada</td></tr>
+
+    </table>
+  </div>
+  
+</workspace>
+
+
+
+<!-- Customer space -------------------------------------------------->
+<workspace id="sales_customer" class="w3-container" hidden>
+  <ws-name class="w3-xxlarge w3-text-orange" _space-title>Customer data</ws-name>
+  <p>this is space you can put all your design, layouts into it</p>
+
+  <div class="w3-row">
+    <img src="food.webp" class="w3-col m4 l3 ">
+    <img src="cup2.jpg" class="w3-col m4 l3 ">
+    <img src="cake.jpeg" class="w3-col m4 l3 ">
+    <img src="food3.jpeg" class="w3-col m4 l3 ">
+    <img src="shirt.webp" class="w3-col m4 l3 ">
+    <img src="shoes.webp" class="w3-col m4 l3 ">
+
+  </div>
+
+</workspace>
+
+
+
+<!-- Quotation space ------------------------------------------------->
+<workspace id="sales_quotation" class="w3-container" hidden>
+  <ws-name class="w3-xxlarge w3-text-green" _space-title>Quotation</ws-name>
+  <p>this is space you can put all your design, layouts into it</p>
+</workspace>
+

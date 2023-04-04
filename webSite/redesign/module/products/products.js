@@ -4,5 +4,5 @@ const products = {
 }
 
 products.init = function () {
-  core.tabAct(productsTab.children[0])
+  console.log('products.init()/' + Date.now())
 }

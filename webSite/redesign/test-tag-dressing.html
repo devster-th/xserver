@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="/redesign/module/xdev/xdev.js"></script>
+<link rel="stylesheet" href="/standard_lib/w3/w3.css">
+<link rel="stylesheet" href="/standard_lib/font-awesome/all.css">
+</head>
+<body class="w3-container">
+<h1>test tag dressing</h1>
+
+
+
+<form id="a_form">
+  <label>Name</label> <input type="text"><br>
+  <label>Age</label> <input type="number"><br>
+
+  <input type="checkbox"> <label>Jazz</label><br>
+  <input type="checkbox"> <label>Rock</label><br>
+  <input type="checkbox"> <label>Blues</label><br>
+  <input type="checkbox"> <label>Classical</label><br><br>
+
+  <input type="radio" name="sex"> <label>Male</label>
+  <input type="radio" name="sex"> <label>Female</label>
+  <input type="radio" name="sex"> <label>Trans</label><br><br>
+
+  <span>0</span> <input id="slide_it" type="range" oninput="range_val.textContent=this.value" min="0" max="10"> <span>100</span> <span>[</span><span id="range_val">50</span><span>]</span>
+
+
+</form><br>
+<block>
+  <button _type="main" class="xyz" onclick="ffff(x)">OK</button> <button _type="warn">Cancel</button> <button _type="danger">Clear</button><br><br>
+</block>
+
+
+<alert-icon></alert-icon>
+<search-icon></search-icon><br>
+
+
+<textarea></textarea>
+
+<div class="w3-row">
+  <div class="w3-half w3-green" style="height:150px">
+    this is column
+  </div>
+  <div class="w3-half w3-pink" style="height:150px">
+    this is another column
+  </div>
+
+</div>
+
+<div class="w3-card">
+  card
+</div>
+
+
+<script>
+///////////////////////////////////////////////////
+
+
+//input
+let ip = x_({el:'input'})
+for (each of ip) {
+  if (each.type.match(/text|number|password|email/) ) {
+    each.className = each.classList.value + ' w3-input w3-border'
+  } else if (each.type == 'checkbox') {
+    each.className = each.classList.value + ' w3-check'
+  } else if (each.type == 'radio') {
+    each.className = each.classList.value + ' w3-radio'
+  }
+}
+
+//alert
+var el = x_({el:'alert-icon'})
+el.className = 'fa fa-exclamation-circle w3-xlarge'
+el.style.color = 'red'
+el.style.cursor = 'pointer'
+el.onmouseover = () => {this.style.border = '1px solid grey'}
+
+//search
+var el = x_({el:'search-icon'})
+el.className = 'fa fa-search w3-xlarge w3-text-grey'
+el.style.cursor = 'pointer'
+
+//button
+let b = x_({el:'button'})
+for (each of b) {
+  each.className = each.classList.value + ' w3-btn' + butColor(each)
+}
+
+function butColor(el) {
+  switch (el.getAttribute('_type')) {
+    case 'main':
+      return ' w3-blue'
+    case 'warn':
+      return ' w3-yellow'
+    case 'danger': 
+      return ' w3-red'
+  }
+}
+
+x_({el:'textarea'}).className = 'w3-input w3-border'
+
+
+
+
+
+
+
+</script>
+</body>  
+</html>

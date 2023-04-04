@@ -4,5 +4,5 @@ const marketing = {
 }
 
 marketing.init = function () {
-  
+  console.log('marketing.init()/' + Date.now())
 }

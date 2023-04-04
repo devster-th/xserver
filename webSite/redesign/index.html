@@ -3,198 +3,144 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <script src="/standard_lib/w3/w3.js"></script>
-
-  <script src="./module/xdev.js"></script>
-  <script src="_config.js"></script>
+  <script src="./module/xdev/xdev.js"></script>
+  <script src="config.js"></script>
   <script src="core.js"></script>
-  <script src="./module/sales.js"></script>
-  <script src="./module/marketing.js"></script>
-  <script src="./module/products.js"></script>
-  
-  
+  <script src="./module/sales/sales.js"></script>
+  <script src="./module/marketing/marketing.js"></script>
+  <script src="./module/products/products.js"></script>
 
   <link rel="stylesheet" href="/standard_lib/w3/w3.css">
   <link rel="stylesheet" href="/standard_lib/font-awesome/all.css">
   <style>
     /* the default style is for mobile */
 
+    /* custom tag */
+    login-space, signup-space, control, mobile-menu-icon, mobile-menu, app-space, module, tab, workspace, indicator, ws-name, block, column, act-bar {display:block}
+    
+    sidebar {display:none}
+    message-box {width:65%}
+
     /* for laptop, desktop, notebook */
     @media screen and (min-width: 1000px) {
-      #sidebar {display: block; width: 15% }
-      #pageContent {margin-left: 15% }
-      #mobileMenuBox {display: none }
-      #mobileMenu_icon {display: none}
+      sidebar {display:block; width:15% }
+      mobile-menu, mobile-menu-icon {display:none }
+      app-space {margin-left:15% }
+      message-box {width:45%}
     }
 
     /* for very wide screen or big external-monitor */
     @media screen and (min-width: 1300px) {
-      #sidebar {width: 10%}
-      #pageContent {margin-left: 10%}
+      sidebar {display:block; width:10%}
+      mobile-menu, mobile-menu-icon {display:none}
+      app-space {margin-left:10%}
+      message-box {width:30%}
     }
+
+    
+
+
   </style>
 </head>
-<body onresize="core.menuAct('updateMenu')">
+<body onresize="core.displayCheck()">
+<!--take out the onresize M:mar31-->
 
+<!-------------------------LOGIN SPACE--------------------------
+this is login content of the app-->
+<login-space 
+  class="w3-display-container" 
+  style="display:block;">
 
-<!-------------------------- CONTROL ---------------------------------->
+  <!--log in box-->
+  <login 
+  class="w3-display-middle w3-display-container w3-large" style="width:400px">
+    <!--LOGO-->
+    <img id="app_logo" src="sun_hand1.png" style="width:120px;" class="w3-display-topmiddle"><br><br><br>
 
-<div id="pageControl" class="w3-display-container">
+    <form id="login_form" style="margin-top:140px">
+      <label>username</label> <input id="username" 
+        type="text" class="w3-input w3-border" 
+        onblur="core.username=this.value" value="mutita"><br>
+      <label>password</label> <input id="password" 
+        type="password" class="w3-input w3-border"
+        oninput="core.passCheck(event)">
+    </form><br><br>
 
+    <!--button-->
+    <block class="w3-bar">
+      <button class="w3-button w3-blue" 
+        onclick="core.login()">Login</button> &nbsp;<button class="w3-button w3-light-grey"
+        onclick="login_form.reset()">Clear</button> &nbsp;<button class="w3-button w3-pink w3-right" 
+        onclick="core.signup()">Sign up</button>
+    </block><br>
 
-  <!-- mobile menu icon -->
-  <i id="mobileMenu_icon"
-    class="fa fa-caret-right w3-left" 
-    style="font-size: 28px; color: darkred; cursor: pointer; z-index: 15; position: fixed; left: 4px; top: 50%; " 
-    onclick="mobileMenuBox.hidden=false"></i>
-    <!--position: fixed; left: 8px; top: 50%;"
-        keep: fa fa-caret-right-->
+    <p class="w3-text-grey">If you haven't got a <u>username</u> yet please fill your desired username & password and then click <span class="w3-border"> Sign up </span> button. And you're done.</p><br>
 
-  <!-- mobile menu box -->
-  <div id="mobileMenuBox"  
-    class="w3-grey w3-bar-block"
-    style="width: 60%; position: fixed; left: 0; bottom: 0; z-index: 20"
-    hidden >
+    <p class="w3-text-grey"><a href="" >Forgot password</a> &nbsp; <a href="">Help</a> &nbsp; <a href="">About</a></p>
 
-    <button id="moClose"
-      class="w3-bar-item w3-button w3-xlarge w3-border-bottom"
-      onclick="mobileMenuBox.hidden=true"><i 
-      class="fa fa-caret-left"></i> Close</button>
-      
-    <button id="moSales"
-      class="w3-bar-item w3-button w3-xlarge"
-      onclick="core.menuAct(this)">Sales</button>
-    <button id="moMarketing"
-      class="w3-bar-item w3-button w3-xlarge"
-      onclick="core.menuAct(this)">Marketing</button>
-    <button id="moProducts"
-      class="w3-bar-item w3-button w3-xlarge"
-      onclick="core.menuAct(this)">Products</button>
-    <button id="moWarehouse"
-      class="w3-bar-item w3-button w3-xlarge"
-      onclick="core.menuAct(this)">Warehouse</button>
-    <button id="moDelivery"
-      class="w3-bar-item w3-button w3-xlarge w3-border-bottom"
-      onclick="core.menuAct(this)">Delivery</button>
+    <label class="w3-text-grey">Language:</label> <select class="w3-text-grey">
+      <option>English</option>
+      <option>Thai</option>
+      <option>Japanese</option>
+    </select>
 
-    <button id="moPurchase"
-      class="w3-bar-item w3-button w3-xlarge"
-      onclick="core.menuAct(this)">Purchase</button>
-    <button id="moFinance"
-      class="w3-bar-item w3-button w3-xlarge"
-      onclick="core.menuAct(this)">Finance</button>
-    <button id="moAccounting"
-      class="w3-bar-item w3-button w3-xlarge"
-      onclick="core.menuAct(this)">Accounting</button>
-    <button id="moManufacturing"
-      class="w3-bar-item w3-button w3-xlarge"
-      onclick="core.menuAct(this)">Manufacturing</button>
-    <button id="moMaintenance"
-      class="w3-bar-item w3-button w3-xlarge"
-      onclick="core.menuAct(this)">Maintenance</button>
-    <button id="moAssets"
-      class="w3-bar-item w3-button w3-xlarge"
-      onclick="core.menuAct(this)">Assets</button>
+    <p class="w3-text-pink w3-small">xServer v1.0</p>
 
-    <button id="moUserSetting"
-      class="w3-bar-item w3-button w3-xlarge w3-border-top"
-      onclick="core.menuAct(this)"><i class="fa fa-user-circle-o"></i> User setting</button>
-    <button id="moAdmin"
-      class="w3-bar-item w3-button w3-xlarge"
-      onclick="core.menuAct(this)"><i class="fa fa-sliders"></i> Admin</button>
-    <button id="moLearn"
-      class="w3-bar-item w3-button w3-xlarge w3-border-bottom"
-      onclick="core.menuAct(this)"><i class="fa fa-book"></i> Learn</button>
-
-    <button id="moLogOut"
-      class="w3-bar-item w3-button w3-xlarge"
-      onclick="core.menuAct(this)"><i class="fa fa-sign-out"></i> Log out</button>
-
-  </div>
+  </login>
+</login-space>
 
 
 
-  <!-- sidebar for wide screen -->
-  <div id="sidebar"
-    class="w3-sidebar w3-grey w3-bar-block"
-    hidden >
+<!-----------------------SIGN UP SPACE------------------------
+signup content-->
+<signup-space 
+  class="w3-container w3-large" 
+  hidden>
 
-    <span>MODULES</span>
+  <h1 class="w3-text-pink">Yo! this is a sign-up form</h1>
+  <p>Please read the <a href="" class="w3-text-blue">license & rules</a> before filling the form below.</p><br>
 
-    <button id="sidSales"
-      class="w3-bar-item w3-button"
-      onclick="core.menuAct(this)">Sales</button>
-    <button id="sidMarketing"
-      class="w3-bar-item w3-button"
-      onclick="core.menuAct(this)">Marketing</button>
-    <button id="sidProducts"
-      class="w3-bar-item w3-button"
-      onclick="core.menuAct(this)">Products</button>
-    <button id="sidWarehouse"
-      class="w3-bar-item w3-button"
-      onclick="core.menuAct(this)">Warehouse</button>
-    <button id="sidDelivery"
-      class="w3-bar-item w3-button w3-border-bottom"
-      onclick="core.menuAct(this)">Delivery</button>
+  <form id="signup_form">
+    <label>1. Your prefered Username *</label> <input name="user_name" type="text" class="w3-input w3-border"><br>
+    <label>2. Your prefered Password *</label> <input name="pass_word" type="text" class="w3-input w3-border"><br>
+    <label>3. Please retype the password again to confirm *</label> <input name="password_confirm" type="text" class="w3-input w3-border"><br>
+    <label>4. Your email, in case we need to communicate outside this app</label> <input name="e_mail" type="email" class="w3-input w3-border"><br>
+    <label>5. Are you conformed to our <a href="" class="w3-text-blue">license & rule</a>? *</label><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" name="conform" class="w3-check"> <label class="w3-text-pink">Yes, I'm confirmed.</label>
 
-    <button id="sidPurchase"
-      class="w3-bar-item w3-button"
-      onclick="core.menuAct(this)">Purchase</button>
-    <button id="sidFinance"
-      class="w3-bar-item w3-button"
-      onclick="core.menuAct(this)">Finance</button>
-    <button id="sidAccounting"
-      class="w3-bar-item w3-button"
-      onclick="core.menuAct(this)">Accounting</button>
-    <button id="sidManufacturing"
-      class="w3-bar-item w3-button"
-      onclick="core.menuAct(this)">Manufacturing</button>
-    <button id="sidMaintenance"
-      class="w3-bar-item w3-button"
-      onclick="core.menuAct(this)">Maintenance</button>
-    <button id="sidAssets"
-      class="w3-bar-item w3-button"
-      onclick="core.menuAct(this)">Assets</button>
+  </form><br><br>
 
-    <button id="sidUserSetting"
-      class="w3-bar-item w3-button w3-border-top"
-      onclick="core.menuAct(this)"><i class="fa fa-user-circle-o"></i> User setting</button>
-    <button id="sidAdmin"
-      class="w3-bar-item w3-button"
-      onclick="core.menuAct(this)"><i class="fa fa-sliders"></i> Admin</button>
-    <button id="sidLearn"
-      class="w3-bar-item w3-button w3-border-bottom"
-      onclick="core.menuAct(this)"><i class="fa fa-book"></i> Learn</button>
+  <button class="w3-button w3-blue">Sign me up</button><br><br><br>
 
-    <button id="sidLogOut"
-      class="w3-bar-item w3-button"
-      onclick="core.menuAct(this)"><i class="fa fa-sign-out"></i> Log out</button>
-  </div>
-
-  
-
-
-</div><!--end of pageControl section-->
+  <a href="" class="w3-text-grey">Back to previous view</a>
+</signup-space>
 
 
 
-<!---------------------------- CONTENT --------------------------------->
 
-<div id="pageContent" class="w3-display-container">
+
+<!--------------------------CONTENT----------------------------
+put all contents of the app here-->
+
+<app-space 
+  class="w3-display-container" 
+  style="height:700px" 
+  hidden>
 
   <!-- messageBox -->
   <!--the messageBox has to be in the Content section because the w3-display-container can control the box's middle position. If not it won't be at the center of the screen.-->
-  <div id="messageBox" 
+  <message-box 
     class="w3-display-middle w3-yellow w3-card-4 w3-container" 
-    style="width: 65%; z-index: 20; " 
+    style="width:65%; z-index:20;" 
     hidden>
-
-    <h3>You've got a message</h3>
+    <br>
+    <message-title class="w3-xlarge">You've got a message</message-title>
     <p>This is a message that the user will see but it changes the color and the texts based on each situation.</p><br>
 
-    <div class="w3-bar w3-center w3-margin-bottom">
+    <act-bar class="w3-bar w3-margin-bottom">
       <button 
         class="w3-button w3-light-grey" 
-        onclick="x_({ cancelTimer: X1.message.timer }); 
+        onclick="x_({ cancelTimer: xdev.timer }); 
         x_({
           replaceClass: 'w3-light-grey', 
           with: 'w3-grey', 
@@ -202,40 +148,85 @@
         })"
         >Hold</button> <button 
         class="w3-button w3-light-grey" 
-        onclick="x_({ hideThis: '#messageBox' })"
+        onclick="x_({ hideThis: 'message-box' })"
         >Close</button>
-    </div>
-  </div>
+    </act-bar>
+  </message-box>
 
 
 
-  <!--each module will replace from below div-->
-  <div id="salesModule" hidden></div>
-  <div id="marketingModule" hidden></div>
-  <div id="productsModule" hidden></div>
-  <div id="warehouseModule" hidden></div>
+  <!--each module will insert its contents into each el below
+  once there's install of the module, it's el will be created here-->
+  <module id="sales_module" hidden></module>
+  <module id="marketing_module" hidden></module>
+  <module id="products_module" hidden></module>
+  <module id="delivery_module" hidden></module>
+  <module id="warehouse_module" hidden></module>
   <module id="test_module" hidden></module>
   
 
 
-</div><!--end of pageContent-->
+</app-space>
+<!--end of page content-->
+
+
+
+<!------------------------CONTROL------------------------------
+put all the control elements here-->
+
+<control
+  hidden>
+
+
+  <!-- mobile menu icon -->
+  <mobile-menu-icon 
+    class="fa fa-caret-right w3-left" 
+    style="font-size:28px; color:darkred; cursor:pointer; z-index:15; position:fixed; left:4px; top:50%" 
+    onclick="x_({el:'mobile-menu'}).hidden=false">
+  </mobile-menu-icon>
+    
+
+
+  <!-- mobile menu box -->
+  <mobile-menu  
+    class="w3-grey w3-bar-block"
+    style="width:60%; position:fixed; left:0; bottom:0; z-index:20">
+
+    <button id="close_menu"
+      class="w3-bar-item w3-button w3-xlarge w3-border-bottom"
+      onclick="x_({el:'mobile-menu'}).hidden=true"><i 
+      class="fa fa-caret-left"></i> Close</button>
+
+  </mobile-menu>
+
+
+  <!-- sidebar for wide screen -->
+  <sidebar
+    class="w3-sidebar w3-grey w3-bar-block"
+    style="margin:0; padding:0">
+
+    <span>MODULES</span>
+  </sidebar>
+
+</control><!--end of pageControl section-->
+
+
 
 
 
 
 <script>
-////////////////////////////////////////////////////////////////////////
+////////////////////////// SCRIPT ////////////////////////////
+/* put basic/general program here, don't put serious/secured things. The things like initialization, or some page control can be considered unharmed stuff can be put here */ 
+
+//set height for all workspaces
+document.querySelector('login-space').style.height = (innerHeight) + 'px'
+document.querySelector('signup-space').style.height = (innerHeight) + 'px'
+document.querySelector('app-space').style.height = (innerHeight) + 'px'
 
 
-core.init()
 
-// DEV NOTE
-/*
-M: now everything mostly done, basic, both menus, the mobile & sidebar synced.
-when refresh page, the default is Sales, 
-
-*/ 
-
+core.password = ''
 
 
 </script>

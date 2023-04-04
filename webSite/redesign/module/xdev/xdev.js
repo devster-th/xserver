@@ -17,6 +17,8 @@ simple like that, so we may cover commands like: create, edit, rename, delete, s
 
 */
 
+var xdev = {}
+
 function x_(x) {
   if (typeof x == 'object' && Object.keys(x).length > 0) {
     switch (Object.keys(x)[0]) {
@@ -114,6 +116,7 @@ function x_(x) {
       case 'loadHtmlFile':
         loadHtmlFile()
         break
+        //insert html file into this file
 
       case 'showEl':
         showEl()
@@ -190,12 +193,13 @@ function x_(x) {
 
   //////////////////////////////////////////////////
   function pickEl() {
+    //pick an el and do something on it
     /* xe({ pickEl: '[_spaceTitle]',
             addClass: 'aaaa bbbb ccccc'   })*/
 
     if (x.pickEl) {
 
-      let el = xe({ el: x.pickEl }) 
+      let el = x_({ el: x.pickEl }) 
        
       if ('addClass' in x) {
         
@@ -253,6 +257,18 @@ function x_(x) {
           el.className = x.resetClassWith
         }
       }//m:ok
+
+      //the properties other than the first one & above regarded as attri
+      if (Object.keys(x).length > 1) {
+        for (k of Object.keys(x)) {
+          if (k.match(/pickEl|addClass|replaceClass|resetClassWith/)) {
+            //skip
+          } else {
+            //other than above just make it as attri
+            el.setAttribute(k, x[k])
+          }
+        }
+      } //M:ok 2023-3-31
     }            
   }
 
@@ -266,23 +282,24 @@ function x_(x) {
 
     if (x.el) {
       
-      if (x.el.includes('#') ) {
+      /*if (x.el.includes('#') ) {
         //this is select id so will get only 1 el
         return document.querySelector(x.el)
-      } else {
+      } else {*/
         // > 1 el
         let a = document.querySelectorAll(x.el)
         if (a.length == 1) return a[0] //if only 1 in a, just give the el
+        else if (a.length == 0) return null  
         else return a //give array of el
-      }
+      //}
 
     } else {
       //invalid input
-      return 'invalid input'
+      return null
     }
-    
+    //use only querySelectorAll 
 
-  }
+  }//
 
 
 
@@ -455,8 +472,8 @@ function x_(x) {
         x.forLong  
       )
 
-      X1.message.timer = this[x.timerName] //keep timer v in X1
-
+      //X1.message.timer = this[x.timerName] //keep timer v in X1
+      xdev.timer = this[x.timerName]
     }
   }//m:ok, 2023-3-15
 
@@ -578,13 +595,20 @@ function x_(x) {
       }
     } 
 
+    //make el the actual el
+    if (typeof x.showEl == 'string') {
+      x.showEl = x_({el: x.showEl})
+    }
+
     //show only the set el , the rest hide
     for (el of x.allEl) { 
       if (el == x.showEl) { 
         el.hidden = false
+        el.style.display = 'block'
       } else {
         //these are the rests
         el.hidden = true 
+        el.style.display = 'none'
       }
     }
 
@@ -602,6 +626,8 @@ function x_(x) {
               thenRun: thisFunction 
           })
     */
+
+
     if (x.loadHtmlFile && x.loadHtmlFile.includes('.html') && x.intoEl) {
       
       if (typeof x.intoEl == 'string') {
@@ -638,7 +664,7 @@ function x_(x) {
       id: --,
       class: 'aaa bbb ccc',
       style: 'aaa:bbb; ccc:ddd; --',
-      attrib: {name:'', value:''},
+      attriName: 'value', //can put many
       text: 'sssssssssssss',
       innerHtml: '<span>yo!</span> ................. ',
       appendTo: el
