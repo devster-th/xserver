@@ -5,53 +5,80 @@
 <link rel="stylesheet" href="/standard_lib/w3/w3.css">
 <link rel="stylesheet" href="/standard_lib/font-awesome/all.css">
 </head>
-<body class="w3-container">
-<h1>test tag dressing</h1>
+<body>
+<module id="sales_123456">
+  <space name="aaa" class="w3-container w3-container w3-block">
+
+    <h1>test tag dressing</h1>
 
 
 
-<form id="a_form">
-  <label>Name</label> <input type="text"><br>
-  <label>Age</label> <input type="number"><br>
+    <form name="quotation">
+      <label>Name</label> <input type="text"><br>
+      <label>Age</label> <input type="number"><br>
 
-  <input type="checkbox"> <label>Jazz</label><br>
-  <input type="checkbox"> <label>Rock</label><br>
-  <input type="checkbox"> <label>Blues</label><br>
-  <input type="checkbox"> <label>Classical</label><br><br>
+      <input type="checkbox"> <label>Jazz</label><br>
+      <input type="checkbox"> <label>Rock</label><br>
+      <input type="checkbox"> <label>Blues</label><br>
+      <input type="checkbox"> <label>Classical</label><br><br>
 
-  <input type="radio" name="sex"> <label>Male</label>
-  <input type="radio" name="sex"> <label>Female</label>
-  <input type="radio" name="sex"> <label>Trans</label><br><br>
+      <input type="radio" name="sex"> <label>Male</label>
+      <input type="radio" name="sex"> <label>Female</label>
+      <input type="radio" name="sex"> <label>Trans</label><br><br>
 
-  <span>0</span> <input id="slide_it" type="range" oninput="range_val.textContent=this.value" min="0" max="10"> <span>100</span> <span>[</span><span id="range_val">50</span><span>]</span>
-
-
-</form><br>
-<block>
-  <button _type="main" class="xyz" onclick="ffff(x)">OK</button> <button _type="warn">Cancel</button> <button _type="danger">Clear</button><br><br>
-</block>
+      <span>0</span> <input id="slide_it" type="range" oninput="range_val.textContent=this.value" min="0" max="10"> <span>100</span> <span>[</span><span id="range_val">50</span><span>]</span>
 
 
-<alert-icon></alert-icon>
-<search-icon></search-icon><br>
+    </form><br>
+    <bar>
+      <button _type="main" class="xyz" onclick="ffff(x)">OK</button> <button _type="warn">Cancel</button> <button _type="danger">Clear</button><br><br>
+    </bar>
 
 
-<textarea></textarea>
+    <alert-icon></alert-icon>
+    <search-icon></search-icon><br>
 
-<div class="w3-row">
-  <div class="w3-half w3-green" style="height:150px">
-    this is column
-  </div>
-  <div class="w3-half w3-pink" style="height:150px">
-    this is another column
-  </div>
 
-</div>
+    <textarea placeholder="type note here"></textarea><br>
 
-<div class="w3-card">
-  card
-</div>
 
+
+    <full>
+      <half>
+        <label>Name</label> <input type="text">
+      </half>
+      <half>
+        <label>Please select one here:</label><br>
+        <input type="radio" name="choice"> <label>Yes</label><br>
+        <input type="radio" name="choice"> <label>No</label><br> 
+        <input type="radio" name="choice"> <label>Maybe</label> 
+
+      </half>
+      <br><br>
+      <bar >
+        <button _type="main">Save</button> <button _type="warn">Clear</button>
+      </bar>
+
+    </full>
+
+    <div class="w3-card-4" style="height:100px">
+      <p>card</p>
+    </div>
+
+  </space>
+
+
+
+
+  <space name="bbb" class="w3-border w3-block">
+    <p>this is a text in space bbb</p>
+  </space>
+
+  <space name="ccc" class="w3-border w3-block">
+    <p>text within space ccc</p>
+  </space>
+
+</module>
 
 <script>
 ///////////////////////////////////////////////////
@@ -71,20 +98,20 @@ for (each of ip) {
 
 //alert
 var el = x_({el:'alert-icon'})
-el.className = 'fa fa-exclamation-circle w3-xlarge'
+el.className = 'fa fa-exclamation-circle w3-xlarge w3-hover-shadow w3-padding-small w3-ripple'
 el.style.color = 'red'
 el.style.cursor = 'pointer'
-el.onmouseover = () => {this.style.border = '1px solid grey'}
+el.style.border = '1px solid white'
 
 //search
 var el = x_({el:'search-icon'})
-el.className = 'fa fa-search w3-xlarge w3-text-grey'
+el.className = 'fa fa-search w3-xlarge w3-text-grey w3-hover-shadow w3-padding-small w3-ripple'
 el.style.cursor = 'pointer'
 
 //button
 let b = x_({el:'button'})
 for (each of b) {
-  each.className = each.classList.value + ' w3-btn' + butColor(each)
+  each.className = each.classList.value + ' w3-btn w3-ripple' + butColor(each)
 }
 
 function butColor(el) {
@@ -101,9 +128,18 @@ function butColor(el) {
 x_({el:'textarea'}).className = 'w3-input w3-border'
 
 
+//special tags
+x_({el:'full'}).className = "w3-row"
 
+var col = x_({el:'half'})
+for (each of col) {
+  each.className = "w3-half w3-container w3-margin-bottom"
+}
 
-
+var bars = x_({el:'bar'})
+for (each of bars) {
+  each.className = "w3-block w3-container w3-margin-bottom w3-margin-top"
+}
 
 
 </script>

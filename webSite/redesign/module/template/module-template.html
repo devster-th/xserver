@@ -1,87 +1,33 @@
-<!-- head note
-put all your note about this module here
--->
+<!--MODULE TEMPLATE-->
+<module 
+  version="2.0"
+  id="sales_module"
+  folder="/redesign/module/sales"
+  html="sales.html"
+  js="sales.js"
+  css="sales.css"
+  json="sales.json"
+>
 
-<!--config-->
-<conf
-  module="sales"
-  default-tab="Home"
-></conf>
-
-<!--tabs-->
 <tab>
-  <button _space="sales_home">Home</button><button _space="sales_quotation">Quotation</button><button _space="sales_order">Order</button><button _space="sales_checkstock">Check stock</button>
+  <button _start _space="home">Home</button><button _space="task">Ongoing tasks</button><button _space="quotation">Quotation</button><button _space="order">Order</button><button _space="issue">Customer issues</button>
 </tab>
 
-<!--workspaces-->
-<workspace id="sales_home">
-  <indicator>
-    <alert-icon></alert-icon>
-  </indicator>
-  <ws-name>This is a workspace name</space-name>
-  <p>This is a brief of this space</p>
-  <search-icon></search-icon>
-  <block>
-    <column>
-      <!--put things here-->
-      <label>Name:</label> <input type="text">
-    </column>
-    <column>
-      <!--put things here-->
-      <label>Note:</label> <textarea></textarea>
-    </column>
-  </block>
-  <act-bar>
-    <button _main onclick="">OK</button> &nbsp; <button _careful  onclick="">Cancel</button> &nbsp; <button _careful1 onclick="">Reset</button>
-  </act-bar>
+<workspace name="home">
+  <ws-name>Home of the sales</ws-name>
+  <full>
+    <half></half>
+    <half></half>
+    <bar>
+      <button>Save</button><button>Clear</button>
+    </bar>
+  </full>
 </workspace>
 
-<!--workspace as many as you need-->
-<workspace id="sales_quotation"></workspace>
-<workspace id="sales_order"></workspace>
-<workspace id="sales_checkstock"></workspace>
+<workspace name="task"></workspace>
+<workspace name="quotation"></workspace>
+<workspace name="order"></workspace>
+<workspace name="issue"></workspace>
 
 
-<!--
-the idea of ui is here:
-
-
-
-AAA | BBB | CCC | DDD |______________________________________
-This is the ws-name
-This is the ws-brief briefs about this workspace...
-
-( ) ...this can be tools like search icon or else
-
-------------------this is ws-block--------------------------
-| ___________________________________________________________ |
-||           column          |         another column        ||
-||                           |                               ||
-||                           |                               ||
-||                           |                               || 
-||                           |                               || 
-||                           |                               || 
-||                           |                               || 
-|-------------------------------------------------------------|
----------------------------------------------------------------
-
-             [ OK ]  [Cancel]  [Reset]  [Help]
-
-
-
-The above drawing explains idea about the module's ui comprised of: tabs, workspace-name, space-brief, space-block, space-column, and space-act.
-
-Put all your ui in this file and keep the file under your module folder like: /module/module_folder/. <--files here
-
-the files in the module_folder gernally are:
- -module.js
- -module.html
- -pic & other files you can organize the folder structure as you need but the module.js & module.html should be in the root of the module_folder
-
-When design your module ui, uses the tags in this template to construct it and when it loads, the core will automatically put the classes into them so you don't need to worry about the styles of it.
-
-If your module name = 'sales' and the tab name = 'Home', you must put the space id = 'sales_home' so when you click on the tab 'Home' it will open the space 'sales_home'.
-
-The doc about this will be available in http://x-app.info
-
--->
+</module>
