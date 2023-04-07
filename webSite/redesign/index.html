@@ -117,6 +117,48 @@ signup content-->
 
 
 
+<!------------------------CONTROL------------------------------
+put all the control elements here-->
+
+<control
+  hidden>
+
+
+  <!-- mobile menu icon -->
+  <mobile-menu-icon 
+    class="fa fa-caret-right w3-left" 
+    style="font-size:28px; color:darkred; cursor:pointer; z-index:15; position:fixed; left:4px; top:50%" 
+    onclick="x_({el:'mobile-menu'}).hidden=false">
+  </mobile-menu-icon>
+    
+
+
+  <!-- mobile menu box -->
+  <mobile-menu  
+    class="w3-grey w3-bar-block"
+    style="width:60%; position:fixed; left:0; bottom:0; z-index:20">
+
+    <button id="close_menu"
+      class="w3-bar-item w3-button w3-xlarge w3-border-bottom"
+      onclick="x_({el:'mobile-menu'}).hidden=true"><i 
+      class="fa fa-caret-left"></i> Close</button>
+
+  </mobile-menu>
+
+
+  <!-- sidebar for wide screen -->
+  <sidebar
+    class="w3-sidebar w3-bar-block w3-grey"
+    style="margin:0; padding:0">
+
+    <span>MODULES</span>
+  </sidebar>
+
+</control><!--end of pageControl section-->
+
+
+
+
 
 
 <!--------------------------CONTENT----------------------------
@@ -169,46 +211,6 @@ put all contents of the app here-->
 </app-space>
 <!--end of page content-->
 
-
-
-<!------------------------CONTROL------------------------------
-put all the control elements here-->
-
-<control
-  hidden>
-
-
-  <!-- mobile menu icon -->
-  <mobile-menu-icon 
-    class="fa fa-caret-right w3-left" 
-    style="font-size:28px; color:darkred; cursor:pointer; z-index:15; position:fixed; left:4px; top:50%" 
-    onclick="x_({el:'mobile-menu'}).hidden=false">
-  </mobile-menu-icon>
-    
-
-
-  <!-- mobile menu box -->
-  <mobile-menu  
-    class="w3-grey w3-bar-block"
-    style="width:60%; position:fixed; left:0; bottom:0; z-index:20">
-
-    <button id="close_menu"
-      class="w3-bar-item w3-button w3-xlarge w3-border-bottom"
-      onclick="x_({el:'mobile-menu'}).hidden=true"><i 
-      class="fa fa-caret-left"></i> Close</button>
-
-  </mobile-menu>
-
-
-  <!-- sidebar for wide screen -->
-  <sidebar
-    class="w3-sidebar w3-grey"
-    style="margin:0; padding:0">
-
-    <span>MODULES</span>
-  </sidebar>
-
-</control><!--end of pageControl section-->
 
 
 
