@@ -135,6 +135,22 @@ function x_(x) {
         xdelete()
         break 
 
+
+      case 'jsid':
+        //x_({genCcode:8}) ....gen 8 digits like abcdsdkf , the code is A-Za-z only
+        return jsid()
+        break 
+
+      case 'randomInt':
+        //x_({randomInt:'20-60'})
+        return randomInt()
+        break 
+
+      case 'password':
+        //x_({password:32}) ....gen 32-char of password
+        return password()
+        break
+
       default:
         return 'command not supported'
     }
@@ -770,6 +786,67 @@ function x_(x) {
   }
 
 
+  ////////////////////////////////////////////////
+  function jsid() {
+    //gen random char at the digits required
+    //x_({ccode:12}) ...gen 12 digits of random chars + 0-9 but the first digit cannot be number
+
+    let code_ = ''
+    for (d=0; d < x.jsid; d++) {
+      if (d==0) {
+        code_ = code_ + 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_$'.charAt( Math.floor( Math.random() * 55 ))
+      } else {
+        code_ = code_ + 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_$0123456789'.charAt( Math.floor( Math.random() * 65 ))
+      }
+      
+    }
+    return code_       
+  }//M:ok 2023-4-8
 
 
-}
+  /////////////////////////////////////////////////
+  function randomInt() {
+    //gen random int from min to max
+    // x_({randomInt:'20-60'})
+    //if no range specified, just make it from 0-... like x_({randomInt:'100'}) is 0-100
+
+    //default
+    let min = 0; max = 100
+
+    if (typeof x.randomInt == 'number') {
+      //no range specified but put number
+      max = x.randomInt
+    } else if (x.randomInt.includes('-')) {
+      let range = x.randomInt.split('-')
+      min = Number(range[0])
+      max = Number(range[1])
+    } 
+    //if put '' takes default which is 100 (max)
+    
+    return Math.floor(
+      Math.random() * (max + 1 - min) + min  
+    )
+  }//M:ok 2023-4-8
+
+
+
+  ///////////////////////////////////////////////////
+  function password() {
+    //gen passw at length desired
+    // x_({password:48}) ...gen 48 char of passw
+
+    if (x.password == '') x.password = 32
+    let p = ''
+    for (i=0; i < x.password; i++) {
+      p = p + 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$!~%^&<>#@+-*/|[]{}()?:;,"='.charAt(
+        Math.floor(
+          Math.random() * 91 
+        )
+      )   
+    }
+    return p 
+  }
+
+
+
+}//end x_()

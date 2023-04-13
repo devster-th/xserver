@@ -165,13 +165,12 @@ core.tabAct = function (el) {
   //right now not all module is open, so limit only few. More than these still don't do
 
   //make list of workspace
-  let spaceList = []
-  for (s of el.parentElement.children) {
-    spaceList.push( '#' + s.getAttribute('_space') )
-  }
+  let spaceList = x_({el:'module[name="' + core.activeMenu + '"]>workspace'}) 
 
   //show workspace
-  x_({  showEl: '#' + el.getAttribute('_space') , 
+  x_({  showEl: 'module[name="' + core.activeMenu + 
+                '"]>workspace[name="' + el.getAttribute('_space') + 
+                '"]' , 
         hide:   'the rest',
         allEl:  spaceList 
     })
@@ -194,7 +193,7 @@ core.menuAct = function (el) {
   //1) MAKE ARRAY OF MENU ITEMS
   let mobileList = []
   for (l of x_({el:'mobile-menu'}).children) {
-    if (l.id.match(/close_menu|logout_menu/) ) {
+    if (l.id.match(/close|logout/) ) {
       //skip
     } else {
       mobileList.push(l)
@@ -203,7 +202,7 @@ core.menuAct = function (el) {
 
   let sidebarList = []
   for (l of x_({el:'sidebar'}).children) {
-    if (l.tagName == 'BUTTON' && l.id != 'logout_menu') {
+    if (l.tagName == 'BUTTON' && l.id != 'logout') {
       sidebarList.push(l)
     }
   }
@@ -220,7 +219,7 @@ core.menuAct = function (el) {
   } else {
     //this is normal flow to get the click from user's selection
     let fromMenuBox = el.parentElement 
-    core.activeMenu = el.id.replace(/_.+/,'') //takeout _menu | _sidebar
+    core.activeMenu = el.name //takeout _menu & _sidebar
     setActiveMenu(mobileList) 
     setActiveMenu(sidebarList) 
 
@@ -237,13 +236,16 @@ core.menuAct = function (el) {
   
   //if module content already loaded, not do, if not loaded, load
   try {
-    if ( x_({el:'#'+_conf.module[core.activeMenu].elid}).innerHTML) {
+    if ( x_({el:'module[name="' + core.activeMenu + '"]'}) ) {
         //already loaded, not load again
     } else {
       //still not load
+      let newPlug = document.createElement('plug')
+      x_({el:'app-space'}).append(newPlug)
+
       x_({
-        loadHtmlFile: '.' + _conf.module[core.activeMenu].htmlFile ,
-        intoEl: '#' + _conf.module[core.activeMenu].elid ,
+        loadHtmlFile: _conf.module[core.activeMenu].htmlFile ,
+        intoEl: newPlug ,
         thenRun: core.startModule
         //'core.dressTag("#" + _conf.module[core.activeMenu].elid)'
         //_conf.module[core.activeMenu].initFunc // sales.init
@@ -257,17 +259,12 @@ core.menuAct = function (el) {
   //core.dressTag('#' + _conf.module[core.activeMenu].elid)
 
   //show the active moduleEl, hide the rest
-  let moduleEleList = []
-  for (m of core.assignedModule) {
-    moduleEleList.push(
-      //eval(`X1.module.${m}.moduleEl`)
-      x_({el: '#' + _conf.module[m].elid})
-    )
-  }
+  let moduleEleList = x_({el:'app-space module'})
+  
 
   try {
     x_({
-      showEl: '#' + _conf.module[core.activeMenu].elid ,
+      showEl: 'module[name="' + core.activeMenu + '"]',
       allEl: moduleEleList 
     })
   } catch {
@@ -289,7 +286,7 @@ core.menuAct = function (el) {
 
       //set color for the active menu
       for (l of menuBoxToSet) {
-        if (l.id.replace(/_.+/,'') == core.activeMenu) {
+        if (l.name == core.activeMenu) {
           x_({ 
             replaceClass:'w3-grey', 
             with:'w3-light-grey', 
@@ -347,7 +344,7 @@ core.login = function () {
     core.makeMenu()
 
     //press on menu based on the core.initModule
-    core.menuAct( '#' + core.initModule.toLowerCase() + '_menu' )
+    core.menuAct( 'mobile-menu>button[name="' + core.initModule + '"]' )
 
     //the codes above this made the width of sidebar changed, so fix by below
     core.displayCheck()
@@ -386,8 +383,8 @@ core.makeMenu = function() {
 
       //make mobile menu
       x_({  createEl:'button',
-            id: _conf.module[mo].menuid + '_menu', //sales_menu
-            text: _conf.menu[ _conf.module[mo].menuid ].text ,
+            name: _conf.module[mo].menuName, //sales_menu
+            text: _conf.menu[ _conf.module[mo].menuName ].text ,
             class: 'w3-bar-item w3-button w3-xlarge' + drawLine(),
             onclick: 'core.menuAct(this)',
             appendTo: x_({el:'mobile-menu'})
@@ -396,8 +393,8 @@ core.makeMenu = function() {
 
       //make sidebar
       x_({  createEl:'button',
-            id: _conf.module[mo].menuid + '_sidebar', //sales_sidebar
-            text: _conf.menu[ _conf.module[mo].menuid ].text ,
+            name: _conf.module[mo].menuName, //sales_sidebar
+            text: _conf.menu[ _conf.module[mo].menuName ].text ,
             class: 'w3-bar-item w3-button w3-large' + drawLine(),
             onclick: 'core.menuAct(this)',
             appendTo: x_({el:'sidebar'})
@@ -406,7 +403,7 @@ core.makeMenu = function() {
 
     //make logout menu
     x_({  createEl:'button',
-          id: 'logout_menu',
+          name: 'logout',
           text: _conf.menu.logout.text ,
           class: 'w3-bar-item w3-button w3-xlarge w3-border-top',
           onclick: 'core.menuAct(this)',
@@ -414,7 +411,7 @@ core.makeMenu = function() {
     })
 
     x_({  createEl:'button',
-          id: 'logout_sidebar',
+          name: 'logout',
           text: _conf.menu.logout.text ,
           class: 'w3-bar-item w3-button w3-large w3-border-top',
           onclick: 'core.menuAct(this)',
@@ -424,7 +421,7 @@ core.makeMenu = function() {
     
 
 
-    ///////////////////////////////////
+    //-------------------------------------------
     function drawLine() {
       //draw line every 4 menu items
       if (count==5 || count==9 || count==13) {
@@ -482,18 +479,151 @@ core.dressTag = function (el) {
   } 
 
   //not do on button & rest yet
-  for (e of el.querySelectorAll('*')) { //
-    for (t in _conf.tag) { //each e check for available config tag
-      if (t == e.tagName.toLowerCase().replace('-','_')) {
-        e.className = _conf.tag[t].class 
-        e.setAttribute('style',_conf.tag[t].style)
-        if (Object.keys(_conf.tag[t].attri != '')) {
+  for (each of el.querySelectorAll('*')) { //
+
+    let t = each.tagName.toLowerCase().replaceAll('-','_')
+
+    if (t in _conf.tag  && !each.hasAttribute('_nodress')) {
+
+      //all tags have no conditions, 1 leyer, just set it
+      if (_conf.tag[t].class) {
+        each.className = (each.classList.value=='')? 
+          _conf.tag[t].class : 
+          each.classList.value + ' ' + _conf.tag[t].class
+
+        if (each.getAttribute('style')) {
+          each.setAttribute(
+            'style',
+            each.getAttribute('style') + _conf.tag[t].style
+          )
+        } else {
+          each.setAttribute('style', _conf.tag[t].style)
+        }
+
+        if (Object.keys(_conf.tag[t].attri !='')) {
           for (a in _conf.tag[t].attri) {
-            e.setAttribute(a, _conf.tag[t].attri[a])
+            each.setAttribute(a, _conf.tag[t].attri[a])
+          }
+        }
+
+      //input
+      } else if (t == 'input') {
+        each.className = (each.classList.value)?
+          each.classList.value + _conf.tag[t][each.type].class :  
+            _conf.tag[t][each.type].class
+        
+        if (each.getAttribute('style')) {
+          each.setAttribute(
+            'style',
+            each.getAttribute('style') + _conf.tag[t][each.type].style
+          )
+        } else {
+          each.setAttribute('style', _conf.tag[t][each.type].style)
+        } 
+
+        if (Object.keys(_conf.tag[t][each.type].attri !='')) {
+          for (a in _conf.tag[t][each.type].attri) {
+            each.setAttribute(a, _conf.tag[t][each.type].attri[a])
+          }
+        }
+
+      //general button
+      } else if (t == 'button' 
+                  && each.parentElement.tagName != 'TAB'
+                  && !each.closest('message-box')) {
+
+        let ty = each.getAttribute('_type')
+        if (!ty) ty = 'normal'
+
+        each.className = (each.classList.value)?
+          each.classList.value + ' ' + _conf.tag.button[ty].class :
+          _conf.tag.button[ty].class
+      
+        if (each.getAttribute('style')) {
+          each.setAttribute(
+            'style',
+            each.getAttribute('style') + _conf.tag[t][ty].style
+          )
+        } else {
+          each.setAttribute('style', _conf.tag[t][ty].style)
+        }
+
+        if (Object.keys(_conf.tag[t][ty].attri !='')) {
+          for (a in _conf.tag[t][ty].attri) {
+            each.setAttribute(a, _conf.tag[t][ty].attri[a])
+          }
+        }
+
+      //button in tab
+      } else if (t == 'button' 
+                  && each.parentElement.tagName == 'TAB') {
+        each.className = (each.classList.value)?
+          each.classList.value + ' ' + _conf.tag.button.tab.class :
+            _conf.tag.button.tab.class
+
+        if (each.getAttribute('style')) {
+          each.setAttribute(
+            'style',
+            each.getAttribute('style') + _conf.tag.button.tab.style
+          ) 
+        } else {
+          each.setAttribute('style', _conf.tag.button.tab.style)
+        }
+
+        if (Object.keys(_conf.tag.button.tab.attri !='')) {
+          for (a in _conf.tag.button.tab.attri) {
+            each.setAttribute(a, _conf.tag.button.tab.attri[a])
+          }
+        }
+
+
+      //button in message-box
+      } else if (t == 'button'
+                  && each.closest('message-box')) {
+        each.className = (each.classList.value=='')?
+          _conf.tag.button.message.class :
+          each.classList.value + ' ' + _conf.tag.button.message.class
+      
+        if (each.getAttribute('style')) {
+          each.setAttribute(
+            'style',
+            each.getAttribute('style') + _conf.tag.button.message.style
+          )
+        } else {
+          each.setAttribute('style', _conf.tag.button.message.style)
+        }
+
+        if (Object.keys(_conf.tag.button.message.attri !='')) {
+          for (a in _conf.tag.button.message.attri) {
+            each.setAttribute(a, _conf.tag.button.message.attri[a])
+          }
+        }
+
+      //message-box
+      } else if (t == 'message_box') {
+        let ty = each.getAttribute('_type')
+
+        each.className = (each.classList.value)?
+          each.classList.value + ' ' + _conf.tag.message_box[ty].class :
+            _conf.tag.message_box[ty].class
+
+        if (each.getAttribute('style')) {
+          each.setAttribute(
+            'style', 
+            each.getAttribute('style') + _conf.tag.message_box[ty].style
+          )
+        } else {
+          each.setAttribute('style', _conf.tag.message_box[ty].style)
+        }
+        
+        if (Object.keys(_conf.tag.message_box[ty].attri !='')) {
+          for (a in _conf.tag.message_box[ty].attri) {
+            each.setAttribute(a, _conf.tag.message_box[ty].attri[a])
           }
         }
       }
-    }    
+       
+    }
   }
 
 
@@ -506,16 +636,16 @@ core.startModule = function () {
 
   //dress all tags with classes, styles, etc.
   core.dressTag(
-    '#' + _conf.module[core.activeMenu].elid
+    'module[name="' + core.activeMenu + '"]' //'module[name="sales"]'
   )
 
   //run the first-tab /workspace
   core.tabAct(
-    x_({el:'#' + _conf.module[core.activeMenu].elid + ' [_first-tab]'})
+    'module[name="' + core.activeMenu + '"]>tab>button[_first-tab]'
   )
 
   //run the init f of the module if any
-  let hasStartFunc = x_({el:'#' + _conf.module[core.activeMenu].elid + ' conf' }).getAttribute('init-func')
+  let hasStartFunc = _conf.module[core.activeMenu].initFunc 
 
   if (hasStartFunc) {
     eval(hasStartFunc)()

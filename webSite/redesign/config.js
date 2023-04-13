@@ -5,201 +5,205 @@ const _conf = {
   
   module: { //all modules in the app
     sales: {
-      htmlFile: '/module/sales/sales.html',
-      jsFile:   '/module/sales/sales.js',
+      htmlFile: './module/sales/sales.html',
+      jsFile:   './module/sales/sales.js',
       initFunc: 'sales.init',
-      menuid:   'sales',
-      elid:     'sales_module'
+      menuName:   'sales',
+      elid:     ''
     },
     marketing: {
-      htmlFile: '/module/marketing/marketing.html',
-      jsFile:   '/module/marketing/marketing.js',
+      htmlFile: './module/marketing/marketing.html',
+      jsFile:   './module/marketing/marketing.js',
       initFunc: 'marketing.init',
-      menuid:   'marketing',
-      elid:     'marketing_module'
+      menuName:   'marketing',
+      elid:     ''
     },
     products: {
-      htmlFile: '/module/products/products.html',
-      jsFile:   '/module/products/products.js',
+      htmlFile: './module/products/products.html',
+      jsFile:   './module/products/products.js',
       initFunc: 'products.init',
-      menuid:   'products',
-      elid:     'products_module'
+      menuName:   'products',
+      elid:     ''
     },
     delivery: {
-      htmlFile: '/module/delivery/delivery.html',
-      jsFile:   '/module/delivery/delivery.js',
-      initFunc: 'delivery.init',
-      menuid:   'delivery'
+      htmlFile: '',
+      jsFile:   '',
+      initFunc: '',
+      menuName:   'delivery'
     },
     warehouse: {
-      htmlFile: '/module/warehouse/warehouse.html',
-      jsFile:   '/module/warehouse/warehouse.js',
-      initFunc: 'warehouse.init',
-      menuid:   'warehouse'
+      htmlFile: '',
+      jsFile:   '',
+      initFunc: '',
+      menuName:'warehouse'
     },
     purchase: {
-      htmlFile: '/module/purchase/purchase.html',
-      jsFile:   '/module/purchase/purchase.js',
-      initFunc: 'purchase.init',
-      menuid:   'purchase'
+      htmlFile: '',
+      jsFile:   '',
+      initFunc: '',
+      menuName:'purchase'
     },
     finance: {
-      htmlFile: '/module/finance/finance.html',
-      jsFile:   '/module/finance/finance.js',
-      initFunc: 'finance.init',
-      menuid:   'finance'
+      htmlFile: '',
+      jsFile:   '',
+      initFunc: '',
+      menuName:'finance'
     },
     accounting: {
-      htmlFile: '/module/accounting/accounting.html',
-      jsFile:   '/module/accounting/accounting.js',
-      initFunc: 'accounting.init',
-      menuid:   'accounting'
+      htmlFile: '',
+      jsFile:   '',
+      initFunc: '',
+      menuName:'accounting'
     },
     manufacturing: {
-      htmlFile: '/module/manufacturing/manufacturing.html',
-      jsFile:   '/module/manufacturing/manufacturing.js',
-      initFunc: 'manufacturing.init',
-      menuid:   'manufacturing'
+      htmlFile: '',
+      jsFile:   '',
+      initFunc: '',
+      menuName:'manufacturing'
     },
     maintenance: {
-      htmlFile: '/module/maintenance/maintenance.html',
-      jsFile:   '/module/maintenance/maintenance.js',
-      initFunc: 'maintenance.init',
-      menuid:   'maintenance'
+      htmlFile: '',
+      jsFile:   '',
+      initFunc: '',
+      menuName: 'maintenance'
     },
     assets: {
-      htmlFile: '/module/assets/assets.html',
-      jsFile:   '/module/assets/assets.js',
-      initFunc: 'assets.init',
-      menuid:   'assets'
+      htmlFile: '',
+      jsFile:   '',
+      initFunc: '',
+      menuName: 'assets'
     },
     staff: {
-      htmlFile: '/module/staff/staff.html',
-      jsFile:   '/module/staff/staff.js',
-      initFunc: 'staff.init',
-      menuid:   'staff'
+      htmlFile: '',
+      jsFile:   '',
+      initFunc: '',
+      menuName: 'staff'
     },
     userSetting: {
-      htmlFile: '/module/user_setting/user-setting.html',
-      jsFile:   '/module/user_setting/userSetting.js',
-      initFunc: 'userSetting.init',
-      menuid:   'usersetting'
+      htmlFile: '',
+      jsFile:   '',
+      initFunc: '',
+      menuName: 'userSetting'
     },
     admin: {
-      htmlFile: '/module/admin/admin.html',
-      jsFile:   '/module/admin/admin.js',
-      initFunc: 'admin.init',
-      menuid:   'admin'
+      htmlFile: '',
+      jsFile:   '',
+      initFunc: '',
+      menuName: 'admin'
     },
     help: {
-      htmlFile: '/module/help/help.html',
-      jsFile:   '/module/help/help.js',
-      initFunc: 'help.init',
-      menuid:   'help'
+      htmlFile: '',
+      jsFile:   '',
+      initFunc: '',
+      menuName: 'help'
     }
   },
+
+  //////////////////////////////////////////////////////////
   menu: { //full menus available in the app
     sales: {
-      text:'Sales', 
-      headicon:'', 
-      tailicon:'', 
-      module:'sales' },
+      text:     'Sales', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'sales' },
     marketing: {
-      text:'Marketing', 
-      headicon:'', 
-      tailicon:'', 
-      module:'marketing' },
+      text:     'Marketing', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'marketing' },
     products: {
-      text:'Products', 
-      headicon:'', 
-      tailicon:'', 
-      module:'products' },
+      text:     'Products', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'products' },
     delivery: {
-      text:'Delivery', 
-      headicon:'', 
-      tailicon:'', 
-      module:'delivery' },
+      text:     'Delivery', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'delivery' },
     warehouse: {
-      text:'Warehouse', 
-      headicon:'', 
-      tailicon:'', 
-      module:'warehouse' },
+      text:     'Warehouse', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'warehouse' },
     purchase: {
-      text:'Purchase', 
-      headicon:'', 
-      tailicon:'', 
-      module:'purchase' },
+      text:     'Purchase', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'purchase' },
     finance: {
-      text:'Finance', 
-      headicon:'', 
-      tailicon:'', 
-      module:'finance' },
+      text:     'Finance', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'finance' },
     accounting: {
-      text:'Accounting', 
-      headicon:'', 
-      tailicon:'', 
-      module:'accounting' },
+      text:     'Accounting', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'accounting' },
     manufacturing: {
-      text:'Manufacturing', 
-      headicon:'', 
-      tailicon:'', 
-      module:'manufacturing' },
+      text:     'Manufacturing', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'manufacturing' },
     maintenance: {
-      text:'Maintenance', 
-      headicon:'', 
-      tailicon:'', 
-      module:'maintenance' },
+      text:     'Maintenance', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'maintenance' },
     assets: {
-      text:'Assets', 
-      headicon:'', 
-      tailicon:'', 
-      module:'assets' },
+      text:     'Assets', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'assets' },
     staff: {
-      text:'Staff', 
-      headicon:'', 
-      tailicon:'', 
-      module:'staff' },
-    usersetting: {
-      text:'User setting', 
-      headicon:'', 
-      tailicon:'', 
-      module:'userSetting' },
+      text:     'Staff', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'staff' },
+    userSetting: {
+      text:     'User setting', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'userSetting' },
     admin: {
-      text:'Admin', 
-      headicon:'', 
-      tailicon:'', 
-      module:'admin' },
+      text:     'Admin', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'admin' },
     help: {
-      text:'Help', 
-      headicon:'', 
-      tailicon:'', 
-      module:'help' },
+      text:     'Help', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'help' },
     logout: {
-      text:'Log out', 
-      headicon:'', 
-      tailicon:'', 
-      module:'logout' },
+      text:     'Log out', 
+      headicon: '', 
+      tailicon: '', 
+      module:   'logout' },
   },
+
+  //////////////////////////////////////////////////////////
   tag: { //special tags defined in this app, set classes & few here
     login_space: { // convert _ to - and get the tagName
-      class: 'w3-display-middle',
-      style: 'display:block',
-      attri: {}
+      class:    'w3-display-container',
+      style:    'display:block',
+      attri:    {}
     },
     login: {
       class: 'w3-display-middle w3-display-container w3-large',
-      style: 'width:400px',
+      style: 'width:350px',
       attri: {}
     },
     signup_space: {
       class: 'w3-container w3-large',
       style: '',
-      attri: {hidden:true}
+      attri: {}
     },
     control: {
       class: '',
       style: '',
-      attri: {hidden:true}
+      attri: {}
     },
     mobile_menu: {
       class: 'w3-grey w3-bar-block',
@@ -219,20 +223,10 @@ const _conf = {
     app_space: {
       class: 'w3-display-container',
       style: 'height:700px',
-      attri: {hidden:true}
-    },
-    message_box: {
-      class: 'w3-display-middle w3-yellow w3-card-4 w3-container',
-      style: 'width:65%; z-index:20',
       attri: {}
     },
-    message_title: {
-      class: 'w3-xlarge',
-      style: '',
-      attri: {}
-    },
-    act_bar: {
-      class: 'w3-bar w3-margin-bottom',
+    bar: {
+      class: 'w3-bar w3-margin-bottom w3-block',
       style: '',
       attri: {}
     },  
@@ -240,11 +234,6 @@ const _conf = {
       class: '',
       style: '',
       attri: {hidden:true}
-    },
-    conf: {
-      class: '',
-      style: '',
-      attri: {}
     },
     tab: {
       class: 'w3-bar w3-black',
@@ -267,19 +256,54 @@ const _conf = {
       attri: {},
       textColorCollec: ['w3-text-brown','w3-text-blue','w3-text-green','w3-text-orange','w3-text-yellow','w3-text-pink']
     },
-    block: {
+    box: {
       class: 'w3-row',
       style: '',
       attri: {}
     },  
-    column: {
+    half: {
       class: 'w3-container w3-half',
       style: '',
       attri: {}
     },
-    /*
+    select: {
+      class: 'w3-select',
+      style: '',
+      attri: {},
+    },
+    textarea: {
+      class: 'w3-input w3-border',
+      style: '',
+      attri: {}
+    },
+    table: { //default table
+      class: 'w3-table-all',
+      style: '',
+      attri: {}
+    },  
+    message_title: {
+      class: 'w3-xlarge w3-margin-top w3-block',
+      style: 'font-weight:bold',
+      attri: {}
+    },
+    responsive: {
+      class: 'w3-responsive',
+      style: '',
+      attri: {}
+    },
+
     input: { // _conf.tag.input.text.class = ??? ....text is type
       text: {
+        class: 'w3-input w3-border',
+        style: '',
+        attri: {}
+      },
+      number: {
+        class: 'w3-input w3-border',
+        style: '',
+        attri: {}
+      },
+      email: {
         class: 'w3-input w3-border',
         style: '',
         attri: {}
@@ -298,18 +322,12 @@ const _conf = {
         class: 'w3-radio',
         style: '',
         attri: {}
+      },
+      nodress: {
+        //don't apply style here
       }
     },
-    select: {
-      class: 'w3-select',
-      style: '',
-      attri: {},
-    },
-    textarea: {
-      class: 'w3-input w3-border',
-      style: '',
-      attri: {}
-    },
+
     button: { // _conf.tag.button.main.class = ??? ...main is _main attri
       main: {
         class: 'w3-button w3-blue',
@@ -321,43 +339,69 @@ const _conf = {
         style: '',
         attri: {}
       },
-      danger: {
+      alert: {
         class: 'w3-button w3-orange',
         style: '',
         attri: {}
       },
-      default: {
+      danger: {
+        class: 'w3-button w3-red',
+        style: '',
+        attri: {}
+      },
+      normal: {
         class: 'w3-button w3-border',
         style: '',
         attri: {}
       },
       tab: {
-        class: 'w3-bar-item w3-button w3-small'
+        class: 'w3-bar-item w3-button w3-small',
+        style: '',
+        attri: {}
+      },
+      message: {
+        class: 'w3-button w3-light-grey',
+        style: '',
+        attri: {}
       }
     },
-    table: { //default table
-      class: 'w3-table-all',
-      style: '',
-      attri: {}
-    }  
-    */
-  },
-  message: { //color of message-box
-    default: {
-      class: 'w3-light-grey',
-      style: '',
-      attri: {}
+  
+    message_box: { //color of message-box based on _type="normal" ...
+      normal: {
+        class: 'w3-display-middle w3-card-4 w3-container w3-light-grey',
+        style: 'width:65%; z-index:20',
+        attri: {}
+      },
+      warn: {
+        class: 'w3-display-middle w3-card-4 w3-container w3-yellow',
+        style: 'width:65%; z-index:20',
+        attri: {}
+      },
+      alert: {
+        class: 'w3-display-middle w3-card-4 w3-container w3-orange',
+        style: 'width:65%; z-index:20',
+        attri: {}
+      },
+      danger: {
+        class: 'w3-display-middle w3-card-4 w3-container w3-red',
+        style: 'width:65%; z-index:20',
+        attri: {}
+      },
+      success: {
+        class: 'w3-display-middle w3-card-4 w3-container w3-green',
+        style: 'width:65%; z-index:20',
+        attri: {}
+      },
+      fail: {
+        class: 'w3-display-middle w3-card-4 w3-container w3-orange',
+        style: 'width:65%; z-index:20',
+        attri: {}
+      },
     },
-    warn: {
-      class: 'w3-yellow',
-      style: '',
-      attri: {}
-    },
-    danger: {
-      class: 'w3-orange',
-      style: '',
-      attri: {}
-    }
-  } 
+    
+  } // end tag
+  
+  
+  
   
 } //end _conf
