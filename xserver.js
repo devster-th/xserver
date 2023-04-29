@@ -1,4 +1,4 @@
-// head note ////////////////////////////////////////////////////////////
+// head note ////////////////////////////////////////////////////
 /*
 this is the simpleApp main file = /simpleApp/simpra.js
 expressjs v4.18.1
@@ -8,27 +8,23 @@ changed name to deeji.js -- 2022-10-12
 */
 
 
-// 1 - init ////////////////////////////////////////////////////////////
+// 1 - init ////////////////////////////////////////////////////
 
-global._server = {
-                appName: "simpleApp",
-                version: "1.0",
+global.XSERVER = {
+                appName:  "xserver",
+                version:  "0.1",
                 startTime: new Date(),
-                domain: "localhost",
-                port: 2000,
-                mongoUrl: "mongodb://localhost:27017/",
+                domain:   "localhost",
+                port:     2000,
+                //mongoUrl: "mongodb://localhost:27017/",
                 //codeGen: {lastXuid: 0, prefix:"deeji-"}
             }
     
 //load module
 const express   = require("express")
 const app       = express()
-//const mongo     = require("mongodb").MongoClient 
-//const crypto    = require("crypto")
-//const uuid      = require("uuid")
-const core = require("./core.js")
-//const xdev = require("./module/xev.js")
-//const xdb = require("./module/xdb.js")
+const core      = require("./core.js")
+//const xdev      = require('./module/xdev/xdev.js') 
 
 //setting
 app.use(express.static("webSite"))
@@ -39,7 +35,7 @@ app.use(express.json())
 
 
 
-// 2 - Get works ///////////////////////////////////////////////////////
+// 2 - Get works ///////////////////////////////////////////////
 /*                  THE TALKING PART
 The server talks to external via GET & POST here and then send 'command' to the xDev which will do detail works.
 */
@@ -55,10 +51,10 @@ app.get("/get_", (req,resp)=>{
 
     //pass to cor.e(method,inputData)
     //most of work will be done in the core module
-    core.run(req.query, 'get')
+    core.$(req.query, 'get')
 
     //for testing just return something to B
-    resp.send("@deeji : received data at " + Date() )
+    resp.send("@xserver : received data at " + Date() )
 
 
 })//mostly work
@@ -79,32 +75,30 @@ app.post("/post_", (req,resp)=> {
     
 
     //pass input to cor.e(method,inputData)
-    core.run(req.body, 'post')
+    core.$(req.body, 'post')
 
     //just send message 'thank you' for now
-    resp.json({ note:"@deeji : received data at " + Date() })
+    resp.json({ note:"@xserver : received data at " + Date() })
 
 })
 
 
 
 
-// 4 - listen ///////////////////////////////////////////////////////
-app.listen(_server.port, ()=>{
-    console.log("////////////////// S I M P R A //////////////////")
-    console.log(`${_server.startTime} -- simpleApp , port: ${_server.port}`)
-    console.log(`...This is a tiny server trying to do little things, and makes things minimal and may be used to be a model, for something bigger.
-    -- @mutita 
-    v0.2 / Sep 30, 2022
-    `)
-    console.log("@deeji is ready...")
+// 4 - listen /////////////////////////////////////////////////
+app.listen(XSERVER.port, ()=>{
+    console.log("////////////////////////////////////")
+    console.log(`${XSERVER.startTime} -- ${XSERVER.appName} starts on port: ${XSERVER.port}`)
+    console.log('...This is a tiny server trying to do little things, and makes things minimal and may be used to be a model, for something bigger. -- @mutita v0.2 / Sep 30, 2022')
+    console.log("@xserver is ready...")
     //cor.e()
     testScript()
+    
 })
 
 
 
-// 5 - child functions ////////////////////////////////////////////////////
+// 5 - child functions ///////////////////////////////////////
 function log_(x) {
   console.log(x)
 }
@@ -114,7 +108,7 @@ function convertToX(input_) {//input_ is string
 }
 
 
-// 6 - test //////////////////////////////////////////////////////////
+// 6 - test //////////////////////////////////////////////////
 function testScript() {
 
 //put all test command here
@@ -134,7 +128,14 @@ function testScript() {
   //xde.v({act:"read file", fileName:"xdb.json", convert:"toObject"})
 
   //xd.b({find:"*",in:"people"})
-  core.run("test")
+  core.$("test")
+  core.$({act:'do something',data:'yeeeeeeeeee'}) //for core.js
+    
+  core.$({ //for sales.js
+      act:'run sales module',
+      module:'sales',
+      data:{name:'john',age:23}
+    })
 }
 
 
@@ -173,5 +174,8 @@ devper = @mutita
 2022-9-30   changed paths to '/get_', '/post_' to avoid conflict of html pages
 
 2023-2-20   M/touch little
+
+
+2023-4-21   M/xserver.js directly comms with core.js and handles mainly traffice, web site, web files. For app level just pass to core.js.
 
 */

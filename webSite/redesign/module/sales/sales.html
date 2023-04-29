@@ -1,5 +1,4 @@
-<module 
-  name="sales">
+<module name="sales">
 
   <!-- tab -->
   <tab>
@@ -22,16 +21,15 @@
   <workspace name="home">
 
     <!-- indicator -->
-    <indicator name="alert"> 
-      <i 
-        class="fa fa-exclamation-circle w3-xlarge" 
-        style="color: red; cursor: pointer"
+    <indicator-box> 
+      <alert-icon 
         onclick="x_({
           showThis: 'message-box',
           forLong: 2000 
         }); 
-        this.className='w3-hide'" ></i>
-    </indicator>
+        this.className='w3-hide'"
+      ></alert-icon>
+    </indicator-box>
 
     <!-- space title -->
     <ws-name>Sales dashboard</ws-name>

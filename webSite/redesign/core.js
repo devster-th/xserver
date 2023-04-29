@@ -385,7 +385,7 @@ core.makeMenu = function() {
       x_({  createEl:'button',
             name: _conf.module[mo].menuName, //sales_menu
             text: _conf.menu[ _conf.module[mo].menuName ].text ,
-            class: 'w3-bar-item w3-button w3-xlarge' + drawLine(),
+            class: _conf.tag.button.menu.class + drawLine(),
             onclick: 'core.menuAct(this)',
             appendTo: x_({el:'mobile-menu'})
       })
@@ -395,7 +395,7 @@ core.makeMenu = function() {
       x_({  createEl:'button',
             name: _conf.module[mo].menuName, //sales_sidebar
             text: _conf.menu[ _conf.module[mo].menuName ].text ,
-            class: 'w3-bar-item w3-button w3-large' + drawLine(),
+            class: _conf.tag.button.sidebar.class + drawLine(),
             onclick: 'core.menuAct(this)',
             appendTo: x_({el:'sidebar'})
       })
@@ -405,7 +405,7 @@ core.makeMenu = function() {
     x_({  createEl:'button',
           name: 'logout',
           text: _conf.menu.logout.text ,
-          class: 'w3-bar-item w3-button w3-xlarge w3-border-top',
+          class: _conf.tag.button.menu.class + ' w3-border-top',
           onclick: 'core.menuAct(this)',
           appendTo: x_({el:'mobile-menu'})
     })
@@ -413,7 +413,7 @@ core.makeMenu = function() {
     x_({  createEl:'button',
           name: 'logout',
           text: _conf.menu.logout.text ,
-          class: 'w3-bar-item w3-button w3-large w3-border-top',
+          class: _conf.tag.button.sidebar.class + ' w3-border-top',
           onclick: 'core.menuAct(this)',
           appendTo: x_({el:'sidebar'})
     })
@@ -472,7 +472,6 @@ core.dressTag = function (el) {
   //set classes, attri everything to the tags esp. the special tags
   //el can be 1 or many el that needs to dress
 
-  console.log('core.dressTag()', el)
 
   if (typeof el == 'string') {
     el = x_({el: el})
@@ -627,7 +626,7 @@ core.dressTag = function (el) {
   }
 
 
-} //M:ok 23-4-2
+} //M:ok 23-4-2 ; M:ok 23-4-13
 
 
 //////////////////////////////////////////////////////

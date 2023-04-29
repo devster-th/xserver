@@ -8,28 +8,28 @@ const _conf = {
       htmlFile: './module/sales/sales.html',
       jsFile:   './module/sales/sales.js',
       initFunc: 'sales.init',
-      menuName:   'sales',
+      menuName: 'sales',
       elid:     ''
     },
     marketing: {
       htmlFile: './module/marketing/marketing.html',
       jsFile:   './module/marketing/marketing.js',
       initFunc: 'marketing.init',
-      menuName:   'marketing',
+      menuName: 'marketing',
       elid:     ''
     },
     products: {
       htmlFile: './module/products/products.html',
       jsFile:   './module/products/products.js',
       initFunc: 'products.init',
-      menuName:   'products',
+      menuName: 'products',
       elid:     ''
     },
     delivery: {
       htmlFile: '',
       jsFile:   '',
       initFunc: '',
-      menuName:   'delivery'
+      menuName: 'delivery'
     },
     warehouse: {
       htmlFile: '',
@@ -185,10 +185,15 @@ const _conf = {
 
   //////////////////////////////////////////////////////////
   tag: { //special tags defined in this app, set classes & few here
+    alert_icon: {
+      class: 'fa fa-exclamation-circle w3-xlarge',
+      style: 'color:red; cursor:pointer',
+      attri: {}
+    },
     login_space: { // convert _ to - and get the tagName
-      class:    'w3-display-container',
-      style:    'display:block',
-      attri:    {}
+      class: 'w3-display-container',
+      style: 'display:block',
+      attri: {}
     },
     login: {
       class: 'w3-display-middle w3-display-container w3-large',
@@ -245,16 +250,20 @@ const _conf = {
       style: '',
       attri: {hidden:true}
     },
-    indicator: {
+    indicator_box: {
       class: 'w3-display-topright',
       style: 'margin-top:4px; margin-right:12px',
       attri: {}
     },
     ws_name: {
-      class: 'w3-xlarge w3-text-brown',
+      get class() { //the text color will rotate every time called
+        let c = this.colorCollec.shift()
+        this.colorCollec.push(c)
+        return 'w3-xlarge ' + c
+      },
       style: '',
       attri: {},
-      textColorCollec: ['w3-text-brown','w3-text-blue','w3-text-green','w3-text-orange','w3-text-yellow','w3-text-pink']
+      colorCollec: ['w3-text-blue','w3-text-green','w3-text-orange','w3-text-yellow','w3-text-pink','w3-text-brown']
     },
     box: {
       class: 'w3-row',
@@ -323,9 +332,7 @@ const _conf = {
         style: '',
         attri: {}
       },
-      nodress: {
-        //don't apply style here
-      }
+     
     },
 
     button: { // _conf.tag.button.main.class = ??? ...main is _main attri
@@ -349,18 +356,28 @@ const _conf = {
         style: '',
         attri: {}
       },
-      normal: {
+      normal: { //default if _type not specified
         class: 'w3-button w3-border',
         style: '',
         attri: {}
       },
-      tab: {
+      tab: { //button in tab
         class: 'w3-bar-item w3-button w3-small',
         style: '',
         attri: {}
       },
-      message: {
+      message: { //buton in the message box
         class: 'w3-button w3-light-grey',
+        style: '',
+        attri: {}
+      },
+      menu: {
+        class: 'w3-bar-item w3-button w3-xlarge',
+        style: '',
+        attri: {}
+      },
+      sidebar: {
+        class: 'w3-bar-item w3-button w3-large',
         style: '',
         attri: {}
       }

@@ -1,42 +1,18 @@
-<module name="marketing"></module>
+<module name="marketing">
+  <tab>
+    <button _first-tab _space="home">Home</button>
+  </tab>
 
-<!-- tab -->
-<tab>
-  <button 
-    class="w3-bar-item w3-button w3-small w3-white"
-    _space="marketing_analysis" 
-    onclick="core.tabAct(this)">Analysis</button><button 
 
-    _first-tab
-    class="w3-bar-item w3-button w3-small" 
-    _space="marketing_trend"
-    onclick="core.tabAct(this)">Trend</button><button 
+  <workspace name="home">
+    <ws-name>This is marketing module</ws-name>
 
-    class="w3-bar-item w3-button w3-small"   
-    _space="marketing_social"
-    onclick="core.tabAct(this)">Social</button>
-  
-</tab>
 
-<!--Home-->
-<workspace id="marketing_analysis" >
 
-  <ws-name>Analysis</ws-name>
-  <p>we can do anything on the content of the module we make</p>
-  <img src="cake2.jpeg" style="width: 100%">
 
-</workspace>
+    
+  </workspace>
 
-<workspace id="marketing_trend" >
 
-  <ws-name>Trend</ws-name>
-  <p>we can do anything on the content of the module we make</p>
 
-</workspace>
-
-<workspace id="marketing_social">
-
-  <ws-name>Social</ws-name>
-  <p>we can do anything on the content of the module we make</p>
-
-</workspace>
+</module>

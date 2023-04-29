@@ -151,13 +151,187 @@ function x_(x) {
         return password()
         break
 
+      case 'rotateA':
+        //x_({rotateA: array, round:10}) ...rotate a to left side and the first one moves to last
+        rotateA()
+        break
+
+      case 'rotateAl':
+        //same as above but just add 'l' in the command
+        rotateA()
+        break
+
+      case 'rotateAr':
+        //rotate right
+        rotateAr()
+        break
+
+      case 'thaiNum':
+        //convert 0-9 to thai num ๐-๙ and works for many digit
+        //x_({thaiNum:123456}) ...gets ๑๒๓๔๕๖
+        return thaiNum()
+        break
+
+      case 'thaiDay':
+        return thaiDay()
+        break
+
+      case 'thaiMonth':
+        return thaiMonth()
+        break
+
       default:
         return 'command not supported'
     }
   } else {
     return 'xdev: invalid command' 
   }
+
+
+  /////////////////////////////////////////////////
+  function thaiMonth() {
+
+    const thaiMonth = [
+      { english:'January',
+        thai:'มกราคม',
+        code:'มค'},
+      { english:'February',
+        thai:'กุมภาพันธ์',
+        code:'กพ'},
+      { english:'March',
+        thai:'มีนาคม',
+        code:'มีค'},
+      { english:'April',
+        thai:'เมษายน',
+        code:'มย'},
+      { english:'May',
+        thai:'พฤษภาคม',
+        code:'พค'},
+      { english:'June',
+        thai:'มิถุนายน',
+        code:'มิย'},
+      { english:'July',
+        thai:'กรกฎาคม',
+        code:'กค'},
+      { english:'August',
+        thai:'สิงหาคม',
+        code:'สค'},
+      { english:'September',
+        thai:'กันยายน',
+        code:'กย'},
+      { english:'October',
+        thai:'ตุลาคม',
+        code:'ตค'},
+      { english:'November',
+        thai:'พฤศจิกายน',
+        code:'พย'},
+      { english:'December',
+        thai:'ธันวาคม',
+        code:'ธค'},
+    ]
+
+    if (x.thaiMonth) {
+      let m = thaiMonth.find(item => 
+        item.english.toLowerCase().match(x.thaiMonth.toLowerCase())
+      )
+      if (m) return [m.thai, m.code]
+      else return false 
+    }
+  }
+
+
+
+  /////////////////////////////////////////////////
+  function thaiDay() {
+    //from Monday > จันทร์ , Tuesday > อังคาร ...
+    //x_({thaiDay:'Monday'}) ....gets จันทร์
+    //return both day name & code like ['จันทร์','จ']
+
+    const thaiDay = [
+      { english: 'Monday',
+        thai: 'จันทร์',
+        code: 'จ'},
+      { english: 'Tuesday',
+        thai: 'อังคาร',
+        code: 'อ'},
+      { english: 'Wednesday',
+        thai: 'พุธ',
+        code: 'พ'},
+      { english: 'Thursday',
+        thai: 'พฤหัสบดี',
+        code: 'พฤ'},
+      { english: 'Friday',
+        thai: 'ศุกร์',
+        code: 'ศ'},
+      { english: 'Saturday',
+        thai: 'เสาร์',
+        code: 'ส'},
+      { english: 'Sunday',
+        thai: 'อาทิตย์',
+        code: 'อา'},
+    ]
+
+  if (x.thaiDay) {
+    let day = thaiDay.find(item => item.english.toLowerCase().match(x.thaiDay.toLowerCase()))
+    if (day) return [day.thai, day.code] 
+    else return false
+  }
   
+}//M:ok 2023-4-14
+
+
+  /////////////////////////////////////////////////
+  function thaiNum() {
+    //convert 0-9 to ๐-๙ and support multi digits
+    //x_({thaiNum:12345}) ....gets ๑๒๓๔๕
+
+    let tn = '๐๑๒๓๔๕๖๗๘๙'
+    x.thaiNum = x.thaiNum.toString()
+
+    if (x.thaiNum.match(/^\d+$/)) {
+      //all input must be digit 0-9
+      if (x.thaiNum && x.thaiNum.length > 1) {
+        //multi digits
+        let outp = ''
+        for (di=0; di < x.thaiNum.length; di++) {
+          outp = outp + tn.charAt( x.thaiNum[di] )
+        }
+        return outp
+      } else {
+        // 1 digit
+        return tn.charAt(x.thaiNum)
+      }
+    } else {
+      //not digit
+      return false
+    }
+    
+  }//M:ok 2023-4-14 , if the digit is many there'll be some strange due to the handling of the display of number of js, guess
+
+
+
+  /////////////////////////////////////////////////
+  function rotateAr() {
+    //x_({rotateAr: array, round:10}) ...rotate right 10 rounds
+    if (!x.round) x.round = 1
+    for (r=0; r < x.round; r++) {
+      x.rotateAr.unshift( x.rotateAr.pop() )
+    }
+  }//M:ok 23-4-13
+
+  
+  
+  /////////////////////////////////////////////////
+  function rotateA() {
+    //x_({rotateA: array, round:10}) ...rotate left 10 rounds
+    if (!x.round) x.round = 1
+    for (r=0; r < x.round; r++) {
+      x.rotateA.push( x.rotateA.shift() )
+    }
+  }//M:ok 23-4-13
+
+
+
   //////////////////////////////////////////////////
   function makeBase64() {
     //convert string to Base64
@@ -169,6 +343,7 @@ function x_(x) {
   }
 
 
+
   //////////////////////////////////////////////////
   function readJsonFrom() {
     //parse json to x
@@ -178,6 +353,7 @@ function x_(x) {
       return JSON.parse(x.readJsonFrom)
     }
   }//M:OK, 2023-3-23
+
 
 
   //////////////////////////////////////////////////
@@ -205,6 +381,7 @@ function x_(x) {
       return x.ofEl.getAttribute(x.readAttrib)
     }
   }//M:OK, 2023-3-22
+
 
 
   //////////////////////////////////////////////////
@@ -456,7 +633,6 @@ function x_(x) {
 
 
 
-
   ///////////////////////////////////////////////////
   function showThis() {
     //show this or 1 el, with time setting
@@ -494,7 +670,6 @@ function x_(x) {
   }//m:ok, 2023-3-15
 
 
- 
 
 
 
@@ -786,6 +961,7 @@ function x_(x) {
   }
 
 
+
   ////////////////////////////////////////////////
   function jsid() {
     //gen random char at the digits required
@@ -802,6 +978,7 @@ function x_(x) {
     }
     return code_       
   }//M:ok 2023-4-8
+
 
 
   /////////////////////////////////////////////////
