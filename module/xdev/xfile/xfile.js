@@ -21,7 +21,7 @@ const fs = require('fs')
 
 //test///////////////////////////////
 
-//erase('newname.txt')
+erase('newname.txt')
 
 
 

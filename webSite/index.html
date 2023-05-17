@@ -9,8 +9,7 @@
 <style></style>
 
 <!--load scripts here-->
-<script src="/deeji/xev2.js"></script>
-<script src="/deeji/deeji2.js"></script>
+<script src="/_xbrowser/module/xdev/xdev_b.js"></script>
 
 </head>
 <body class="w3-container">
@@ -32,6 +31,11 @@
 
 <hr>
 
+<p>Password <input id="pass" type="password" style="width:100%"></p>
+<button onclick="xdev.hash(pass.value).then(h => {passProc(h);pass.value=''})">Submit</button>
+
+<hr>
+
 <p><a href="page1.html">Post form</a>
 <br><a href="fullWidth.html">full width content</a>
 <br><a href="halfWidth.html">half width content</a>
@@ -44,49 +48,17 @@
 
 
 <script>
-//deeji("test")
+async function passProc(hash) {
+    console.log(hash)
+    let pk = await xdev.passKey(hash)
 
-//if no saved var, create new
-//this block may put into deeji2.js
-/*
-if (!sessionStorage.getItem("_session")) {
-    //if no session, create new and save to sessionStorage
-    globalThis._session = {
-        appName: "deeji",
-        sessid: Date.now(),
-        content: [],
-        control: {
-            menu: {},
-            indicator: {},
-            message: {}
-        },
-        commu: {
-            in:"", out:""
-        },
-        user: {} //must be encrypted in real-use
-    } 
-    sessionStorage.setItem("_session",JSON.stringify(_session))
-} else {
-    //if session exists, loads from sessStor
-    globalThis._session = JSON.parse(sessionStorage.getItem("_session"))
+    let x = {name:'mutita'}
+    cipher = await xdev.enc(x, pk)
+    console.log(cipher)
+
+    deci = await xdev.dec(cipher, pk)
+    console.log(deci)
 }
-*/ 
-
-
-function test() {
-  //rewrite the xuid
-  let init = Date.now() //this code will make sure that we won't dupplicate with the previouse code
-  let xuid = Date.now()
-  while (xuid==init) {
-    xuid = Date.now()
-  } 
-  console.log(xuid) //so code2 is the real xuid
-}//work
-
-
-
-
-
 
 
 
@@ -98,5 +70,6 @@ function test() {
 </html>
 
 <!--this file is at: /simpleApp/webSite/index.html 
-for testing GET method
+for testing GET method 
+.
 -->

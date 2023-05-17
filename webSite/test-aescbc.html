@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>test AES-CBC</h1>
+
+
+<script>
+
+//message
+const encoder = new TextEncoder()
+var msg = encoder.encode('this is text to be encrypted')
+console.log('msg:', msg)
+
+//iv
+const iv = window.crypto.getRandomValues(new Uint8Array(12))
+console.log(
+  'iv:', 
+  buffer2base64(iv) 
+)
+
+//gen key
+window.crypto.subtle.generateKey(
+  { name:'AES-GCM', length:256},
+  true,
+  ['encrypt','decrypt']
+).then(key => {
+  console.log('key:', key)
+
+  //export key
+  window.crypto.subtle.exportKey('raw',key).then(
+    x => {
+      exportedKeyBuffer = new Uint8Array(x)
+      console.log('key exported:',
+        buffer2base64(exportedKeyBuffer)
+      )
+    }
+  )
+
+
+  //encrypt
+  window.crypto.subtle.encrypt(
+    {name:'AES-GCM', iv:iv},
+    key,
+    msg
+  ).then(cipher => {
+    let output = buffer2base64(cipher)
+    
+
+    console.log('output:', output)
+  })
+
+
+} )
+
+
+function buffer2base64(buffer) {
+  return btoa(
+    String.fromCharCode.apply(null, new Uint8Array(buffer))
+  )
+}
+
+
+
+
+</script>
+</body>
+</html>

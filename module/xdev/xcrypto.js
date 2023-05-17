@@ -22,6 +22,7 @@ USE
 
 const crypto = require('crypto')
 
+//1-------------------------------------------------------
 function hash(words,algor='sha256',outputFormat='hex') {
   //algor : md5 | sha1 | sha256 | sha512
 
@@ -35,6 +36,7 @@ function hash(words,algor='sha256',outputFormat='hex') {
 }//M:ok 2023-4-22
 
 
+//2----------------------------------------------------------
 function hmac(words,key,algor='sha256',outputFormat='hex') {
   if (!algor) algor = defaultHashAlgor
   if (!outputFormat) outputFormat = defaultOutputFormat 
@@ -45,6 +47,7 @@ function hmac(words,key,algor='sha256',outputFormat='hex') {
 }//ok 20230422
 
 
+//3-----------------------------------------------
 function random(bytes=16, outputFormat='hex') {
   const buf = crypto.randomBytes(bytes)
   //console.log(buf.toString('hex'))
@@ -52,36 +55,43 @@ function random(bytes=16, outputFormat='hex') {
 }//ok 20230422
 
 
-async function encrypt(words,userKey,salt,algor='aes-256-cbc',outputFormat='base64') {
-  if (!salt) salt = Date.now()
-  const securedKey = crypto.scryptSync(userKey,salt,32)
-  //console.log(key2)
-  //const iv = Buffer.alloc(16,0)
-  const iv = random(8)
+//4-----------------------------------------------------------
+async function encrypt( msg, key) {
+  
+  let msg_ = Buffer.from(msg)
+  let iv = crypto.randomBytes(12)
+  let key_ = Buffer.from(key,'hex')
+  
+  let cx = crypto.createCipheriv('aes-256-gcm', key_, iv)
 
-  const cipher = crypto.createCipheriv(algor,securedKey,iv)
-  let cipherText = cipher.update(words,'utf8',outputFormat)
-  cipherText += cipher.final(outputFormat)
+  let cx_ = Buffer.concat(
+    [iv, cx.update(msg_), cx.final(), cx.getAuthTag()]
+    //iv + msgx + tag
+  )
 
-  return {
-    cipherText: cipherText,
-    key: securedKey.toString('hex'),
-    salt: salt,
-    iv: iv,
-    algorithm: algor, 
-  }
-}//ok 20230422
+  return cx_.toString('base64')
+}
 
 
-async function decrypt(cipherText,securedKey,iv,algor='aes-256-cbc',inputFormat='base64') {
-  key = Buffer.from(securedKey,'hex')
-  const decipher = crypto.createDecipheriv(algor,key,iv)
-  let words = decipher.update(cipherText,inputFormat,'utf8')
-  words += decipher.final('utf8')
-  return words
-}//ok 20230422
+//5----------------------------------------------------------
+async function decrypt(cx, key) {
+  
+  let cx_ = Buffer.from(cx,'base64')
+  let iv_ = cx_.subarray(0,12)
+  let tag_ = cx_.subarray(cx_.length - 16)
+  let msgx_ = cx_.subarray(12, cx_.length - 16)
+
+  let key_ = Buffer.from(key,'hex')
+  let msg_ = crypto.createDecipheriv('aes-256-gcm', key_, iv_)
+  msg_.setAuthTag(tag_)
+
+  return msg_.update(msgx_,'binary','utf8') + msg_.final('utf8')
+}
 
 
+
+
+//6--------------------------------------------
 async function genKeys() {
   const keysPair = crypto.generateKeyPairSync(
     'rsa',
@@ -103,6 +113,7 @@ async function genKeys() {
 }//ok 20230422
 
 
+//7-----------------------------------------------------------
 async function keyEncrypt(msg,pubKey,outputFormat='base64') {
   const encryptedMsg = crypto.publicEncrypt(
     pubKey,
@@ -112,7 +123,7 @@ async function keyEncrypt(msg,pubKey,outputFormat='base64') {
 }//ok 20230422
 
 
-
+//8-------------------------------------------------------------
 async function keyDecrypt(encMsg,priKey,inputFormat='base64') {
   const decryptedMsg = crypto.privateDecrypt(
     priKey,
@@ -122,6 +133,7 @@ async function keyDecrypt(encMsg,priKey,inputFormat='base64') {
 }//ok 20230422
 
 
+//9-------------------------------------------------
 async function sign(msg,priKey) {
   const signer = crypto.createSign('RSA-SHA256')
   signer.update(msg)
@@ -130,6 +142,8 @@ async function sign(msg,priKey) {
   return signature
 }//m,ok 20230424
 
+
+//10---------------------------------------------------
 async function verify(msg,signature,pubKey) {
   const verifier = crypto.createVerify('SHA256')
   verifier.update(msg)
@@ -140,7 +154,7 @@ async function verify(msg,signature,pubKey) {
 
 
 
-
+//11--------------------------------------------------
 function convert(source,fromFormat,toFormat) {
   const buff = Buffer.from(source, fromFormat)
   return buff.toString(toFormat)
@@ -154,39 +168,6 @@ function convert(source,fromFormat,toFormat) {
 }
 
 
-async function gcmEnc(words, userKey) {
-  const iv = crypto.randomBytes(16)
-  const salt = crypto.randomBytes(64)
-  const key = crypto.pbkdf2Sync(userKey, salt, 2145, 32, 'sha512')
-  const cipher = crypto.createCipheriv('aes-256-gcm',key,iv)
-  const enc = Buffer.concat([cipher.update(words,'utf8'), cipher.final()])
-  const tag = cipher.getAuthTag()
-  
-  return Buffer.concat([salt,iv,tag,enc]).toString('base64')
-}//ok, m/20230513
-
-async function gcmDec(cipher, userKey) {
-  const buffer = Buffer.from(cipher, 'base64')
-  const salt = buffer.slice(0,64) //64 char
-  const iv = buffer.slice(64,80) //16 char
-  const tag = buffer.slice(80,96) // 16 char
-  const msg_ = buffer.slice(96) 
-
-  const key = crypto.pbkdf2Sync(userKey,salt,2145,32,'sha512')
-  const decipher = crypto.createDecipheriv('aes-256-gcm',key,iv)
-  decipher.setAuthTag(tag)
-
-  return decipher.update(msg_,'binary','utf8') + decipher.final('utf8')
-}//ok, m/20230513
-
-
-
-
-
-
-
-
-
 //exports
 /*exports.hash = hash
 exports.hmac = hmac 
@@ -195,13 +176,10 @@ exports.encrypt = encrypt
 exports.decrypt = decrypt
 */
 
-module.exports = {hash, hmac, random, encrypt, decrypt, genKeys, keyEncrypt, keyDecrypt, sign, verify, convert, gcmEnc, gcmDec}
+module.exports = {hash, hmac, random, encrypt, decrypt, genKeys, keyEncrypt, keyDecrypt, sign, verify, convert}
 
 /*
 jwt will not make in xcrypto as it is simple enough to be used for the xdev
 
 m, all tested ok 20230424
-
-
-added gcmEnc & gcmDec for testing AES-GCM mode, ok
 */

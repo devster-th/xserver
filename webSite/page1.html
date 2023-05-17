@@ -9,15 +9,15 @@
 <style></style>
 
 <!--load scripts here-->
-<script src="/deeji/xev2.js"></script>
-<script src="/deeji/deeji2.js"></script>
-<script src="/deeji/xlib.js"></script>
+<script src="/_xbrowser/module/xdev/xdev_b.js"></script>
+<script src="/_xbrowser/core_b.js"></script>
+
 
 </head>
 <body class="w3-container">
 <h1>page1/Post form</h1>
 <p>put the form data here</p>
-<form id="formAbc" name="formAbc">
+<form id="form100" name="form100">
     <p>name <input name="name" type="text" value="mutita">
     <br>age <input name="age" type="number" value="54">
     <br>sex <input type="radio" name="sex" value="female">female <input type="radio" name="sex" value="male">male
@@ -27,9 +27,12 @@
 </form>
 
 <button 
-onclick="xev({  sendForm:formAbc    })
-            ">Send</button><br><br>
-<!-- @deeji will read the form data automatically -->
+onclick="core.formProc('#form100')"
+>Send</button><br><br>
+
+
+
+
 <a href="index.html">homepage</a>
 
 

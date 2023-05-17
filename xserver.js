@@ -10,27 +10,33 @@ changed name to deeji.js -- 2022-10-12
 
 // 1 - init ////////////////////////////////////////////////////
 
-global.XSERVER = {
-                appName:  "xserver",
-                version:  "0.1",
-                startTime: new Date(),
-                domain:   "localhost",
-                port:     2000,
-                //mongoUrl: "mongodb://localhost:27017/",
-                //codeGen: {lastXuid: 0, prefix:"deeji-"}
-            }
+global._xserver = {
+  appName:  "xserver",
+  version:  "0.1",
+  startTime: Date.now(),
+  domain:   "localhost",
+  port:     2000,
+  security:{
+    salt: 'mutita',
+    serverid:'',
+    key: 'c40b93b2dfb61810e5ad22d132de54b7e718d10f66a8f523379826de95dbadf1'
+  }
+}
     
 //load module
-const express   = require("express")
-const app       = express()
-const core      = require("./core.js")
-//const xdev      = require('./module/xdev/xdev.js') 
+const express = require("express")
+const app     = express()
+global.core   = require("./core.js")
+global.xdev   = require('./module/xdev/xdev.js')
+global.sales = require('./module/sales/sales.js')
+
 
 //setting
 app.use(express.static("webSite"))
 app.use(express.json())
-//let mongoUrl = "mongodb://localhost:27017/"
 
+//else
+_xserver.serverid = xdev.random()
 
 
 
@@ -72,13 +78,58 @@ app.post("/post_", (req,resp)=> {
     //console.log(req.method)
     //console.log(req.body)
 
+    //1) verifying the msg here: check if the 'cert' correct
+    console.log('\n//xserver(), msg from caller:', req.body)
+    let cert = req.body.cert
+    delete req.body.cert
     
+    let ver = xdev.sha256(
+      JSON.stringify(req.body) + _xserver.security.salt
+    )
+    
+    console.log(
+      `\n//xserver(), ver result: ${cert==ver? true : false}`
+    )
 
-    //pass input to cor.e(method,inputData)
-    core.$(req.body, 'post')
+    //2) after verify the msg , xserver() may return a response
+    let wrap = {
+      from:'xserver()',
+      msg:'OK, your msg is verified and being computed.',
+      time: Date.now()
+    }
+
+    wrap.cert = xdev.sha256(
+      JSON.stringify(wrap) + _xserver.security.salt
+    )
+
+    console.log(
+      '\n//xserver(), respond this back to caller:',
+      wrap
+    )
+    
+    resp.json(wrap)
+
+
+
+    //3) pass input to core()
+    core.$(
+      { id: req.body.id,
+        from: req.body.from,
+        for: req.body.for,
+        seal: req.body.seal }, //req.body,
+      //'post'
+    ).then( moduleRe => {
+      //the module responses to the request here
+
+      console.log(
+        '\n//xserver(), this is reply from core():\n',
+        moduleRe
+      )
+      //resp.json(re) this is msg from core()
+    })
 
     //just send message 'thank you' for now
-    resp.json({ note:"@xserver : received data at " + Date() })
+    //resp.json({ msg:"@xserver : received data at " + Date() })
 
 })
 
@@ -86,26 +137,31 @@ app.post("/post_", (req,resp)=> {
 
 
 // 4 - listen /////////////////////////////////////////////////
-app.listen(XSERVER.port, ()=>{
-    console.log("////////////////////////////////////")
-    console.log(`${XSERVER.startTime} -- ${XSERVER.appName} starts on port: ${XSERVER.port}`)
-    console.log('...This is a tiny server trying to do little things, and makes things minimal and may be used to be a model, for something bigger. -- @mutita v0.2 / Sep 30, 2022')
-    console.log("@xserver is ready...")
-    //cor.e()
-    testScript()
+app.listen(_xserver.port, ()=>{
+    console.log("//////////////////////////////////////////////////////////////////////")
+    console.log(
+`@${_xserver.appName} starts at http://localhost:${_xserver.port}
+${new Date()}\n`
+    )
+
+    console.log('Brief: This is a tiny server trying to do little things, and makes things minimal and may be used to be a model, for something bigger. \n-- @mutita v0.2 / Sep 30, 2022\n')
+    
+    console.log("@xserver is ready...\n")
+    
+    //testScript()
     
 })
 
 
 
 // 5 - child functions ///////////////////////////////////////
-function log_(x) {
-  console.log(x)
+
+function xrespond(m) {
+  //this for xserver() to respond to all request; must use this f all the time
+
+  
 }
 
-function convertToX(input_) {//input_ is string
-  return eval("obj =" + input_)
-}
 
 
 // 6 - test //////////////////////////////////////////////////
@@ -113,29 +169,24 @@ function testScript() {
 
 //put all test command here
 
+let msg = JSON.stringify(
+  {name:'mutita',ag:55,sex:'male'}
+) 
+let key = xdev.random()
+let salt = xdev.random()
+console.log('key: '+key, '\nsalt: '+salt)
+let seal = xdev.$({encrypt:msg,userKey:key, salt:salt}).then(seal => {
+  console.log(seal)
 
-  /*
-  xde.v({ act:"find mongo", data:{}, 
-            dbName:"test100", collecName:"people"})
+  xdev.$({decrypt:seal.cipherText, secureKey:seal.key, iv:seal.iv}).then( text => console.log(text))
+} 
 
-  //xde.v({act:"find xdb", data:{price:">500"}, in:"goods"})
-  xde.v({ act:"edit xdb", find:{name:"noodle"}, 
-          edit:{review:"best one"}, in:"goods"    })
 
-  xde.v({ act:"find xdb", data:"*", in:"goods" })
-  */              
+)
 
-  //xde.v({act:"read file", fileName:"xdb.json", convert:"toObject"})
 
-  //xd.b({find:"*",in:"people"})
-  core.$("test")
-  core.$({act:'do something',data:'yeeeeeeeeee'}) //for core.js
-    
-  core.$({ //for sales.js
-      act:'run sales module',
-      module:'sales',
-      data:{name:'john',age:23}
-    })
+
+
 }
 
 

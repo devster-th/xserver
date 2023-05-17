@@ -1,24 +1,15 @@
 //core.js
 /*this is core of the app level programs. Any people can dev module.js and then include into this core.js then core.js can pass data to the module.js */
 
-global.core = {
-  moduleName: 'core',
-  version: '0.1',
-  started: new Date,
-  message() {
-    console.log('this is core module 0.1')
-  }
-}
 
-const xdev = require("./module/xdev/xdev.js")
-const sales = require('./module/sales/sales.js')
+
 
 
 
 //sales.$(core,'this is from core')
 
 //the cor.e() takes 2 para, method_ & data_ 
-exports.$ = function (x,metho) {
+exports.$ = async function (x,metho) {
   //get input from deeji.js 
   // inpu = input that deeji.js sends
   // metho = fetch method, e.g., post, get, if skip default is 'post'
@@ -42,8 +33,10 @@ exports.$ = function (x,metho) {
     })*/
     console.log('//core.js test simple things like show global v, call xdev.js' )
     console.log(XSERVER)
-    xdev.$('test')
 
+    console.log('//core:test xdev',
+      xdev.random()
+    )
     /*
     xfile.$({create:'test.txt'}).then(
       xfile.$({write:'test.txt',content:'this is a test file'})
@@ -68,14 +61,35 @@ exports.$ = function (x,metho) {
     */
   
   } else if (!x.module) {
-    console.log('//core.js')
+
+    //1) get & check msg
+    console.log('\n//core(), msg from xserver():')
     console.log(x)
+
+
+    //2) work on the msg here ...
+    let msg = await xdev.$({
+      decrypt: x.seal, 
+      key: _xserver.security.key
+    })
+
+    console.log('\n//core/unseal the msgAction:')
+    console.log(msg)
+
+    //3) then return something back to the caller
+    return {
+      from:'core()',
+      msg:`OK, your request #${x.id} is computed.`,
+    }
 
   } else if (x.module) {
     //pass data to the module
     console.log('//core.js')
     console.log(x)
-    eval(`${x.module}.$(x.data)`)
+    eval(`${x.module}.$(x.data)`) //sales.$(x.data)
+  
+  } else if (x=='message') {
+    console.log('\nyo! this is a message from core.js')
   }
 
 

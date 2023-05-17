@@ -162,9 +162,6 @@ function updates(value,query,colName,dbName) {
   })
 }//m,ok
 
-
-
-
 module.exports = {newDb, newCol, inserts, find, updates}
 
 

@@ -4,18 +4,18 @@
 
 exports.$ = function (x) {
 
-  console.log('//sales.js')
+  console.log('//sales.js test accessing XSERVER')
   console.log(XSERVER)
 
   console.log('//sales.js: got this data = ')
   console.log(x)
 
   console.log('//sales.js calls on core.message:')
-  core.message()
+  core.$({msg:'this is message from sales.js'})
   
-
-  //test calling core
-  //core.$('calling from sales module')
+  console.log('//sales: call xdev:',
+    xdev.random()
+  )
 
 
 

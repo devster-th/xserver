@@ -1,10 +1,11 @@
 //test.js
 /* m, completed test 20230424, all ok */
 
+const crypto = require('crypto')
 const xcrypto = require('./xcrypto')
 const jwt = require('jsonwebtoken')
 const xfile = require('./xfile.js')
-
+/*
 const priKey = `-----BEGIN RSA PRIVATE KEY-----
 MIIEogIBAAKCAQEAiQaqr4X6JWVF5dCUEu9QJX93OyLkXBng+4CZ8k2zlvBEMSrv6axbwf0Z
 42ru8AdWIdb6kD0ivcPTPV+upcR2oXVUICt33qymwhM0qil2c4lHNOxUYzVeIQQt6xUM3ZAb
@@ -58,8 +59,11 @@ let serverid = xcrypto.hash(
   xcrypto.random() + Date.now(),
   'md5'
 )
-
+*/
 let data = {name:'mutita',age:55,sex:'male',country:'thailand'}
+
+
+/*
 let xdata = jwt.sign(data,key)
 xfile.write('jwtToken.txt',xdata)
 let time = Date.now()
@@ -92,39 +96,49 @@ console.log(
   jwt.verify(x.data,key, (err,data) => {
     return data? data: false 
   })
-)
+)*/
 
 //symetric
+
 xcrypto.encrypt(
   JSON.stringify(data),
   'thisismykey', //userKey
-  xcrypto.random() //this is salt
+  xcrypto.random(), //this is salt
+  'aes-256-cbc'
+
 ).then(out => {
   console.log('//sysmetric encrypted:')
-  console.log(out)
+  console.log(out, out.length)
 
   xcrypto.decrypt(
     out.cipherText,
     out.key,
     out.iv,
+    'aes-256-cbc'
+
   ).then(text => console.log(
     '//symetric decrypt:', text
   ))
 
 })
+/**
+ * cbc works, gcm not works m/20230513
+ */
 
+
+/*
 // keys
 let keysPair
 xcrypto.genKeys().then(k => {
   keysPair = k
   console.log('//keys test')
-  console.log(k)
+  console.log(k)  /*
   xfile.write('pubKeyRsa.pem', keysPair.publicKey)
   xfile.write('priKeyRsa.pem', keysPair.privateKey)
-
+*/
   //key
-  let jdata = JSON.stringify(data)
-
+  //let jdata = JSON.stringify(data)
+/*
   xcrypto.keyEncrypt(jdata, k.publicKey)
   .then(ct => {
     console.log('//key encrypt:')
@@ -136,7 +150,10 @@ xcrypto.genKeys().then(k => {
     })
   })
 
+*/
 
+
+/*
   //sign & ver
   xcrypto.sign(jdata,k.privateKey).then(sig => {
     console.log('//signature:')
@@ -147,17 +164,109 @@ xcrypto.genKeys().then(k => {
     xcrypto.verify(jdata, sig, k.publicKey).then(out => 
       console.log('//verify output:', out))
   })
+*/
 
 
-
-})
+//})
 
 
 // conversion
-
+/*
 let words = 'this is thailand'
 let hex = xcrypto.convert(words,'utf8','hex')
 let b64 = xcrypto.convert(hex,'hex','base64')
 let back = xcrypto.convert(b64,'base64','utf8')
 console.log('//conversion:')
 console.log(words +'\n'+ hex +'\n' + b64 +'\n' + back)
+
+*/
+
+
+
+/* test GCM = ok, m/20230513
+
+let msg = JSON.stringify(
+  {name:'mutita',age:55,sex:'male',living:'nakorn pathom, thailand'}
+)
+
+let key = xcrypto.hash('mutita')
+console.log(key, key.length)
+
+xcrypto.gcmEnc(msg,key).then(
+  cipher => {
+    console.log(cipher, cipher.length)
+
+    xcrypto.gcmDec(cipher, key).then(
+      msg => console.log(msg)
+    )
+  } 
+)
+*/
+//ok, m/
+
+
+
+
+/* test GCM 2 = ok, m/20230513
+
+
+let msg = JSON.stringify(
+  { name:'mutita',
+    age:55,
+    sex:'male',
+    living:'nakorn pathom, thailand',
+    career:'advisor'
+  }
+)
+
+
+let key = xcrypto.random(32)
+let iv = xcrypto.random()
+
+let key_ = Buffer.from(key, 'hex')
+console.log('key: ', key)
+let iv_ = Buffer.from(iv, 'hex')
+let tagLength = 16
+
+let msg_ = Buffer.from(msg, 'utf-8')
+
+let cipher = crypto.createCipheriv(
+  'aes-256-gcm', 
+  key_, 
+  iv_, 
+  tagLength
+)
+
+let cipher_ = Buffer.concat(
+  [ cipher.update(msg_),
+    cipher.final(),
+    cipher.getAuthTag()
+  ]
+)
+
+console.log('cipher: ', cipher_.toString('base64'))
+
+
+// decrypt
+
+let cipher2 = cipher_.slice(0, cipher_.length - tagLength)
+let authTag = cipher_.slice(cipher_.length - tagLength, cipher_.length)
+
+let decipher = crypto.createDecipheriv(
+  'aes-256-gcm',
+  key_,
+  iv_,
+  tagLength
+)
+
+decipher.setAuthTag(authTag)
+
+let decipher_ = Buffer.concat(
+  [ decipher.update(cipher2),
+    decipher.final()
+  ]
+)
+
+console.log('decipher: ', decipher_.toString('utf-8'))
+
+*/

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * {font-family: sans-serif;}
+  h3 {font-style: italic; color:darkslateblue}
+  code {color:brown}
+  textarea {color:brown; width:100%}
+</style>
+</head>
+<body>
+<h1>xdev guide</h1>
+<ol>
+  <li><a href="#brief">Brief & How to use</a></li>
+  <hr>
+  <span><b>Quick tools</b></span>
+  <li><a href="#quick_random">xdev.random()</a></li>
+  <li><a href="#uuidx">xdev.uuidx()</a></li>
+  <li><a href="#quick_md5">xdev.md5('words')</a></li>
+  <li><a href="#quick_sha">xdev.sha256('words')</a></li>
+  <li><a href="#quick_genkeys">xdev.genKeys()</a></li>
+  <li><a href="#quick_readf">xdev.readF('fileName')</a></li>
+  <li><a href="#quick_hasf">xdev.hasF('fileName')</a></li>
+  <li><a href="#quick_deletef">xdev.deleteF('fileName')</a></li>
+  <li><a href="#quick_jsonf">xdev.jsonf()</a></li>
+  <hr>
+  <span><b>Crypto & coding</b></span>
+  <li>xdev.$({hash:'words', ...})</li>
+  <li>xdev.$({hmac:'words', ...})</li>
+  <li>xdev.$({random:16, ...})</li>
+  <li>xdev.$({encrypt:'words', ...})</li>
+  <li>xdev.$({decrypt:'cipher', ...})</li>
+  <li>xdev.$({genKeys:'rsa', ...})</li>
+  <span>--</span>
+  <li>xdev.$({keyEncrypt:'words', ...})</li>
+  <li>xdev.$({keyDecrypt:'cipher', ...})</li>
+  <li>xdev.$({sign:'words', ...})</li>
+  <li>xdev.$({verify:'signature', ...})</li>
+  <li>xdev.$({jwtSign:'data', ...})</li>
+  <li>xdev.$({jwtVerify:'jwtToken', ...})</li>
+  <li>xdev.$({convert:'chars', ...})</li>
+  <hr>
+  <span><b>MongoDB</b></span>
+  <li>xdev.$({newDb:'db name', ...})</li>
+  <li>xdev.$({newCol:'collection name', ...})</li>
+  <li>xdev.$({dbInsert:{...}, ...})</li>
+  <li>xdev.$({dbUpdate:{...}, ...})</li>
+  <li>xdev.$({dbFind:{query}, ...})</li>
+  <li>xdev.$({dbUpdate:{key:value}, ...})</li>
+  <hr>
+  <span><b>File handling</b></span>
+  <li>xdev.$({fileWrite:'content', ...})</li>
+  <li>xdev.$({fileAppend:'content', ...})</li>
+  <li>xdev.$({readFile:'file name' })</li>
+  <li>xdev.$({renameFile:'old name', to:'new name'})</li>
+  <li>xdev.$({deleteFile:'file name'})</li>
+  <li>xdev.$({fileExist:'file name'})</li>
+</ol>
+
+<h3 id="brief">Brief & How to use</h3>
+<p>The 'xdev' comes from x = object and dev = development or software dev. It aims to make the software dev more easier. We try to use object (or 'x') as a language and hope it will make life easier, such as: <code>{send:'this', to:'john'}</code></p>
+
+<p>To use it, just include it in the node.js program and use it:</p>
+<textarea rows="5">
+const xdev = require('./xdev.js')
+
+xdev.$({...}).then( ... )
+const key = xdev.random()
+</textarea>
+
+<p>xdev has 3 parts, the crypto, the mongo and the file handling. There're some quick functions that need less parameters we put in quick tools.</p>
+
+<p>There're files in the package, they must go together:</p>
+<ol>
+  <li>xdev.js</li>
+  <li>xfile.js</li>
+  <li>xmongo.js</li>
+  <li>xcrypto.js</li>
+  <li>xdev-guide.html</li>
+</ol>
+
+<p>This has no license, feel free to use. Contact <a href="mailto:mutita.org@gmail.com">mutita.org@gmail.com</a> for any issue.</p>
+
+<hr>
+
+<h3 id="quick_random">xdev.random()</h3>
+<p>This function returns 16 bytes random in hex format, 32 digits.</p>
+<textarea>
+const key = xdev.random()  
+//a7f2cb6feefa28cb2b18cb1d5c7041b7
+</textarea>
+
+<hr>
+
+<h3 id="uuidx">xdev.uuidx()</h3>
+<p>Generates a universal unique id in the 'x style'. The x style UUID is just a simple js timestamp but it never dup;icated.</p>
+<textarea>
+let key = xdev.uuidx()
+//'1683176379320' ...string type not number
+</textarea>
+
+
+<hr>
+
+<h3 id="quick_md5">xdev.md5('words')</h3>
+<p>Returns MD5 hex from the 'words' we put in.</p>
+<textarea>
+const hash = xdev.md5('this is the words to be hashed in MD5.')
+</textarea>
+
+<hr>
+
+<h3 id="quick_sha">xdev.sha256('words')</h3>
+<p>Returns SHA-256 in hex codes, 64 digits.</p>
+<textarea>
+const hash = xdev.sha256('this is my words to be hashed')
+</textarea>
+
+<hr>
+
+<h3 id="quick_genkeys">xdev.genKeys()</h3>
+<p>Generates RSA keypair, modulus length 4096, pubKey encoding type = spki, priKey encoding type = pkcs8 and both keys are in PEM format.</p>
+<textarea>
+xdev.genKeys().then(keys => ...)
+// {privateKey:*******, publicKey:********}
+</textarea>
+
+
+<hr>
+
+<h3 id="quick_readf">xdev.readF('file name')</h3>
+<p>Reads text file.</p>
+<textarea>
+xdev.readF('name.json').then(content => ...)
+</textarea>
+
+
+<hr>
+
+<h3 id="quick_hasf">xdev.hasF('file name')</h3>
+<p>Checks if the file existed.</p>
+<textarea>
+xdev.hasF('file name').then(result => ...)
+</textarea>
+
+
+<hr>
+
+<h3 id="quick_deletef">xdev.deleteF('file name')</h3>
+<p>Deletes a file.</p>
+<textarea>
+xdev.deleteF('filename.txt')
+</textarea>
+
+
+<hr>
+
+<h3 id="quick_jsonf">xdev.jsonf()</h3>
+<p>Save & read json file quickly. Example below, first line names the file to be saved. The 2nd line saves an object into the file. Third line reads the file and get the object to use. This kind of tool can help use manage json file like a database, simple/small database easily.</p>
+
+<p>The line 5 shows a simple way to read data from json file then find something from it. Just like a database work.</p>
+
+<textarea rows="16">
+//define a json file name 
+global._jsonf = file:'jsonf.json'
+
+//save object into it
+xdev.jsonf({name:'john', age:23, ...})
+
+//read file and gets object, then use it in program
+xdev.json().then(obj => ...)
+
+//sample of find a data from the object
+xdev.json().then(
+  obj => {
+    let find = obj.name.match(/jo/)
+    ...
+  }
+)
+</textarea>
+
+
+
+
+
+
+
+
+</body>
+</html>
