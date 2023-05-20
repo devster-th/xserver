@@ -23,7 +23,7 @@ USE
 const crypto = require('crypto')
 
 //1-------------------------------------------------------
-function hash(words,algor='sha256',outputFormat='hex') {
+async function hash(words,algor='sha256',outputFormat='hex') {
   //algor : md5 | sha1 | sha256 | sha512
 
   if (!algor) algor = defaultHashAlgor
@@ -37,7 +37,7 @@ function hash(words,algor='sha256',outputFormat='hex') {
 
 
 //2----------------------------------------------------------
-function hmac(words,key,algor='sha256',outputFormat='hex') {
+async function hmac(words,key,algor='sha256',outputFormat='hex') {
   if (!algor) algor = defaultHashAlgor
   if (!outputFormat) outputFormat = defaultOutputFormat 
   const hmac = crypto.createHmac(algor,key)
@@ -61,7 +61,7 @@ async function encrypt( msg, key) {
   let msg_ = Buffer.from(msg)
   let iv = crypto.randomBytes(12)
   let key_ = Buffer.from(key,'hex')
-  
+
   let cx = crypto.createCipheriv('aes-256-gcm', key_, iv)
 
   let cx_ = Buffer.concat(

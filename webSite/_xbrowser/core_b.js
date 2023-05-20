@@ -27,19 +27,17 @@ core.formProc = async function (formid) {
     core.security.key
   )
 
-  let msgWrap = { seal: msgSeal }
+  let msgWrap = { msg: msgSeal }
 
   msgWrap.id = xdev.uuidx() + '-' + xdev.random()          
   msgWrap.to = core.security.serverid //server id
   msgWrap.from = core.security.sessionid //session id
   msgWrap.subject = ''
-  msgWrap.for = xdev.uuid() //module id      
   msgWrap.note = ''
   msgWrap.time = Date.now()
   msgWrap.cert = await xdev.hash(
     JSON.stringify(msgWrap) + core.security.salt
   ) 
-
 
   xdev.send(msgWrap, core.security.serverUrl)
 

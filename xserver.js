@@ -87,9 +87,14 @@ app.post("/post_", (req,resp)=> {
       JSON.stringify(req.body) + _xserver.security.salt
     )
     
+    req.body.verified = cert==ver? true : false
+
     console.log(
-      `\n//xserver(), ver result: ${cert==ver? true : false}`
+      '\n//xserver(), ver result:', req.body.verified
     )
+
+    //if not verified, do something
+
 
     //2) after verify the msg , xserver() may return a response
     let wrap = {
@@ -111,14 +116,8 @@ app.post("/post_", (req,resp)=> {
 
 
 
-    //3) pass input to core()
-    core.$(
-      { id: req.body.id,
-        from: req.body.from,
-        for: req.body.for,
-        seal: req.body.seal }, //req.body,
-      //'post'
-    ).then( moduleRe => {
+    //3) pass input to core() or any module that set in the unwrap
+    core.$( req.body ).then( moduleRe => {
       //the module responses to the request here
 
       console.log(

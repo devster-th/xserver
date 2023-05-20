@@ -22,7 +22,7 @@ const jwt = require('jsonwebtoken')
 ///////////////////////////////////////
 
 
-function $(x) {
+async function $(x) {
 
   switch (Object.keys(x)[0]) {
 
@@ -42,22 +42,60 @@ function $(x) {
       break
       //m,ok 20230502
 
+    case 'verifyHash':
+      // await xdev.$({ verifyHash:'--hash--', msg:'--words--', key:'--key--'})
 
-    case 'random':
+      let hashFromMsg = await xsec.hmac(x.msg, x.key)
+      return x.verifyHash == hashFromMsg?true:false
+      break
+      //ok, m20230518
+
+
+    case 'xcert': //------------------------------------------
+      /**
+       * Certifies message usinng hash/sha256. The f does 2 things: 
+       * 1) sign: if we put the msg & key it knows that you're signing msg. 
+       * 2) verify: if we put msg, key and sig then it knows that you like to verify.
+       
+       USE
+        
+        xdev.$({
+          xcert:  '--msg/words--', 
+          key:    '--string/hex/base64--', 
+          sig:    '--hex--' 
+        })
+      
+      */
+
+      if (x.xcert && x.key && !x.sig) {
+        return sha256(x.xcert + x.key)
+
+      } else if (x.xcert && x.key && x.sig) {
+        let sig_ = await sha256(x.xcert + x.key)
+        return (sig_ == x.sig)? true:false
+
+      } else {
+        return 'xdev.xcert: wrong input'
+      }
+      break
+      //ok, m20230519
+
+
+    case 'random': //-----------------------------------
       // xdev.$({ random:16, format:'hex' })
       return xsec.random(x.byte, x.format)
       break
       //m,ok 20230502
 
     case 'encrypt':
-      // xdev.$({ encrypt:'words', userKey:  ,salt:   ,algor: ,format: })
+      // xdev.$({ encrypt:'--words--', key:'--hex--' })
       return xsec.encrypt(x.encrypt, x.key)
       break
       //m,ok 20230502
 
 
     case 'decrypt':
-      // xdev.$({ decrypt:'cipher', secureKey: ,iv: ,algor:'aes-256-cbc', format:'base64'})
+      // xdev.$({ decrypt:'--cipher--', key:'--hex--' })
       return xsec.decrypt(x.decrypt, x.key)
       break
       //m,ok 20230502
@@ -126,33 +164,33 @@ function $(x) {
     //----------- xmongo ------------------------------------
 
     case 'newDb':
-      // xdev.$({ newDb:'db name'})
+      // xdev.$({ newDb:'--db name--'})
       return xdb.newDb(x.newDb)
       break
       //m,ok
 
 
     case 'newCol':
-      // xdev.$({ newCol:'collection name', db:'db name' })
+      // xdev.$({ newCol:'--collection name--', db:'--db name--' })
       return xdb.newCol(x.newCol, x.db)
       break
       //m,ok
 
 
     case 'dbInsert':
-      // xdev.$({ dbInsert:{...}, col: ,db: }) ...insert 1 or many
+      // xdev.$({ dbInsert:{...}, col:'--', db:'--'}) ...insert 1 or many
       return xdb.inserts(x.dbInsert, x.col, x.db)
       break
       //m,ok
 
 
     case 'dbFind':
-      // xdev.$({ dbFind:{query}, col: ,db: })
+      // xdev.$({ dbFind:{--query--}, col:'--', db:'--'})
       return xdb.find(x.dbFind, x.col, x.db)
 
 
     case 'dbUpdate':
-      // xdev.$({ dbUpdate:{key:'value'}, query:{..}, col: ,db: })
+      // xdev.$({ dbUpdate:{--key--:--value--}, query:{..}, col: ,db: })
       return xdb.updates(x.dbUpdate, x.query, x.col, x.db)
 
 
@@ -197,7 +235,7 @@ function $(x) {
 //----------quick func---------------------------------
 
 function random() {
-  // xdev.random() ...rt 16bytes, hex random codes
+  // xdev.random() ...rt 16bytes(32 chars), hex random codes
   return xsec.random()
 }
 
@@ -206,12 +244,12 @@ async function genKeys() {
   return xsec.genKeys()
 }
 
-function sha256(words) {
+async function sha256(words) {
   // xdev.sha256('words') ...default sha256, hex
   return xsec.hash(words)
 }
 
-function md5(words) {
+async function md5(words) {
   // xdev.md5('words')
   return xsec.hash(words,'md5')
 }

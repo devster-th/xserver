@@ -59,7 +59,7 @@ exports.$ = async function (x,metho) {
       })
     )
     */
-  
+  //--------------------------------------------------------
   } else if (!x.module) {
 
     //1) get & check msg
@@ -69,12 +69,13 @@ exports.$ = async function (x,metho) {
 
     //2) work on the msg here ...
     let msg = await xdev.$({
-      decrypt: x.seal, 
+      decrypt: x.msg, 
       key: _xserver.security.key
     })
 
     console.log('\n//core/unseal the msgAction:')
     console.log(msg)
+
 
     //3) then return something back to the caller
     return {
@@ -82,6 +83,7 @@ exports.$ = async function (x,metho) {
       msg:`OK, your request #${x.id} is computed.`,
     }
 
+    //------------------------------------------------------
   } else if (x.module) {
     //pass data to the module
     console.log('//core.js')

@@ -8,6 +8,58 @@ const xdev = {
 }
 
 
+// the $ interface
+xdev.$ = async function(x) {
+
+  switch (Object.keys(x)[0]) {
+
+    case 'xcert':
+      /**
+       * xdev.$({xcert:--msg--, key:--key--, sig:--sig-- })
+       * to sign just put msg & key
+       * to verify put all the msg, key and signature
+       */
+
+      if (x.xcert && x.key && !x.sig) {
+        //sign
+        return xdev.xcert(x.xcert, x.key)
+
+      } else if (x.xcert && x.key && x.sig) {
+        //verify
+        return xdev.xcert(x.xcert, x.key, x.sig)
+      
+      } else {
+        return 'ERROR: wrong input'
+      }
+
+      break
+      //ok, m20230519
+
+
+    case 'genKey':
+
+      if (x.genKey == 'aes') {
+        return xdev.genKey()
+      }
+
+      break
+
+
+    case 'encrypt':
+      return xdev.encrypt(x.encrypt, x.key)
+      break
+
+
+    case 'decrypt':
+      return xdev.decrypt(x.decrypt, x.key)
+      break
+
+      
+  }
+}
+
+
+
 
 //-----------crypto-------------------------------------
 // default algor = AES-GCM
@@ -16,7 +68,7 @@ const xdev = {
 xdev.random = function () {
   //  xdev.random()
 
-  const arr = new Uint32Array(1)
+  const arr = new Uint32Array(1) //1
   return self.crypto.getRandomValues(arr)
 }//ok
 
@@ -78,7 +130,53 @@ xdev.hash = async function (words, algor=256) {
 }//ok
 
 
-//4-----------------------------------------
+
+//4-------------------------------------------------
+xdev.xcert = async function (msg, key, sig) {
+  /**
+   * Certifies message using hash/sha256. This f does 2 things (1) sign and (2) verify. If we put msg & key this is the sign, if we put msg, key & sig then this is verify
+   * 
+   * USE 
+   *      xdev.xcert('--words--','--key--','--signature--')
+   * 
+   * FORMAT
+   *      the sign returns hex of sha-256 (64 chars)
+   *      the verify returns true|false
+   */
+
+  if (msg && key && !sig) {
+    //sign
+    if (typeof msg != 'string' || typeof key != 'string') {
+      return 'ERROR: input type'
+    }
+
+    return xdev.hash(msg + key)
+  
+  } else if (msg && key && sig) {
+    //verify
+    if (typeof msg != 'string' || typeof key != 'string' || typeof sig != 'string') {
+      return 'ERROR: input type'
+    }
+
+    let _sig = await xdev.hash(msg + key)
+    return (_sig == sig)? true:false
+
+  } else {
+    return 'ERROR: wrong input'
+  }
+
+  //ok, m20230519
+}
+
+
+
+
+
+
+
+
+
+//5-----------------------------------------
 xdev.genKey = async function (algor='aes') {
   //  xdev.genKey('rsa'|'hmac'|'aes'|'ecdsa')
 
@@ -98,7 +196,9 @@ xdev.genKey = async function (algor='aes') {
 //HMAC    
   } else if (algor=='hmac') {
     const key = await window.crypto.subtle.generateKey(
-      { name:'HMAC', hash:{name:'SHA-256'} }, //256*|384|512 
+      { name:'HMAC', 
+        hash:{name:'SHA-256'} //256*|384|512
+      },  
       true,
       ['sign','verify']
     )//ok, get 1 key
@@ -110,7 +210,9 @@ xdev.genKey = async function (algor='aes') {
 //ECDSA    
   } else if (algor=='ecdsa') {
     return await crypto.subtle.generateKey(
-      { name:'ECDSA', namedCurve:'P-384' },
+      { name:'ECDSA', 
+        namedCurve:'P-384' 
+      },
       true,
       ['sign','verify']
     )//ok
@@ -119,7 +221,9 @@ xdev.genKey = async function (algor='aes') {
   } else if (algor=='aes') {
     //will use this as a default symmetric key
     const key = await crypto.subtle.generateKey(
-      { name:'AES-GCM', length:256 },
+      { name:'AES-GCM', 
+        length:256 
+      },
       true,
       ['encrypt','decrypt']
     )
@@ -133,6 +237,7 @@ xdev.genKey = async function (algor='aes') {
 }
 
 
+// internal use-----------------------------------
 function b64ToBuf(b64) {
   var bi = atob(b64)
   var len = bi.length
@@ -156,10 +261,11 @@ function hex2buf(hex) {
 }
 
 
-//5-----------------------------------------
+//6-----------------------------------------
 xdev.enc = async function ( msg, key) {
   return xdev.encrypt( msg, key)
 }//ok, make it a little bit shorter
+
 
 
 xdev.encrypt = async function( msg, key) {
@@ -264,7 +370,7 @@ xdev.encrypt = async function (msg, key, cert='', algor='aes') {
 //}*/
 
 
-//6-----------------------------------------
+//7-----------------------------------------
 xdev.buffer2hex = function (buffer) {
   //  xdev.buffer2hex(buffer) ...gets hex code
 
@@ -280,7 +386,7 @@ xdev.buffer2hex = function (buffer) {
 
 
 
-//7-----------------------------------------
+//8-----------------------------------------
 xdev.buffer2base64 = function (buffer) {
   //  xdev.buffer2base64(buffer) ...gets base64 codes
 
@@ -293,7 +399,7 @@ xdev.buffer2base64 = function (buffer) {
 
 
 
-//8-----------------------------------------
+//9-----------------------------------------
 xdev.base64ToBuffer = function (base64) {
   //  xdev.base64ToBuffer(base64) ...gets buffer
 
@@ -304,7 +410,7 @@ xdev.base64ToBuffer = function (base64) {
 
 
 
-//9-----------------------------------------
+//10-----------------------------------------
 xdev.buffer2utf8 = function (buffer) {
   //  xdev.buffer2utf8(buffer) ...gets utf8 codes
 
@@ -315,7 +421,13 @@ xdev.buffer2utf8 = function (buffer) {
 
 
 
-//10------------------------------------------------------
+
+
+
+
+
+
+//11------------------------------------------------------
 xdev.dec = async function (cx, key) {
   return xdev.decrypt(cx, key)
 }
@@ -434,7 +546,7 @@ xdev.decrypt = async function (seal, key, cert='', algor='aes') {
 
 
 
-//11-----------------------------------------
+//12-----------------------------------------
 xdev.exportKey = async function(key, format='aes') {
   //  xdev.exportKey(key, 'priKey'|'pubKey'|'raw')
   //  output is base64
@@ -462,7 +574,7 @@ xdev.exportKey = async function(key, format='aes') {
 
 
 
-//12-----------------------------------------
+//13-----------------------------------------
 xdev.importKey = async function(key,format='aes') {
   //  xdev.importKey(key || key,'pubKey'|'aes'|'raw')  
 
@@ -520,7 +632,7 @@ xdev.importKey = async function(key,format='aes') {
 }
 
 
-//13----------------------------------------------
+//14----------------------------------------------
 xdev.sign = async function (msg, key, algor='hmac') {
   // take HMAC is the defaul sign algorithm
 
@@ -562,7 +674,8 @@ xdev.sign = async function (msg, key, algor='hmac') {
       msg_
     )
 
-    return xdev.buffer2base64(buffer)
+    //return xdev.buffer2base64(buffer)
+    return xdev.buffer2hex(buffer)
     //ok
   }
   
@@ -570,7 +683,7 @@ xdev.sign = async function (msg, key, algor='hmac') {
 }
 
 
-//14-------------------------------------------------
+//15-------------------------------------------------
 xdev.verify = async function (msg, signature, key, algor='hmac') {
   // HMAC is default verify algor
   //const msg_ = new TextEncoder().encode(msg)
@@ -608,7 +721,8 @@ xdev.verify = async function (msg, signature, key, algor='hmac') {
     return await crypto.subtle.verify(
       'HMAC',
       key,
-      xdev.base64ToBuffer(signature),
+      //xdev.base64ToBuffer(signature),
+      hex2buf(signature),
       new TextEncoder().encode(msg)
     )
     //ok
@@ -617,7 +731,7 @@ xdev.verify = async function (msg, signature, key, algor='hmac') {
 }
 
 
-//15----------------------------------------------------------
+//16----------------------------------------------------------
 xdev.uuidx = function() {
   //gen special uuid which is simply a timestamp but no dup
   //to prevent dup, we take t2 not t1
@@ -627,14 +741,14 @@ xdev.uuidx = function() {
 }//ok
 
 
-//16---------------------------------------------
+//17---------------------------------------------
 xdev.utf8ToBuffer = function (msg) {
   return new TextEncoder().encode(msg)
 }//ok
 
 
 
-//17---------------------------------------------
+//18---------------------------------------------
 xdev.passKey = async function (passHash) {
   //generate AES-GCM key from a password, this key will be unexactable, and should be destroyed at unnecessarily.
 
@@ -667,7 +781,7 @@ xdev.passKey = async function (passHash) {
 
 
 
-//18----------------------------------------------
+//19----------------------------------------------
 xdev.promptKey = async function () {
   //gen an AES-GCM key from user prompt's password
 
@@ -679,8 +793,19 @@ xdev.promptKey = async function () {
 }//ok
 
 
+//20------------------------------------------------
+xdev.promptHash = async function () {
+  //prompt to get words and gen hash from it
 
-//19------------------------------------------------
+  return xdev.hash(
+    prompt('words:')
+  )
+}
+
+
+
+
+//21------------------------------------------------
 //randomW is a random code tha containing only a-zA-Z nothing else
 xdev.randomW = function (length=16) {
   //gen a js var style code contains only a-zA-Z
@@ -698,7 +823,7 @@ xdev.randomW = function (length=16) {
 
 
 
-//20--------------------------------------------
+//22--------------------------------------------
 xdev.password = function (length=12) {
   //gen random password from 92 characters
 
@@ -715,7 +840,7 @@ xdev.password = function (length=12) {
 
 
 
-//21---------------------------------------------
+//23---------------------------------------------
 xdev.vaultAdd = async function (x) {
   // x = {label:value, label2:..., } ...can put many key:value pairs
   //the output is at xdev.vault in base64 encrypted format
@@ -738,13 +863,18 @@ xdev.vaultAdd = async function (x) {
 
     if (!xdev.vault) {
       //firstly add
-      xdev.vault = await xdev.enc(x, await xdev.promptKey())
+      xdev.vault = await xdev.enc(
+        JSON.stringify(x), 
+        await xdev.promptHash()
+      )
 
     } else {
       //more add
 
-      let key = await xdev.promptKey()
-      let gold = await xdev.dec(xdev.vault, key)
+      let key = await xdev.promptHash()
+      let gold = JSON.parse(
+        await xdev.dec(xdev.vault, key)
+      ) 
 
       for (label in x) {
         if (label in gold) {
@@ -755,7 +885,10 @@ xdev.vaultAdd = async function (x) {
         }
       }
 
-      xdev.vault = await xdev.enc(gold, key)
+      xdev.vault = await xdev.enc(
+        JSON.stringify(gold), 
+        key
+      )
     }
 
     
@@ -768,14 +901,17 @@ xdev.vaultAdd = async function (x) {
 
       //firstly add
       xdev.vault = await xdev.enc(
-        x ,  
-        await xdev.promptKey()
+        JSON.stringify(x),  
+        await xdev.promptHash()
       )
 
     } else {
       //if vault already existed
-      let key = await xdev.promptKey()
-      let gold = await xdev.dec(xdev.vault, key)
+      let key = await xdev.promptHash()
+      
+      let gold = JSON.parse(
+        await xdev.dec(xdev.vault, key)
+      ) 
       let label = Object.keys(x)
 
       if (label in gold) {
@@ -785,7 +921,11 @@ xdev.vaultAdd = async function (x) {
       } else {
         //label not duplicated
         gold[label] = x[label]
-        xdev.vault = await xdev.enc(gold, key)
+
+        xdev.vault = await xdev.enc(
+          JSON.stringify(gold), 
+          key
+        )
       }
     }
   }
@@ -794,13 +934,18 @@ xdev.vaultAdd = async function (x) {
 
 
 
-//22----------------------------------------------
+//24----------------------------------------------
 xdev.vaultGet = async function (label) {
   //label is the key of the obj that saved in the vault
 
   if (!label || typeof label != 'string') return 'ERROR/vaultGet: invalid input'
 
-  let gold = await xdev.dec(xdev.vault, await xdev.promptKey())
+  let gold = JSON.parse(
+    await xdev.dec( 
+      xdev.vault, 
+      await xdev.promptHash()
+    )
+  ) 
   
   if (label in gold) {
     return gold[label]
@@ -819,7 +964,7 @@ m/20230509
 */
 
 
-//23----------------------------------------------
+//25----------------------------------------------
 /* if put {people: {...} }   the people is the collection
  */
 xdev.db = function (x) {
@@ -966,7 +1111,7 @@ xdev.db = function (x) {
 }
 
 
-//24--------------------------------------------------
+//26--------------------------------------------------
 xdev.atime = function (same='hour') {
 
   let t = new Date()
@@ -1015,7 +1160,7 @@ xdev.atime = function (same='hour') {
 
 
 
-//25--------------------------------------------------
+//27--------------------------------------------------
 xdev.acode = async function (t=24) {
 
   switch (t) {
@@ -1054,7 +1199,7 @@ xdev.acode = async function (t=24) {
 
 
 
-//26------------------------------------------
+//28------------------------------------------
 xdev.send = async function (wrap, urlToSendTo) {
   //seal the data and wrap it and send to the server
 
@@ -1096,7 +1241,7 @@ xdev.send = async function (wrap, urlToSendTo) {
 
 
 
-//-----------------------------------------------------
+//29-----------------------------------------------------
 xdev.readForm = function (formid) {
   // v0.5 --read form's input then return x of all filled data
 
