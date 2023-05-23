@@ -49,6 +49,10 @@ async function hmac(words,key,algor='sha256',outputFormat='hex') {
 
 //3-----------------------------------------------
 function random(bytes=16, outputFormat='hex') {
+  /**
+   * the default returns 32-hex
+   */
+
   const buf = crypto.randomBytes(bytes)
   //console.log(buf.toString('hex'))
   return buf.toString(outputFormat)
@@ -168,6 +172,14 @@ function convert(source,fromFormat,toFormat) {
 }
 
 
+//12--------------------------------------------------
+function randomInt(min=1000000000, max=10000000000) {
+  //the default makes 10 digits of int: 1000000000-9999999999
+  return crypto.randomInt(min, max)
+}
+
+
+
 //exports
 /*exports.hash = hash
 exports.hmac = hmac 
@@ -176,7 +188,7 @@ exports.encrypt = encrypt
 exports.decrypt = decrypt
 */
 
-module.exports = {hash, hmac, random, encrypt, decrypt, genKeys, keyEncrypt, keyDecrypt, sign, verify, convert}
+module.exports = {hash, hmac, random, encrypt, decrypt, genKeys, keyEncrypt, keyDecrypt, sign, verify, convert, randomInt}
 
 /*
 jwt will not make in xcrypto as it is simple enough to be used for the xdev

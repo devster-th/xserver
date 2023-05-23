@@ -4,8 +4,36 @@
 
 const xdev = {
   note: 'this is an object to work on browser side',
-  version: '0.5'
+  version: '0.5',
+  serverPostUrl: '/post_'
 }
+
+//data model
+
+class Wrap {
+  id = Date.now() + '-' + xdev.random()
+  to = ''
+  from = ''
+  subj = ''
+  msg = ''
+  note = ''
+  ref = ''
+  confidential = ''
+  time = Date.now()
+  cert = '' //--hex-- .....this will be added after cert
+  verified = '' //true|false .......added after verified
+
+  /**
+   * this is a data model for the message wrap used to send/receive among programs.
+   */
+}
+
+
+
+
+
+
+
 
 
 // the $ interface
@@ -1200,10 +1228,16 @@ xdev.acode = async function (t=24) {
 
 
 //28------------------------------------------
-xdev.send = async function (wrap, urlToSendTo) {
+xdev.send = async function (wrap, urlToSendTo=xdev.serverPostUrl) {
   //seal the data and wrap it and send to the server
 
-  xdev.send = {wrap: wrap}
+  //A - check server post url
+  if (urlToSendTo == '') {
+    return 'invalid input'
+  }
+
+  //B - ready & proceed
+  xdev._send = {wrap: wrap} //keep wrap for ref
 
   fetch(
     urlToSendTo,
@@ -1212,31 +1246,54 @@ xdev.send = async function (wrap, urlToSendTo) {
       headers: {'Content-Type':'application/json; charset=utf-8'},
       body: JSON.stringify(wrap)
     }
+  
   ).then( resp => {
     //console.log(resp) //resp obj
     return resp.json() //make it json
+  
   }).then( resp => {
     //work on the resp here
-    xdev.send.resp = resp
-    console.log(resp)
+    xdev._send.resp = resp
+    //console.log(resp)
 
     //verify the msg from xserver
-    let cert = resp.cert
-    delete resp.cert
+    if (resp.cert) {
+      //has certification
 
-    xdev.hash(
-      JSON.stringify(resp) + core.security.salt
+      let cert = resp.cert
+      resp.cert = ''
+  
+      xdev.$({
+        xcert: JSON.stringify(resp),
+        key: core.security.salt,
+        sig: cert
+      })
+  
+      .then(certified => {
+        xdev._send.resp.verified = certified
+        xdev._send.resp.cert = cert
+  
+        if (certified) {
+          //true
+  
+        } else {
+          //false
+        }
+  
+        console.log(
+          xdev._send.resp 
+        )
+      })
 
-      ).then(ver => {
-      let verified = (cert==ver)? true : false
-      xdev.send.resp.verified = verified
+    } else {
+      //has no cert
+      console.log('invalid message')
+    }
+    
 
-      console.log(
-        `verify result: ${verified}` 
-      )
-    })
 
   })
+
 }//ok /m 20230512 
 
 
@@ -1313,6 +1370,33 @@ xdev.readForm = function (formid) {
 
 
 }//ok, m/20230512
+
+
+//30-----------------------------------------
+xdev.jsonify = function (x) {
+  /**
+   * make little shorter of the JSON.stringify()
+   */
+
+  return JSON.stringify(x)
+}
+
+
+//31-----------------------------------------
+xdev.parseJson = function (json) {
+  /**
+   * little shorter JSON.parse()
+   */
+
+  return JSON.parse(json)
+}
+
+
+
+
+
+
+
 
 
 

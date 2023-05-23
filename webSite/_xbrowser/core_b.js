@@ -7,19 +7,20 @@ globalThis.core = {
   worksOn: 'browser side',
   coder: '@mutita',
   security: {
-    serverid: xdev.uuid(),
+    serverid: '35af4272-c5c2-48c7-8a37-6ed1a703a3f6',
     sessionid: xdev.uuid(),
-    salt: 'mutita',
+    salt: 'Ac+G_^;axLHq',
     key:'c40b93b2dfb61810e5ad22d132de54b7e718d10f66a8f523379826de95dbadf1',
     serverUrl: '/post_'
   }
 }
 
+
 core.formProc = async function (formid) {
   // core.formProc('#form100')
 
   let msg = xdev.readForm(formid)
-  console.log(msg)
+  //console.log(msg)
 
   //wrap.msg .....seal the msg & put in the wrap
   let msgSeal = await xdev.enc(
@@ -27,19 +28,42 @@ core.formProc = async function (formid) {
     core.security.key
   )
 
-  let msgWrap = { msg: msgSeal }
+  let wrap = new Wrap //born new wrap from a master/template/class
 
-  msgWrap.id = xdev.uuidx() + '-' + xdev.random()          
-  msgWrap.to = core.security.serverid //server id
-  msgWrap.from = core.security.sessionid //session id
-  msgWrap.subject = ''
-  msgWrap.note = ''
-  msgWrap.time = Date.now()
-  msgWrap.cert = await xdev.hash(
-    JSON.stringify(msgWrap) + core.security.salt
-  ) 
+  wrap.msg = msgSeal
+  wrap.to = core.security.serverid //server id
+  wrap.from = core.security.sessionid //session id
+  wrap.confidential = 'module only'
 
-  xdev.send(msgWrap, core.security.serverUrl)
+  wrap.cert = await xdev.$({
+    xcert:  JSON.stringify(wrap),
+    key:    core.security.salt
+  }) 
+
+  //send
+  xdev.send(wrap) //, core.security.serverUrl)
+
+}
 
 
+core.superPassword = async function (passHash) {
+  //the hash is the signature getting from the form
+
+  //wrap
+  let wrap = new Wrap
+  wrap.msg = passHash
+  wrap.subj = 'super password'
+  wrap.to = core.security.serverid
+  wrap.from = core.security.sessionid
+  
+  //cert
+  wrap.cert = await xdev.$({
+    xcert: xdev.jsonify(wrap),
+    key: core.security.salt
+  })
+
+  xdev.send(
+    wrap, 
+    //core.security.serverUrl
+  )
 }

@@ -17,6 +17,10 @@ const xfile = require('./xfile.js')
 const xdb = require('./xmongo.js') 
 const jwt = require('jsonwebtoken')
 
+
+
+
+
 //test///////////////////////////////////
 
 ///////////////////////////////////////
@@ -239,6 +243,11 @@ function random() {
   return xsec.random()
 }
 
+function randomInt() {
+  // xdev.randomInt() ...rt 10-int from 1000000000-9999999999
+  return xsec.randomInt()
+}
+
 async function genKeys() {
   // xdev.genKeys() ...rt rsa priKey & pubKey , pem format
   return xsec.genKeys()
@@ -308,7 +317,38 @@ function uuidx() {
 }
 
 
-module.exports = {$,random, genKeys, sha256, md5, readF, hasF, deleteF, jsonf, uuidx}
+function jsonify(x) {
+  return JSON.stringify(x)
+}
+
+function parseJson(j) {
+  return JSON.parse(j)
+}
+
+
+
+
+class Wrap {
+  id = Date.now() + '-' + xdev.randomInt()
+  to = ''
+  from = ''
+  subj = ''
+  msg = ''
+  note = ''
+  ref = ''
+  confidential = ''
+  time = Date.now()
+  cert = '' //--hex-- .....this will be added after cert
+  verified = '' //true|false .......added after verified
+
+  /**
+   * this is a data model for the message wrap used to send/receive among programs.
+   */
+}
+
+
+
+module.exports = {$,random, genKeys, sha256, md5, readF, hasF, deleteF, jsonf, uuidx, randomInt, jsonify, parseJson, Wrap}
 
 /* note
 all works excepts the sign & verify f, seems to have problem in the xcrypto module ,20230502

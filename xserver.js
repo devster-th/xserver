@@ -8,7 +8,7 @@ changed name to deeji.js -- 2022-10-12
 */
 
 
-// 1 - init ////////////////////////////////////////////////////
+//1) initialize --------------------------------------------
 
 global._xserver = {
   appName:  "xserver",
@@ -16,15 +16,19 @@ global._xserver = {
   startTime: Date.now(),
   domain:   "localhost",
   port:     2000,
+  operator: '@deeji.co',
   security:{
-    salt: 'mutita',
-    serverid:'',
+    salt: 'Ac+G_^;axLHq',
+    serverid:'35af4272-c5c2-48c7-8a37-6ed1a703a3f6',
     key: 'c40b93b2dfb61810e5ad22d132de54b7e718d10f66a8f523379826de95dbadf1'
   }
 }
     
-//load module
+
+
+//load modules
 const express = require("express")
+const { W } = require("./module/xdev/xdev.js")
 const app     = express()
 global.core   = require("./core.js")
 global.xdev   = require('./module/xdev/xdev.js')
@@ -36,118 +40,166 @@ app.use(express.static("webSite"))
 app.use(express.json())
 
 //else
-_xserver.serverid = xdev.random()
+//_xserver.serverid = xdev.random()
+
+
+
+// data model
 
 
 
 
-// 2 - Get works ///////////////////////////////////////////////
-/*                  THE TALKING PART
-The server talks to external via GET & POST here and then send 'command' to the xDev which will do detail works.
-*/
-//handling requests
-//the app has only 1 GET and 1 POST
+
+
+
+//2) GET works ----------------------------------------
+/**
+ * open/insecured msg handling mainly used for static & web pages not private data.
+ */
 
 app.get("/get_", (req,resp)=>{
-    //log_(req.ip)
-    //console.log(req.method)
-    //console.log(req.query)
+
+  //A) works on the input mainly for certifying msg
+  console.log('//--------------------------------------')
+  console.log('//@xserver: received GET message:')
+  console.log(req.ip)
+  console.log(req.method)
+  console.log(req.query)
+
+  let getMsg = req.query //put a name to prevent confuse
+  getMsg.method = 'get'
+
+  if (!getMsg.id) getMsg.id = Date.now() + '-' + xdev.randomInt()
+  
+  //B) pass msg to specified module
+  core.$(getMsg).then(re => {
     
-    
-
-    //pass to cor.e(method,inputData)
-    //most of work will be done in the core module
-    core.$(req.query, 'get')
-
-    //for testing just return something to B
-    resp.send("@xserver : received data at " + Date() )
+    //C) return something back to caller/browser
+    console.log('\n//@xserver: response from @core is: ', re)
+    resp.send(re)
 
 
-})//mostly work
-/* when key xdev command like: {act:"generate",code:"xuid"} returns output to browser = good,
-But when do {act:"find xdb",...} return blank on browser, but the server console got output
+  })
 
-this generally OK, because just test, will need to work more on real stuff afterward.
-*/
+
+  /**
+   * haven't do things much so far. The GET will mainly use for static & open web pages, contents.
+   */
+
+})
 
 
 
-// 3 - Post works ///////////////////////////////////////////////////////
+//3 POST works -----------------------------------
+/**
+ * secured msg handling
+ * POST will be main channel for all communications in the app
+ */
+
 app.post("/post_", (req,resp)=> {
     //console.log(req)
     //console.log(req.method)
     //console.log(req.body)
 
-    //1) verifying the msg here: check if the 'cert' correct
-    console.log('\n//xserver(), msg from caller:', req.body)
-    let cert = req.body.cert
-    delete req.body.cert
-    
-    let ver = xdev.sha256(
+    //A) certifying msg
+    console.log('//---------------------------------------')
+    console.log('\n//@xserver: received POST msg', req.body)
+
+    let postMsg = req.body //just put name to avoid confuse
+
+    //valid check
+    if (!postMsg.cert || !postMsg.id || !postMsg.to || !postMsg.from || !postMsg.msg || !postMsg.time) {
+
+      console.log('invalid message')
+      return resp.json({msg:'invalid message'})
+    } 
+
+
+    let cert_ = postMsg.cert //take out first
+    postMsg.cert = '' //empty the cert then verify the rest
+
+    //certifying the msg
+    xdev.$({  xcert: JSON.stringify(postMsg), 
+              key:   _xserver.security.salt, 
+              sig:   cert_
+          })
+
+    .then(resul => {
+
+      //if false stop the processing
+      if (!resul) return resp.json({msg:'msg is not certified'})
+
+      postMsg.verified = resul
+      postMsg.cert = cert_ //if certified put the cert back
+      postMsg.method = 'post'
+
+      //B) pass msg to module
+      core.$(postMsg).then(re => {
+
+        console.log(
+          '\n//@xserver: got this back from @core \n', 
+          re
+        )
+
+
+        //C) return msg to browser
+        let wrap = new xdev.Wrap
+
+        wrap.to = postMsg.from
+        wrap.from = _xserver.security.serverid
+        wrap.subj = 'response'
+        wrap.ref = postMsg.id
+        wrap.msg = re
+        wrap.note = 'OK'
+        wrap.confidential = 'module only'
+
+        //cert
+        xdev.$({
+          xcert: JSON.stringify(wrap), 
+          key:   _xserver.security.salt
+        })
+        
+        .then(cert => {
+          wrap.cert = cert 
+          
+          console.log(
+            '\n//@xserver: respond this back to browser:'
+          )
+          console.log(wrap)
+          
+          //send back to browser
+          resp.json(wrap)
+        })
+
+
+      }) //core
+    }) //.then
+
+/*    xdev.sha256(
       JSON.stringify(req.body) + _xserver.security.salt
-    )
-    
-    req.body.verified = cert==ver? true : false
-
-    console.log(
-      '\n//xserver(), ver result:', req.body.verified
-    )
-
-    //if not verified, do something
-
-
-    //2) after verify the msg , xserver() may return a response
-    let wrap = {
-      from:'xserver()',
-      msg:'OK, your msg is verified and being computed.',
-      time: Date.now()
-    }
-
-    wrap.cert = xdev.sha256(
-      JSON.stringify(wrap) + _xserver.security.salt
-    )
-
-    console.log(
-      '\n//xserver(), respond this back to caller:',
-      wrap
-    )
-    
-    resp.json(wrap)
-
-
-
-    //3) pass input to core() or any module that set in the unwrap
-    core.$( req.body ).then( moduleRe => {
-      //the module responses to the request here
-
-      console.log(
-        '\n//xserver(), this is reply from core():\n',
-        moduleRe
-      )
-      //resp.json(re) this is msg from core()
-    })
-
-    //just send message 'thank you' for now
-    //resp.json({ msg:"@xserver : received data at " + Date() })
-
+    ).then(ver => {
+      req.body.verified = cert==ver? true : false
+*/
 })
 
 
 
 
 // 4 - listen /////////////////////////////////////////////////
-app.listen(_xserver.port, ()=>{
-    console.log("//////////////////////////////////////////////////////////////////////")
-    console.log(
+app.listen(_xserver.port, () => {
+  console.log("//////////////////////////////////////////////////////////////////////")
+  console.log(
 `@${_xserver.appName} starts at http://localhost:${_xserver.port}
 ${new Date()}\n`
-    )
+  )
 
-    console.log('Brief: This is a tiny server trying to do little things, and makes things minimal and may be used to be a model, for something bigger. \n-- @mutita v0.2 / Sep 30, 2022\n')
-    
-    console.log("@xserver is ready...\n")
-    
-    //testScript()
+  console.log('Brief: This is a tiny server trying to do little things, and makes things minimal and may be used to be a model, for something bigger. \n-- @mutita v0.2 / Sep 30, 2022\n')
+  
+  console.log("@xserver is ready...\n")
+  
+  //testScript()
+
+ 
     
 })
 
@@ -168,22 +220,19 @@ function testScript() {
 
 //put all test command here
 
-let msg = JSON.stringify(
-  {name:'mutita',ag:55,sex:'male'}
-) 
-let key = xdev.random()
-let salt = xdev.random()
-console.log('key: '+key, '\nsalt: '+salt)
-let seal = xdev.$({encrypt:msg,userKey:key, salt:salt}).then(seal => {
-  console.log(seal)
+  let msg = JSON.stringify(
+    {name:'mutita',ag:55,sex:'male'}
+  ) 
 
-  xdev.$({decrypt:seal.cipherText, secureKey:seal.key, iv:seal.iv}).then( text => console.log(text))
-} 
+  let key = xdev.random()
+  let salt = xdev.random()
+  console.log('key: '+key, '\nsalt: '+salt)
 
+  let seal = xdev.$({encrypt:msg,userKey:key, salt:salt}).then(seal => {
+    console.log(seal)
 
-)
-
-
+    xdev.$({decrypt:seal.cipherText, secureKey:seal.key, iv:seal.iv}).then( text => console.log(text))
+  })
 
 
 }
