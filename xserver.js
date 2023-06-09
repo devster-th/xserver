@@ -8,7 +8,7 @@ changed name to deeji.js -- 2022-10-12
 */
 
 
-//1) initialize --------------------------------------------
+//1) initialize/config -----------------------------------------
 
 global._xserver = {
   appName:  "xserver",
@@ -28,7 +28,7 @@ global._xserver = {
 
 //load modules
 const express = require("express")
-const { W } = require("./module/xdev/xdev.js")
+//const { W } = require("./module/xdev/xdev.js")
 const app     = express()
 global.core   = require("./core.js")
 global.xdev   = require('./module/xdev/xdev.js')
@@ -45,7 +45,7 @@ app.use(express.json())
 
 
 // data model
-
+core.id = xdev.uuid()
 
 
 
@@ -146,10 +146,10 @@ app.post("/post_", (req,resp)=> {
         let wrap = new xdev.Wrap
 
         wrap.to = postMsg.from
-        wrap.from = _xserver.security.serverid
+        wrap.from = re.from // _xserver.security.serverid
         wrap.subj = 'response'
         wrap.ref = postMsg.id
-        wrap.msg = re
+        wrap.msg = re.msg
         wrap.note = 'OK'
         wrap.confidential = 'module only'
 
@@ -199,6 +199,7 @@ ${new Date()}\n`
   
   //testScript()
 
+  console.log('@core id: ', core.id )
  
     
 })

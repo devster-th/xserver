@@ -1,6 +1,6 @@
 // xmongo.js
 // v1.0
-// try to simplify ways to use mongoDb here
+// Make it simpler to interact with mongoDb, make it promisified
 // mutita.org@gmail.com
 
 /*
@@ -79,6 +79,14 @@ function newCol(colName, dbName) {
 }//m,ok
 
 
+
+
+
+
+
+
+
+
 /* use inserts instead
 function insert(doc,colName,dbName) {
   return new Promise( (resolve,reject) => {
@@ -121,22 +129,34 @@ function inserts(docs,colName,dbName) {
 
 
 
-function find(query,colName,dbName) {
+function find(query,colName,dbName,option={_id:0},qty=0,order={}) {
   //query = {name:/j/}
+  //option is projection, e.g., {_id:0, name:1} shows only name
+
+  if (typeof option != 'object') option={_id:0}
+  if (typeof qty != 'number') qty = 0
+  if (typeof order != 'object') order = {}
+
   return new Promise( (resolve,reject) => {
 
     mongo.connect(url, (err,dbx) => {
       if (err) reject(err)
       const useDb = dbx.db(dbName)
 
-      useDb.collection(colName).find(query).toArray( 
+      useDb.collection(colName).find(query).project(option).limit(qty).sort(order).toArray( 
+
         (err,result) => {
           if (err) reject(err) 
           dbx.close()
           resolve(result) 
-        })
+        }
+      )
     })
   })
+
+  /**
+   * added option in the f var so now we can put projection, 20230503
+   */
 }//m,ok
 
 
@@ -163,9 +183,117 @@ function updates(value,query,colName,dbName) {
 }//m,ok
 
 
+//enhance version
+function updates2(value,query,colName,dbName,option) {
+
+  /**
+   * created m/20230609
+   * added option v
+   * 
+   *    
+   */
 
 
-module.exports = {newDb, newCol, inserts, find, updates}
+  return new Promise( (resolve,reject) => {
+
+    mongo.connect(url, (err,dbx) => {
+      if (err) reject(err)
+      const useDb = dbx.db(dbName)
+
+      useDb.collection(colName).updateMany(
+        query,
+        { $set: value }, 
+        (err,result) => {
+          if (err) reject(err)
+          dbx.close()
+          resolve(result)
+        }
+      )
+    })
+  })
+}
+
+
+
+
+
+
+
+
+function increase(value,query,colName,dbName) {
+  // xs.increase({stock:100, price:-10}, {name:'coffee'}, 'product','xdb')
+
+  /**
+   * increase f will do only 1 doc at a time to prevent mistake
+   */
+
+
+  return new Promise( (resolve,reject) => {
+
+    mongo.connect(url, (err,dbx) => {
+      if (err) reject(err)
+      const useDb = dbx.db(dbName)
+
+      useDb.collection(colName).updateOne(
+        query,
+        { $inc: value }, 
+        (err,result) => {
+          if (err) reject(err)
+          dbx.close()
+          resolve(result)
+        }
+      )
+    })
+  })
+}//ok m/20230606
+
+
+
+function deletes(query,colName,dbName) {
+  return new Promise( (resolve,reject) => {
+
+    mongo.connect(url, (err,dbx) => {
+      if (err) reject(err)
+      const useDb = dbx.db(dbName)
+
+      useDb.collection(colName).deleteMany(
+        query,
+        (err,result) => {
+          if (err) reject(err)
+          dbx.close()
+          resolve(result)
+        }
+      )
+    })
+  })
+}//ok 20230605 m
+
+
+
+function dropCol(colName,dbName) {
+  return new Promise( (resolve,reject) => {
+
+    mongo.connect(url, (err,dbx) => {
+      if (err) reject(err)
+      const useDb = dbx.db(dbName)
+
+      useDb.collection(colName).drop(
+        (err,result) => {
+          if (err) reject(err)
+          dbx.close()
+          resolve(result)
+        }
+      )
+    })
+  })
+
+  //changed name from drop to dropCol m/20230609
+}//ok 20230605 m
+
+
+
+
+module.exports = {newDb, newCol, inserts, find, updates, increase, deletes, dropCol}
 
 
 /*

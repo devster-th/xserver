@@ -23,7 +23,7 @@ exports.$ = async function (x) {
 
 
   //2) work on the msg here ...
-  if (x.method == 'post') {
+  if (x.method == 'post' && x.subj != 'super password') {
     let msg = await xdev.$({
       decrypt: x.msg, 
       key: _xserver.security.key
@@ -39,8 +39,8 @@ exports.$ = async function (x) {
 
   //3) then return something back to the caller
   return {
-    from:'@core',
-    msg:`OK, your msg #${x.id} is computing`,
+    from: core.id,
+    msg:  `OK, your msg #${x.id} is computing`,
   }
 
   

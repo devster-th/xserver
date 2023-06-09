@@ -16,7 +16,7 @@ const xsec = require('./xcrypto.js')
 const xfile = require('./xfile.js')
 const xdb = require('./xmongo.js') 
 const jwt = require('jsonwebtoken')
-
+const {v4: uuidv4} = require('uuid')
 
 
 
@@ -308,6 +308,7 @@ async function jsonf(obj) {
 
 function uuidx() {
   // xdev.uuidx() ...get unique timestamp
+
   let t0 = Date.now()
   let t1 = Date.now()
   while (t1==t0) {
@@ -318,15 +319,27 @@ function uuidx() {
 
 
 function jsonify(x) {
+  // xdev.jsonify(x)
+
   return JSON.stringify(x)
 }
 
+
 function parseJson(j) {
+  // xdev.parseJson(--json--)
+
   return JSON.parse(j)
 }
 
 
+function uuid() {
+  // xdev.uuid() ...gets 12345678-1234-1234-1234-123456789012 hex
+  
+  return uuidv4()
+}
 
+
+// data model --------------------------------------
 
 class Wrap {
   id = Date.now() + '-' + xdev.randomInt()
@@ -348,7 +361,7 @@ class Wrap {
 
 
 
-module.exports = {$,random, genKeys, sha256, md5, readF, hasF, deleteF, jsonf, uuidx, randomInt, jsonify, parseJson, Wrap}
+module.exports = {$,random, genKeys, sha256, md5, readF, hasF, deleteF, jsonf, uuidx, randomInt, jsonify, parseJson, uuid, Wrap}
 
 /* note
 all works excepts the sign & verify f, seems to have problem in the xcrypto module ,20230502
