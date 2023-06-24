@@ -1,3 +1,12 @@
+/**
+ * xdev is a framework for software development.
+ * Version: 0.1
+ * Web:''
+ * License: none
+ * Contact: mutita.org@gmail.com
+ * Date: 2023-06-13
+ */
+
 //xdev.js 
 /*
 Simplify the dev language
@@ -12,9 +21,29 @@ USE
 
 */
 
+global.XDEV = {
+  info: {
+    softwareName: 'xdev',
+    for: 'Helps the software development easier.',
+    version: '0.2',
+    released: '2023-06-11',
+    by: 'mutita.org@gmail.com',
+    installid: ''
+  },
+  db: {
+    dbName: 'xdb',
+    url:''
+  }
+  
+
+}
+
+// import modules ---------------------------------
+
 const xsec = require('./xcrypto.js')
 const xfile = require('./xfile.js')
-const xdb = require('./xmongo.js') 
+//const xdb = require('./xmongo.js') 
+const xmongo = require('./xmongo.js')
 const {ObjectId} = require('mongodb')
 const jwt = require('jsonwebtoken')
 const {v4: uuidv4} = require('uuid')
@@ -26,7 +55,12 @@ const {v4: uuidv4} = require('uuid')
 
 ///////////////////////////////////////
 
+/*
+function info() {
+  console.log(XDEV)
+}*/
 
+/* NOT USE
 async function v(x) {
   console.log(x)
   let part = x.get.match(/^({\w+})?(.+)$/)
@@ -44,7 +78,7 @@ async function v(x) {
 
   return xdb.find({[key]:eval('/j/')},col,db)
 }
-
+*/
 
 
 async function $(x) {
@@ -54,10 +88,13 @@ async function $(x) {
 // get, set, del ----------------------------------------
 
     case 'get':
+      
       /*  xs.$({
             get:'name age sex',
             from:'xdb.customer',
-            filter:{province:bangkok, age:'50-'}
+            filter:{province:bangkok, age:'50-'},
+            qty: 20,
+            order: 'asc|des|a>z|z>a|1|-1'
           })
       */
       
@@ -72,10 +109,167 @@ async function $(x) {
        */
 
       //console.log( Object.keys(x.filter) == '' )
+
+// VIP command is the only 1 statement command
+// like   {get:'xdb.product.6476ceecf01f0d7ff6a69a26' }
+//  or    {get:'xdb.product{name:"coffee"}' }
+//  or just 'xdb.product{name:"coffee"}' ...this will mean get
+
+//  new command
+//  {get:'xdb.product{name:"coffee"}.price' }
+//  this gets only price value
+
+      if (Object.keys(x).length == 1) { // 1 key command
+
+        if (Object.keys(x)[0] == 'get' && typeof x.get == 'string') {
+
+          if (!x.get.includes('{')) {
+            //not includes {...} so it is general 'xdb.product.4654613546513abcdef' type of command
+
+            let part = x.get.split('.')
+            let db,col,filter 
+  
+            if (part.length > 1) {
+              //valid
+  
+              if (part.length == 2) {
+                // db.collection
+
+                if (await xmongo.isDb(part[0])) {
+                  // {get:'xdb.product'}
+                  db = part[0]
+                  col = part[1]
+                  return xmongo.find({},col,db) //ok m20230611
+                  //ok
+
+                } else if (await xmongo.isCollection(part[0])) {
+                  // {get:'product.1234568974564'}
+                  col = part[0]
+                  db = XDEV.db.dbName
+
+                  if ( isHex(part[1]) ) filter = ObjectId(`${part[1]}`)
+  
+                  return xmongo.find(filter,col,db)
+                }//ok
+
+              
+              } else if (part.length == 3) {
+                // db.collection._id
+               
+                if ( isHex(part[2]) ) {
+  
+  
+                  db = part[0]
+                  col = part[1]
+                  filter = ObjectId(`${part[2]}`)
+  
+                  return xmongo.find(
+                    filter, //ObjectId('647d30c7ea9fd00cdd19367d'),
+                    col,db
+                  )
+  
+                } else {
+                  return false
+                }
+              }
+  
+            } else {
+              //like {get:'product'} ...so take it as collection
+
+              db = XDEV.db.dbName
+              col = part[0]
+              //console.log(db,col)
+              return  xmongo.find({},col,db)
+            }//ok
+
+
+          } else {
+            //has {...} so it is a simple filter like 'xdb.product{name:"coffee"}'
+            //can also put ... {name:/j/} ..regex
+
+          /*
+            let filterPart = x.get.match(/{.+}/)[0]
+            let firstPart = x.get.replace(/{.+}/,'')
+
+            let part = firstPart.split('.')
+            if (part.length > 2) return false 
+            let db = part[0], col = part[1]
+
+            eval('filter =' + filterPart)
+            return xmongo.find(filter,col,db)  
+          */
+
+          //add the field after the ...{name:/fried/}.price so it returns the price out
+          
+            let part = x.get.match(
+              /^((\w+)\.)?(\w+)({.*})?(\.(\w+))?$/
+            )
+
+            let db,col,query,option 
+            
+            if (part[2]) db = part[2]
+            else db = XDEV.db.dbName
+
+            if (part[3]) col = part[3]
+            else return false 
+            
+            if (part[4]) {
+            
+              if (part[4] == '{}') query = {}
+              //for... 'xdb.product{} ...means all doc
+              else {
+                eval('query = ' + part[4])
+              }
+            
+            } else query = {}
+
+
+            if (part[6]) option = {[ part[6] ]:1, _id:0}
+            else option = {}
+
+            
+            let re = await xmongo.find(
+              query,
+              col,
+              db,
+              option
+            )
+
+            if (re.length == 1 && part[6]) {
+              return re[0][ part[6] ]
+            } else {
+              return re 
+            }
+
+            //ok m20230612
+
+          }//ok
+          
+
+        } // second if block
+      }//ok
+
+
+//initial
+      let onlyThisValue = '' //if only getting 1 value, will store the key here
+
       
 //limit      
       if (typeof x.qty != 'number') x.qty = 0
-      var [db,col] = x.from.split('.') //xdb.customer
+
+//db & col      
+      var part = x.from.split('.') //xdb.customer
+      var db,col
+
+      if (part.length == 1) {
+        col = part[0]
+        db = XDEV.db.dbName
+      } else if (part.length == 2) {
+        db = part[0]
+        col = part[1]
+      } else {
+        return false 
+      }
 
 //filter or query
           if (x.filter) {
@@ -101,42 +295,87 @@ async function $(x) {
         return '! xdev/filterHelp: wrong input'
       }
 */
+
 //projection
       // default of _id >> _id:0
       if (x.get == 'all' || x.get == '' || x.get == '*' || !Object.keys(x.get).length ) {
 
-        x.get = {_id:0}
+        x.get = {} //{_id:0}
+
+      } else if (x.get == '_docQty') {
+
+        return xmongo.docCount(
+          x.filter,
+          col,
+          db
+        )
+        //ok, m/20230610
+
+
+      } else if (typeof x.get == 'object' 
+          && Object.keys(x.get)[0] == 'distinct') {
+
+            //distinct mode
+
+            return xmongo.distinct(
+              x.get.distinct,
+              x.filter,
+              col,
+              db
+            )
+              //ok, m/20230610
+
 
       } else {
         //there's setting
 
         let field = x.get.split(' ')
-        let state = '{'
+        
+        if (field.length == 1) onlyThisValue = field[0] //keep the key here and will use at the returning output
+//------------------
+/*        let state = '{'
 
         for (f of field) {
           state = state + f + ':1,' //{ + name:1,
-        }
-        
-        //if there's no setting of _id, sets it to 0 (not show)
-        if (x.get.includes('_id') ) {
-          state = state + '}'
-        } else {
-          state = state + '_id:0 }'
+        } */
+//----------------------
+//change above block with this block
+        let getObject = {}
+
+        for (key of field) {
+          getObject[key] = 1
         }
 
-        eval('x.get =' + state) 
+
+        //if there's no setting of _id, sets it to 0 (not show)
+        if (x.get.includes('_id') ) {
+          //state = state + '}'
+        } else {
+          //state = state + '_id:0 }'
+          getObject._id = 0
+        }
+
+        //eval('x.get =' + state) 
+        x.get = getObject
       }
+//------------------------------
+
 
 //sorting accepts 3 types: (a) 1 or -1 , (b) asc, des, (c) a>z, z>a 
       if (x.order) {
+
         for (k in x.order) {
-          if (x.order[k].match(/asc|a>z/) ) x.order[k] = 1
-          else if (x.order[k].match(/des|z>a/) ) x.order[k] = -1
+
+          if (typeof x.order[k] == 'string' && x.order[k].match(/asc|a>z/) ) x.order[k] = 1
+
+          else if (typeof x.order[k] == 'string' && x.order[k].match(/des|z>a/) ) x.order[k] = -1
+
+          //if input is number just pass it (1=ascend, -1 is descending)
         }
       }
 
       //run
-      let re = await xdb.find(
+      let re = await xmongo.find(
         x.filter,
         col,
         db,
@@ -146,8 +385,17 @@ async function $(x) {
       )
 
       if (re.length == 1) {
-        return re[0]
+        if (onlyThisValue) {
+          //just return the pure value if getting only 1 field
+          return re[0][onlyThisValue]
+
+        } else {
+          //if multiple keys of getting, return the object
+          return re[0]
+        }
+
       } else {
+        //this returns multiple obj in an array
         return re
       }
 
@@ -162,14 +410,19 @@ async function $(x) {
       //ok m-20230607-------------------------------------
 
 
+////////////////////////////////////////////////////////
+
+
       case 'set':
       //the set is both new & change mode: if no filter supplied it is new mode, if filter supplied it is change/update mode
 
       /**
        * xs.$({
        *  set:{...}, if many docs put [{..},{..}, ...]
+       *  option: '$rename|$mul|$inc|$unset',
        *  to: 'xdb.customer',
-       *  filter: {group:'A'}
+       *  filter: {group:'A'},
+       * 
        * })
        */
 
@@ -182,7 +435,7 @@ async function $(x) {
 
         if (!x.filter) {
           //no filter is the new/insert mode
-          return xdb.inserts(
+          return xmongo.inserts(
             x.set,
             col,
             db
@@ -196,35 +449,120 @@ async function $(x) {
 
           
           
-          let increase = false
+          let specialSet = 'none' 
+          //option: increase +, multiply *, divide /, percent %
 
           // check for increase mode or not
           for (key in x.set) {
 
             if (typeof x.set[key] == 'string' 
               && x.set[key].match(/[+-]\d+$/) ) { //'+10' or '-10'
-                
+
+                //increase +,-
                 x.set[key] = Number( x.set[key] )
-                increase = true
+                specialSet = 'increase'
+            }
+
+            else if (typeof x.set[key] == 'string'
+              && x.set[key].match(/\*.+/) ) { // '*1.1'
+
+                //multiply * like set:{price:'*1.1'}
+                x.set[key] = Number( x.set[key].replace('*','') )
+                specialSet = 'multiply'
+              }
+
+            else if (typeof x.set[key] == 'string'
+              && x.set[key].match(/\/\d+/) ) {
+
+                //divide / ...set:{price:'/2'}
+                x.set[key] = eval(1 + x.set[key] )
+                specialSet = 'divide'
+              }
+
+            else if (typeof x.set[key] == 'string'
+              && x.set[key].match(/[+-]?(\d+)%(\d+)?$/) ) {
+
+                //percent % ...set:{ratio: '+5%'} ..or '-5%'
+                /*
+                    +5% ...increase 5% from current value
+                    -5% ...decrease 5%
+
+                    formula:  current * (5/100 + 1) 
+                              current * (-5/100 + 1)
+                */
+                specialSet = 'percent'
+                x.set[key] = eval(`'${x.set[key]}'.replace('%','') / 100 + 1`)
               }
           }
 
-          if (increase) {
-            //increase mode like set:{stock:'+10'}
-            return xdb.increase(
-              x.set,
-              x.filter,
-              col,
-              db
-            )
+          //run setting
 
-          } else {
-            //general update
-            return xdb.updates(
-              x.set,
+          if (specialSet == 'increase') {
+            //increase mode like set:{stock:'+10'}
+            //return xdb.increase(
+            
+            return xmongo.updates2(
+              { $inc: x.set },
               x.filter,
               col,
               db
+            )//ok
+
+          } else if (specialSet == 'multiply') {
+
+            return xmongo.updates2(
+              {$mul: x.set},
+              x.filter,
+              col,
+              db
+            )//ok
+          
+          } else if (specialSet == 'divide') {
+
+            return xmongo.updates2(
+              {$mul: x.set}, //the x.set is already 1/x.set
+              x.filter,
+              col,
+              db
+            )//ok
+          
+          } else if (specialSet == 'percent') {
+
+            //to work
+            return xmongo.updates2(
+              {$mul: x.set}, //x.set already made +5/100 +1 before this *
+              x.filter,
+              col,
+              db
+            )//ok
+          
+          } else {
+
+            //general update
+            /*  xs.$({
+                  set:{...},
+                  special: true,
+                  to:'xdb.product',
+                  filter:{......}
+                })
+            */
+
+            if (x.special) {
+              //just pass the x.set into the xdb.updates2()
+              //there's an x.special:true in the set command
+              /*
+                  special set like:
+                  $unset, $mul, $rename, all of the mongo's update command should be able to do
+              */
+            } else {
+              x.set = {$set: x.set} //make it general update $set
+            }
+
+            return xmongo.updates2(
+              x.set,
+              x.filter,
+              col,
+              db,
             )
           }
           
@@ -233,10 +571,14 @@ async function $(x) {
 
       } else {
         //invalid if no set or to
-        return '! xdev.$set: invalid input; nothing set.'
+        return false 
       }
       
-
+      /**
+       * now supports set:{} of +100, *1.1  m/20230609
+       *    set:{price:'*1.1'} ...price x 1.1
+       *    set:{price:'+100'} ...plus 100 to the price
+       */
       
 
       break
@@ -252,7 +594,7 @@ async function $(x) {
 
       var [db,col] = x.from.split('.')
 
-      return xdb.deletes(x.del, col, db)
+      return xmongo.deletes(x.del, col, db)
 
       break
       //ok 20230605 m
@@ -309,7 +651,7 @@ async function $(x) {
         return (sig_ == x.sig)? true:false
 
       } else {
-        return 'xdev.xcert: wrong input'
+        return 'xs.xcert: wrong input'
       }
       break
       //ok, m20230519
@@ -399,21 +741,21 @@ async function $(x) {
 
     case 'newDb':
       // xdev.$({ newDb:'--db name--'})
-      return xdb.newDb(x.newDb)
+      return xmongo.newDb(x.newDb)
       break
       //m,ok
 
 
     case 'newCol':
       // xdev.$({ newCol:'--collection name--', db:'--db name--' })
-      return xdb.newCol(x.newCol, x.db)
+      return xmongo.newCol(x.newCol, x.db)
       break
       //m,ok
 
 
     case 'dbInsert':
       // xdev.$({ dbInsert:{...}, col:'--', db:'--'}) ...insert 1 or many
-      return xdb.inserts(
+      return xmongo.inserts(
         x.dbInsert, 
         x.col, 
         x.db
@@ -424,7 +766,7 @@ async function $(x) {
 
     case 'dbFind':
       // xdev.$({ dbFind:{--query--}, col:'--', db:'--'})
-      return xdb.find(
+      return xmongo.find(
         x.dbFind, 
         x.col, 
         x.db
@@ -433,14 +775,14 @@ async function $(x) {
 
     case 'dbUpdate':
       // xdev.$({ dbUpdate:{--key--:--value--}, query:{..}, col: ,db: })
-      return xdb.updates(
+      return xmongo.updates(
         x.dbUpdate, 
         x.query, 
         x.col, 
         x.db
       )
 
-    
+/* NOT USE, use $set    
     case 'dbIncrease':
       // xs.$({ dbIncrease:{stock:-1}, query:{..}, col: ,db: })
       return xdb.increase(
@@ -450,10 +792,13 @@ async function $(x) {
         x.db
       )
         //ok m/20230606
+*/
+
 
     case 'dbDelete':
       //xs.$({ dbDelete:{key:value}, col:--, db:--})
-      return xdb.deletes(x.dbDelete, x.col, x.db)
+      //delete doc based on the query
+      return xmongo.deletes(x.dbDelete, x.col, x.db)
 
 
 
@@ -492,7 +837,7 @@ async function $(x) {
     //--------------------------------------------------
 
     default:
-      return '! xdev.$: invalid input'
+      return false 
   }
 }
 
@@ -523,17 +868,17 @@ async function md5(words) {
   return xsec.hash(words,'md5')
 }
 
-async function readF(fileName) {
+async function readFile(fileName) {
   // xdev.readF(fileName)
   return xfile.read(fileName)
 }
 
-async function hasF(fileName) {
+async function hasFile(fileName) {
   // xdev.hasF(fileName)
   return xfile.exist(fileName)
 }
 
-async function deleteF(fileName) {
+async function deleteFile(fileName) {
   // xdev.deleteF(fileName)
   return xfile.erase(fileName)
 }
@@ -586,15 +931,29 @@ function uuidx() {
 function jsonify(x) {
   // xdev.jsonify(x)
 
-  return JSON.stringify(x)
-}
+  if (typeof x == 'object') {
+    return JSON.stringify(x)
+
+  } else {
+    return false
+    //{jsonify: 'Wrong input. Input must be object type.'}
+  }
+}//ok m/20230611
 
 
-function parseJson(j) {
+function jparse(j) {
   // xdev.parseJson(--json--)
 
-  return JSON.parse(j)
-}
+  try {
+    let read = JSON.parse(j)
+    if (typeof read == 'object') return read
+    else return false 
+
+  } catch {
+    return false
+    //{parseJson:'Wrong input. Has to be json format.'}
+  }
+}//ok m/20230611
 
 
 function uuid() {
@@ -603,11 +962,159 @@ function uuid() {
   return uuidv4()
 }
 
+function isHex(sample) {
+  //check if the input hex or not, returning true or false
+
+  if (typeof sample == 'string') {
+    if (sample.match(/^[0-9a-f]+$/i)) {
+      return true
+    } else {
+      return false 
+    }
+
+  } else {
+    return false 
+  }
+}
+
+
+function isJson(sample) {
+  //test if the sample Json or not, if yes returns true, not returns false
+  //let check = xs.isJson(aVar)
+  //#tested ok, m20230616
+
+  try {
+    let check = JSON.parse(sample)
+    if (typeof check == 'object') return true 
+    else return false 
+  } catch {
+    return false
+  }
+}
+
+
+async function wrap(data,key=XSERVER.security.key) {
+  //wrap data before sending to xserver
+  //let w = await xs.wrap(obj)
+  //returns {wrap:'--base64 encrypted string--'}
+  //#tested ok, m20230616
+
+  if (typeof data == 'object') {
+    data = JSON.stringify(data)
+  }
+
+  return {
+    wrap: await xs.$({encrypt:data, key:key})
+  }
+}
+
+
+async function unwrap(wrappedObj,key=XSERVER.security.key) {
+  //unwrap wrapped-data
+  //let uw = await xs.unwrap(wrapObj)
+  //return data before wrapping, if it's obj it gives you obj
+  //#tested ok, m20230616
+
+  if (wrappedObj.wrap) {
+    let re = await xs.$({decrypt:wrappedObj.wrap, key:key})
+    
+    if ( xs.isJson(re) ) {
+      return JSON.parse(re)
+    } else {
+      return re 
+    }
+
+  } else {
+    return {
+      msg:'Wrong input.',
+      success: false ,
+      from: 'xs.unwrap()'
+    }
+  }
+}
+
+
+
+
+
+function cl(thing) {
+  //shortening the console.log()
+  return console.log(thing)
+}
+
+
+
+function docNum(pattern) {
+  //gen doc# for use in business
+
+  let time = new Date
+  let yyyy = time.getFullYear().toString()
+  let yy = yyyy.slice(2)
+
+  let mo = (time.getMonth() + 1).toString()
+  if (mo.length == 1) mo = 0 + mo 
+
+  let dd = time.getDate().toString()
+  if (dd.length == 1) dd = 0 + dd 
+  
+  let hh = time.getHours().toString()
+  if (hh.length == 1) hh = 0 + hh 
+
+  let mm = time.getMinutes().toString()
+  if (mm.length == 1) mm = 0 + mm 
+
+  let ss = time.getSeconds().toString()
+  if (ss.length == 1) ss = 0 + ss 
+  
+  let ms = time.getMilliseconds().toString()
+
+  if (typeof sn == 'undefined') {
+    global.sn = 1000
+  } else {
+    sn++
+  }
+
+  let cat = 'food'
+
+  return (yy + mo + dd + '-' + cat + '-' + sn).toUpperCase() 
+}
+
+
+function testAsync(f) {
+  /**
+   * For: test async func so don't need to put .then(x=>...) all the time.
+   * Test: ok
+   * Date: 20230611
+   * Dev: M
+   * Use: 
+   *        xs.testAsync(
+   *          ....put func here....
+   *        )
+   * 
+   *        run this in nodejs prompt >
+   */
+
+  f.then(x=>{
+    console.log(x)
+    return true   
+  })
+
+}//ok m20230612
+
+
+
+
+
+
+
+
+
+
 
 // data model --------------------------------------
 
 class Wrap {
-  id = Date.now() + '-' + xdev.randomInt()
+  id = Date.now() + '-' + xs.randomInt()
   to = ''
   from = ''
   subj = ''
@@ -630,7 +1137,7 @@ class Wrap {
 function filterHelp(filter) {
 
   // #1. first check
-  if (filter == '' || filter == '*' || filter == 'all' || !Object.keys(filter).length ) {
+  if (filter == '' || filter == '*' || filter == 'all' /*|| !Object.keys(filter).length*/ ) {
 
     return {}
 
@@ -648,7 +1155,9 @@ function filterHelp(filter) {
 
     //ObjectId
     if (k == '_id') {
-      eval(`filter = ObjectId('${filter[k]}')`)
+      //eval(`filter = ObjectId('${filter[k]}')`)
+      filter = ObjectId( filter._id )
+      return filter
     }
 
     // > MORE THAN
@@ -798,12 +1307,80 @@ function filterHelp(filter) {
 
 
 
+//---------------------------------------------------------
+function x2html(xinput) {
+  /**
+   * x2html() -- converts object to html so that the xserver can respond back in html format, the xbrowser can read it easily.
+   * version: 0.1
+   * by: M
+   * created: 2023-06-22
+   * status: dev
+   * 
+   * #run
+   *        xs.x2html({name:'john',age:23,sex:'male'})
+   * 
+   * #output
+   *        <p><b>name:</b> john<br><b>age:</b> 23<br><b>sex:</b> male</p>
+   * 
+   * on web page will show like:
+   * 
+   * name: john
+   * age: 23
+   * sex: male
+   * 
+   * #tested OK, m-202306221133
+   */
+
+  if (xinput == '' || typeof xinput != 'object') return {
+    msg:'Wrong input.',
+    success: false,
+    from: 'x2html()'
+  }
+
+  let htmlOutput = ''
+
+  if (Array.isArray(xinput)) {
+    //this is array of obj
+
+    xinput.forEach(doc => {
+      htmlOutput += '<p>'
+      let key = Object.keys(doc) 
+      
+      key.forEach(k => {
+        htmlOutput += '<b>' + k + ':</b> ' + doc[k] + '<br>'                 
+      })
+
+      htmlOutput += '</p>'
+    })
+
+  } else {
+    //this is only 1 obj
+    let key = Object.keys(xinput)
+    htmlOutput += '<p>'
+
+    key.forEach(k => {
+      htmlOutput += '<b>' + k + ':</b> ' + xinput[k] + '<br>'
+    })
+
+    htmlOutput += '</p>'
+  }
+
+  return htmlOutput
+}
 
 
 
-//------------------------------------------------------------
 
-module.exports = {$,random, genKeys, sha256, md5, readF, hasF, deleteF, jsonf, uuidx, randomInt, jsonify, parseJson, uuid, Wrap, v}
+
+// exports -------------------------------------------------
+
+module.exports = {
+  $, random, genKeys, sha256, md5, 
+  readFile, hasFile, deleteFile, jsonf, uuidx, 
+  randomInt, jsonify, jparse, uuid, 
+  Wrap, isHex, docNum, cl, testAsync,
+  isJson, wrap, unwrap, x2html  
+}
 
 /* note
 all works excepts the sign & verify f, seems to have problem in the xcrypto module ,20230502
@@ -816,3 +1393,13 @@ all the quick-func works, m/20230504
 
 
 */
+
+
+/**
+ * Devnote
+ * 
+ * Changed the import name of xmongo from 'xdb' to 'xmongo' so it's not duplicate with the db name 'xdb' in the mongodb. And to prevent confusion from different of filename and the const name of the xmongo.js module.
+ * m20230613
+ * 
+ * 
+ */

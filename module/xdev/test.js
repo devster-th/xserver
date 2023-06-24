@@ -6,7 +6,7 @@
 //const xcrypto = require('./xcrypto')
 //var crypto = require('crypto')
 const xs = require('./xdev1.js')
-const xdb = require('./xmongo.js')
+const xmongo = require('./xmongo.js')
 const {ObjectId} = require('mongodb') 
 const model = require('./xDataModel.js')
 
@@ -91,15 +91,32 @@ async function test1by1() {
 
 async function testGet() {
   console.log(
+    
     await xs.$({
-      get:'name count',
-      from:'xdb.product',
-      //filter:{_id:'647ca62b606827ba2cda5e41'} ,
+      get:"xdb.order{orderNum:/96562/}"
+      //get:'xdb.product.6476ceecf01f0d7ff6a69a26',
+      //from:'xdb.product',
+      //filter:{_id:"647d30c7ea9fd00cdd19367d"} ,
       //order:{star:'des'}
-    })
+    }) 
+
+    /*
+    await xmongo.find(ObjectId('647d30c7ea9fd00cdd19367d'),'product','xdb')
+
+    //ok
+    */
+
   )
-  
 }
+//testGet()
+
+/*
+console.log(
+  xs.isHex("647ca62b606827bsa2cda5e3f")
+  //xs.jparse('{"name":"john"}')
+  //xs.jsonify({name:'john'})
+)
+*/
 
 
 async function xmon() {
@@ -262,24 +279,25 @@ function testFilter(fil) {
 //testSet()
 //test1by1()
 
-
+/*
 xs.$({
   set:{
-    $rename:{"sex":"gent"}
+    stock:'10%', price:'10%', leadTime:'10%'
   }, 
-  to:'xdb.customer', 
-  filter:{name:'john' } 
+  //special:true, //allows to put special option into the set  
+  to:'xdb.product', 
+  filter:{name:'nood*'} 
 
-}).then(  
-    xs.$({
-      get:'', 
-      from:'xdb.customer', 
-      filter:{name:'john'},
-      //order:{stock:'des'}
-    })
-    
-    .then(x=>console.log(x))
-  )
+}).then( re => {
+  console.log(re)   
+
+  xs.$({
+    get:'', 
+    from:'xdb.product', 
+    filter:{partNum:'f*'},
+    order:{name:'a>z'}
+  }).then(x=>console.log(x))  /*
+})
 
 
 
@@ -319,11 +337,18 @@ newp.star = 5
 xs.$({
   set: newp,
   to:'xdb.product'
-}).then(
+}).then( 
 
-  xs.$({get:'', from:'xdb.product', filter:{name:/bicycle/i}}).then(x => console.log(x))
-)
-*/
+  xs.$({
+
+    get:'', 
+    from:'xdb.product', 
+    filter:{specialCode:'04e252ffe0d7737c2e64b2d5ccea8fd0'}
+    //filter:{internalCode:'49c4124c-0089-4408-a7f0-60c21585d0c5'}
+  
+  }).then(x => console.log(x))
+//)
+
 
 
 //new customer from model
@@ -342,17 +367,26 @@ xs.$({set:newcus, to:'xdb.customer'}).then(
 */
 
 /*
-let n = ['john','jane','mutita','palika']
-n.forEach(
-  nn => {
-    xs.$({
-      set: {customerid: xs.uuid()}, 
-      to:'xdb.customer', 
-      filter:{name: nn}
-    })
-  }
-)
-*/
+let n = [/nood/,/ga prao/,/coffee/,/tom/,/cake/,/pen/,/cup/,/fried/,/bicycle/i]
+
+async function testSetMany() {
+  n.forEach(
+    nn => {
+      xs.$({
+        set: {specialCode: xs.random() }, 
+        to:'xdb.product', 
+        filter:{name: nn}
+      })
+    }
+  )
+}
+
+/*
+testSetMany().then(x => {
+  
+  xs.$({get:'specialCode',from:'xdb.product'}).then(x => console.log(x))
+})
+
 
 function clog(v) {
   return console.log(v)
@@ -365,6 +399,94 @@ xs.$({  get:'',
     }).then(x => clog(x))
 
 */
+
+/*
+for (i=0; i<=10; i++) {
+  console.log(
+    xs.random()
+  )
+}
+*/
+
+/*
+console.log(
+  xs.$({
+    xcert:'thailand',
+    key:'mutita'
+  }).then(s => {
+    console.log(s)
+    
+    xs.$({
+      xcert:'thailand',
+      key:'mutita',
+      sig: s
+    }).then(v => console.log(v))
+  })
+)
+
+*/
+
+
+async function testDocCount() {
+  console.log(
+    await xmongo.docCount({UOM:/cup/},'product','xdb')
+  )
+}
+//testDocCount()
+
+
+async function testDistinct() {
+  console.log(
+    await xmongo.distinct(
+      'organization',
+      {},
+      'customer',
+      'xdb'
+    )
+  )
+}
+//testDistinct()
+
+
+
+//new order
+async function newor() {
+  let newor = new model.Order
+  newor.createdBy = await xs.$({get:'userid', from:'xdb.customer', filter:{name:'mutita'}})
+  
+  newor.customerid = await xs.$({get:'customerid',from:'xdb.customer',filter:{name:'john'}})
+
+  newor.product[0].id = await xs.$({get:'specialCode',from:'xdb.product',filter:{name:/fried/}})
+
+  xs.$({set:newor, to:'xdb.order'}).then(re => {
+    console.log(re)
+
+    xs.$({get:'',from:'xdb.order'}).then(x => console.log(x))
+  })
+}
+
+//newor()
+
+
+async function dist() {
+
+  xs.$({
+    get:{distinct:'status'},
+    from:'xdb.order'
+  }).then(x => console.log(x))
+}//ok
+//dist()
+
+
+async function count() {
+
+  xs.$({
+    get:'_docQty',
+    from:'xdb.product',
+    filter:{brand:/ye/i}
+  }).then(x => console.log(x))
+}//ok
+//count()
 
 /**
  * the get has no problem with the ObjectId or _id in the filter

@@ -1,22 +1,25 @@
-// head note ////////////////////////////////////////////////////
-/*
-this is the simpleApp main file = /simpleApp/simpra.js
-expressjs v4.18.1
-this file can finally named deeji.js , the main or core module
-changed name to 'simpra.js' -- 2022-10-2
-changed name to deeji.js -- 2022-10-12
-*/
+/**
+ * xserver is a framework to dev software.
+ * Version: 0.1
+ * Web:''
+ * Date: 2023-06-13
+ * Contact: mutita.org@gmail.com
+ * License: none
+ */
+
+
+
 
 
 //1) initialize/config -----------------------------------------
 
-global._xserver = {
+global.XSERVER = {
   appName:  "xserver",
   version:  "0.1",
   startTime: Date.now(),
   domain:   "localhost",
   port:     2000,
-  operator: '@deeji.co',
+  operator: 'mutita',
   security:{
     salt: 'Ac+G_^;axLHq',
     serverid:'35af4272-c5c2-48c7-8a37-6ed1a703a3f6',
@@ -31,12 +34,13 @@ const express = require("express")
 //const { W } = require("./module/xdev/xdev.js")
 const app     = express()
 global.core   = require("./core.js")
-global.xdev   = require('./module/xdev/xdev.js')
+global.xs   = require('./module/xdev/xdev1.js')
+global.model = require('./module/xdev/xDataModel.js')
 global.sales = require('./module/sales/sales.js')
 
 
 //setting
-app.use(express.static("webSite"))
+app.use(express.static("website"))
 app.use(express.json())
 
 //else
@@ -45,7 +49,7 @@ app.use(express.json())
 
 
 // data model
-core.id = xdev.uuid()
+core.id = xs.uuid()
 
 
 
@@ -57,19 +61,115 @@ core.id = xdev.uuid()
  * open/insecured msg handling mainly used for static & web pages not private data.
  */
 
-app.get("/get_", (req,resp)=>{
+app.get("/xget", (req,resp)=>{
 
   //A) works on the input mainly for certifying msg
   console.log('//--------------------------------------')
   console.log('//@xserver: received GET message:')
-  console.log(req.ip)
-  console.log(req.method)
+  //console.log(req.ip)
+  //console.log(req.method)
   console.log(req.query)
 
   let getMsg = req.query //put a name to prevent confuse
-  getMsg.method = 'get'
+  //getMsg.method = 'get'
 
-  if (!getMsg.id) getMsg.id = Date.now() + '-' + xdev.randomInt()
+  if (getMsg._xs) {
+    eval('_xs =' + getMsg._xs)
+    delete getMsg._xs //before pass it to the db
+
+    let xsKey = Object.keys(_xs)[0]
+
+    //write mode
+    if ( xsKey == 'setTo') {
+      xs.$({set:getMsg, to: _xs.setTo}).then(re => {
+
+        if (re.insertedCount) { //success
+          resp.send(`<h1>Successfully save data.</h1>
+          <p><b>from:</b> @xserver<br>
+          <b>success:</b> true<br>
+          <b>id:</b> ${re.insertedIds[0]}<br>
+          <b>time:</b> ${new Date().toISOString()}</p>`)
+        
+        } else { //fail
+          resp.send(`<h1>Fail to save data.</h1>
+          <p><b>from:</b> @xserver<br>
+          <b>success:</b> false<br>
+          <b>id:</b> ${xs.uuid()}<br>
+          <b>time:</b> ${new Date().toISOString()}`)
+        }
+        
+      })
+    
+    //read mode
+    } else if (xsKey == 'getFrom' && Object.keys(getMsg)[0] == 'search') {
+
+      xs.$({
+        get:'',from: _xs.getFrom, 
+        filter: {$text:{$search: getMsg.search }}
+
+      }).then(re => {
+//---will replace this block        
+/*        if (typeof re == 'object') re = JSON.stringify(re)
+        resp.send(`<p style="font-size:large">${re}</p>`) */
+
+//--- block #2306220917m
+
+        //work on this block to display in html
+        console.log(re)
+/*        
+        let outputHtml = ''
+
+        if (Array.isArray(re)) {
+
+          if (re == '') return resp.send('<h1>Not found.</h1>')
+
+          //each doc has <p> with the <br> to break each data
+          re.forEach(doc => {
+            outputHtml += '<p>'
+            let key = Object.keys(doc) 
+
+            key.forEach(k => {
+              outputHtml += '<b>' + k + ':</b> ' + doc[k] + '<br>'
+            })
+
+            outputHtml += '</p>'
+
+          })
+
+        } else if (typeof re == 'object') {
+          //the re is obj, containing only 1 doc
+          outputHtml += '<p>'
+          let key = Object.keys(re) 
+
+          key.forEach(k => {
+            outputHtml += '<b>' + k + ':</b> ' + re[k] + '<br>'
+          })
+
+          outputHtml += '</p>'
+
+        } else {
+          //out of scope
+          outputHtml = '<h1>Something wrong.</h1>'
+        }
+*/
+
+        //console.log(outputHtml)
+        let htmlOutput = xs.x2html(re)
+
+        if (htmlOutput.success == false) {
+          resp.send('<h1>Not found.</h1>')
+        } else {
+          resp.send( htmlOutput )
+        }
+//---
+
+      }) //then
+    }
+  }
+
+
+/*  
+  if (!getMsg.id) getMsg.id = Date.now() + '-' + xs.randomInt()
   
   //B) pass msg to specified module
   core.$(getMsg).then(re => {
@@ -80,7 +180,7 @@ app.get("/get_", (req,resp)=>{
 
 
   })
-
+*/
 
   /**
    * haven't do things much so far. The GET will mainly use for static & open web pages, contents.
@@ -94,19 +194,146 @@ app.get("/get_", (req,resp)=>{
 /**
  * secured msg handling
  * POST will be main channel for all communications in the app
+ * Takes only JSON data
  */
 
-app.post("/post_", (req,resp)=> {
-    //console.log(req)
-    //console.log(req.method)
-    //console.log(req.body)
+app.post("/xpost", (req,resp)=> {
+  //console.log(req)
+  //console.log(req.method)
+  //console.log(req.body)
 
-    //A) certifying msg
-    console.log('//---------------------------------------')
-    console.log('\n//@xserver: received POST msg', req.body)
+  //A) certifying msg
+  console.log('//---------------------------------------')
+  console.log('//@xserver: received POST msg:')
+  console.log(req.body)
 
-    let postMsg = req.body //just put name to avoid confuse
+  let postMsg = req.body //just put name to avoid confuse
 
+//working on new block    
+
+  if (postMsg.wrap) {
+    //this is wrapped msg (encrypted one)
+    // {wrap:'--base64 encrypted text--'}
+
+    //unwrap
+    xs.$({
+      decrypt: postMsg.wrap,
+      key: XSERVER.security.key
+    
+    }).then(re => {
+      console.log(re)
+
+      let xsCommand = JSON.parse(re)
+      console.log(xsCommand)
+
+//working in this block
+
+      xs.$(xsCommand).then(re => {
+        console.log(re)
+
+        if (xsCommand.set) {
+          let msg = new model.ServerResponse
+
+          if (re.insertedCount) {
+            msg.msg = "Successfully save the data."
+            msg.success = true
+            msg.id = re.insertedIds[0]
+
+            xs.wrap(msg).then(wrap => {
+              console.log(wrap)
+              resp.json(wrap)
+            })
+            
+  
+          } else {
+            msg.msg = "Fail to save the data."
+            msg.success = false
+            msg.id = xs.uuid()
+
+            xs.wrap(msg).then(wrap => {
+              console.log(wrap)
+              resp.json(wrap)
+            })
+            
+          }
+        
+        } else if (xsCommand.get) {
+          console.log('this is get results')
+
+          xs.wrap(re).then(wrap => {
+            console.log(wrap)
+            resp.json(wrap)
+          })
+          
+        }
+        
+      })
+
+
+
+/*      
+      eval('_xs = ' + obj._xs)
+      console.log(_xs)
+      delete obj._xs
+
+      let xsKey = Object.keys(_xs)[0]
+
+      if (xsKey == 'setTo') {
+        //this is set command
+        xs.$({set:obj, to: _xs.setTo}).then(re => {
+
+          console.log(re)
+
+          //response back to caller
+          if (re.insertedCount) { //success
+
+            let respMsg = {
+              from: '@xserver',
+              success: true,
+              msg:'Successfully save data.',
+              id: re.insertedIds[0],
+              time: new Date().toISOString()
+            }
+            console.log(respMsg)
+            resp.json(respMsg)
+
+          } else { //fail
+
+            let respMsg = { 
+              from: '@xserver',
+              success: false,
+              msg:'Fail to save data.',
+              id: xs.uuid(),
+              time: new Date().toISOString()   
+            }
+            console.log(respMsg)
+            resp.json(respMsg)
+          } 
+
+        })
+      }
+*/      
+    })
+  
+
+  } else {
+    //not wrapped data
+
+    let msg = new model.ServerResponse
+    
+    msg.msg = "Rejected, unrecognized command."
+    msg.success = false 
+    msg.id = xs.uuid()
+
+    resp.json(msg)
+  }
+
+
+
+
+
+// below is old block
+/*    
     //valid check
     if (!postMsg.cert || !postMsg.id || !postMsg.to || !postMsg.from || !postMsg.msg || !postMsg.time) {
 
@@ -119,8 +346,8 @@ app.post("/post_", (req,resp)=> {
     postMsg.cert = '' //empty the cert then verify the rest
 
     //certifying the msg
-    xdev.$({  xcert: JSON.stringify(postMsg), 
-              key:   _xserver.security.salt, 
+    xs.$({  xcert: JSON.stringify(postMsg), 
+              key:   XSERVER.security.salt, 
               sig:   cert_
           })
 
@@ -143,7 +370,7 @@ app.post("/post_", (req,resp)=> {
 
 
         //C) return msg to browser
-        let wrap = new xdev.Wrap
+        let wrap = new xs.Wrap
 
         wrap.to = postMsg.from
         wrap.from = re.from // _xserver.security.serverid
@@ -154,9 +381,9 @@ app.post("/post_", (req,resp)=> {
         wrap.confidential = 'module only'
 
         //cert
-        xdev.$({
+        xs.$({
           xcert: JSON.stringify(wrap), 
-          key:   _xserver.security.salt
+          key:   XSERVER.security.salt
         })
         
         .then(cert => {
@@ -174,34 +401,31 @@ app.post("/post_", (req,resp)=> {
 
       }) //core
     }) //.then
+*/    
 
 /*    xdev.sha256(
       JSON.stringify(req.body) + _xserver.security.salt
     ).then(ver => {
       req.body.verified = cert==ver? true : false
 */
-})
+}) //end app.post()
 
 
 
 
 // 4 - listen /////////////////////////////////////////////////
-app.listen(_xserver.port, () => {
+app.listen(XSERVER.port, () => {
   console.log("//////////////////////////////////////////////////////////////////////")
   console.log(
-`@${_xserver.appName} starts at http://localhost:${_xserver.port}
-${new Date()}\n`
+`@${XSERVER.appName} starts at http://localhost:${XSERVER.port}
+${new Date().toISOString()}\n`
   )
 
-  console.log('Brief: This is a tiny server trying to do little things, and makes things minimal and may be used to be a model, for something bigger. \n-- @mutita v0.2 / Sep 30, 2022\n')
-  
+  console.log('A little thing that trying to solve bigger things.')
   console.log("@xserver is ready...\n")
   
   //testScript()
-
-  console.log('@core id: ', core.id )
- 
-    
+  //console.log('@core id: ', core.id )
 })
 
 
@@ -225,14 +449,14 @@ function testScript() {
     {name:'mutita',ag:55,sex:'male'}
   ) 
 
-  let key = xdev.random()
-  let salt = xdev.random()
+  let key = xs.random()
+  let salt = xs.random()
   console.log('key: '+key, '\nsalt: '+salt)
 
-  let seal = xdev.$({encrypt:msg,userKey:key, salt:salt}).then(seal => {
+  let seal = xs.$({encrypt:msg,userKey:key, salt:salt}).then(seal => {
     console.log(seal)
 
-    xdev.$({decrypt:seal.cipherText, secureKey:seal.key, iv:seal.iv}).then( text => console.log(text))
+    xs.$({decrypt:seal.cipherText, secureKey:seal.key, iv:seal.iv}).then( text => console.log(text))
   })
 
 
@@ -279,3 +503,14 @@ devper = @mutita
 2023-4-21   M/xserver.js directly comms with core.js and handles mainly traffice, web site, web files. For app level just pass to core.js.
 
 */
+
+/**
+ * Devnote
+ * 
+ * Changed global var from _xserver to XSERVER
+ * Changed get path from /get_ to /xget
+ * Changed post path from /post_ to /xport
+ * m20230613
+ * 
+ * 
+ */

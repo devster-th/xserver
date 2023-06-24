@@ -8,10 +8,10 @@ globalThis.core = {
   coder: '@mutita',
   security: {
     serverid: '35af4272-c5c2-48c7-8a37-6ed1a703a3f6',
-    sessionid: xdev.uuid(),
+    sessionid: xs.uuid(),
     salt: 'Ac+G_^;axLHq',
     key:'c40b93b2dfb61810e5ad22d132de54b7e718d10f66a8f523379826de95dbadf1',
-    serverUrl: '/post_'
+    serverUrl: '/xpost'
   }
 }
 
@@ -19,11 +19,11 @@ globalThis.core = {
 core.formProc = async function (formid) {
   // core.formProc('#form100')
 
-  let msg = xdev.readForm(formid)
+  let msg = xs.readForm(formid)
   //console.log(msg)
 
   //wrap.msg .....seal the msg & put in the wrap
-  let msgSeal = await xdev.enc(
+  let msgSeal = await xs.enc(
     JSON.stringify(msg), 
     core.security.key
   )
@@ -35,13 +35,13 @@ core.formProc = async function (formid) {
   wrap.from = core.security.sessionid //session id
   wrap.confidential = 'module only'
 
-  wrap.cert = await xdev.$({
+  wrap.cert = await xs.$({
     xcert:  JSON.stringify(wrap),
     key:    core.security.salt
   }) 
 
   //send
-  xdev.send(wrap) //, core.security.serverUrl)
+  xs.send(wrap) //, core.security.serverUrl)
 
 }
 
@@ -57,12 +57,12 @@ core.superPassword = async function (passHash) {
   wrap.from = core.security.sessionid
   
   //cert
-  wrap.cert = await xdev.$({
-    xcert: xdev.jsonify(wrap),
+  wrap.cert = await xs.$({
+    xcert: xs.jsonify(wrap),
     key: core.security.salt
   })
 
-  xdev.send(
+  xs.send(
     wrap, 
     //core.security.serverUrl
   )

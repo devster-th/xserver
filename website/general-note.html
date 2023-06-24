@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!--load styles here-->
+<!--<link rel="stylesheet" href="/deeji/deeji.css">-->
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style></style>
+
+<!--load scripts here-->
+<script src="/xbrowser/module/xdev/xdev_b.js"></script>
+<script src="/xbrowser/core_b.js"></script>
+
+</head>
+<body class="w3-container">
+<h1 class="w3-text-green">general note</h1>
+<p class="w3-large">Whatever you want to note, note it:</p>
+
+<hr>
+
+SEARCH
+<form id="search_form" name="searchGeneralNote" action="/xget">
+  <input id="search" name="search" type="search">
+  <input name="_xs" value="{getFrom:'xdb.generalNote'}" hidden>
+  <input type="submit" value="Search">
+</form>
+
+<hr>
+
+NEW NOTE
+<form id="generalnote_form" name="generalNote" action="/xget">
+  <div>
+    1. Note <textarea name="note" rows="8" style="width:100%"></textarea><br>
+    2. Tag <input name="tag" type="text" size="30"><br>
+    3. By <input name="by" type="text" value="M"><br>
+    4. Time <input id="time" name="time" type="text"><br>
+  </div>
+
+  <br>
+  <input name="_xs" type="text" value="{setTo:'xdb.generalNote'}" hidden>
+  <input type="submit" value="Submit">
+
+</form>
+
+<script>
+  let t = new Date
+  time.value = t.toISOString() 
+</script>
+
+</body>
+</html>

@@ -1,8 +1,17 @@
+/**
+ * core.js is the main program of the app/software.
+ * version: 0.1
+ * license: none
+ * date: 2023-06-13
+ * web:''
+ * contact: mutita.org@gmail.com
+ * 
+ * @param {*} x 
+ * @returns 
+ */
+
 //core.js
 /*this is core of the app level programs. Any people can dev module.js and then include into this core.js then core.js can pass data to the module.js */
-
-
-
 
 
 
@@ -24,9 +33,9 @@ exports.$ = async function (x) {
 
   //2) work on the msg here ...
   if (x.method == 'post' && x.subj != 'super password') {
-    let msg = await xdev.$({
+    let msg = await xs.$({
       decrypt: x.msg, 
-      key: _xserver.security.key
+      key: XSERVER.security.key
     })
   
     console.log('\n//@core: unseal msg:')

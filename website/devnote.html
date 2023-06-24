@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!--load styles here-->
+<!--<link rel="stylesheet" href="/deeji/deeji.css">-->
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style></style>
+
+<!--load scripts here-->
+<script src="/xbrowser/module/xdev/xdev_b.js"></script>
+<script src="/xbrowser/core_b.js"></script>
+
+
+</head>
+<body class="w3-container">
+<button style="position:fixed;top:0;right:0" onclick="if (searchBox.hidden==true) searchBox.hidden=false; else searchBox.hidden=true">search on/off</button>
+
+
+<h1 class="w3-text-red">devnote</h1>
+Note anything about your dev works here:
+
+<div id="searchBox" hidden>
+SEARCH
+  <form id="search_form" action="/xget">
+    <input name="search" type="search">
+    <input name="_xs" value="{getFrom:'xdb.devnote'}" hidden>
+    <input type="submit" value="Search">
+  </form>
+</div>
+
+<hr>
+NEW NOTE 
+<form id="devnote_form" name="newDevnote" action="/xget">
+  <div>
+    1. Number <input id="noteNum" name="noteNum" type="text"><br>
+    2. Ref <input name="ref" type="text"><br>
+    3. Title <input name="title" type="text" style="width:80%"><br>
+    4. Type <select name="type">
+          <option>--please choose one--</option>
+          <option>bug</option>
+          <option>error</option>
+          <option>idea</option>
+          <option>issue</option>
+          <option>note</option>
+          <option>question</option>
+          <option>task</option>
+          <option>topic</option>
+          <option>update</option>
+          <option>else</option>
+      </select><br>
+    5. Message <textarea name="msg" cols="35" rows="3" style="width:100%"></textarea><br>
+    6. Project <input name="project" type="text"><br>
+    7. Module <input name="module" type="text"><br>
+    8. Function <input name="func" type="text"><br>
+    9. Code block <input name="codeBlock" type="text"><br>
+    10. App <input name="app" type="text"><br>
+    11. Db <input name="db" type="text"><br>
+    12. File <input name="file" type="text"><br>
+    13. Tag <input name="tag" type="text"><br>
+    14. Category <input name="category" type="text"><br>   
+    15. Status <select name="status">
+      <option>new</option>
+      <option>resolved</option>
+      <option>need verify</option>
+      <option>cancel</option>
+    </select><br>
+    16. Status note <input name="statusNote" type="text"><br>
+    17. By <input name="by" type="text" value="M"><br>
+    18. Time <input id="time" name="time" type="text"><br>
+  </div>
+
+  <br>
+  
+  <input name="_xs" type="text" value="{setTo:'xdb.devnote'}" hidden>
+  <input type="submit" value="Submit">
+
+</form>
+
+<script>
+  noteNum.value = xs.uuidx() 
+  time.value = new Date().toISOString() 
+</script>
+
+</body>
+</html>

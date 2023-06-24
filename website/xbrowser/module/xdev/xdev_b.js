@@ -1,17 +1,48 @@
-// xdev_b.js 
-// dev tools for browser side
-// mutita.org@gmail.com
+/**
+ * xdev_b.js
+ * This is xdev for browser. A tool that helping software development easier.
+ * version: 0.1
+ * license: none
+ * web: ''
+ * createdDate: 20230613
+ * lastUpdated: 20230614.0811
+ * staff: mutita.org@gmail.com 
+ * 
+ * #use
+ *      <head>
+ *          <script src="./xdev_b.js"></script>
+ *      </head>
+ * 
+ *      <script>
+ *          el = xs.readForm2('#formid')
+ *      </script>
+ */
 
-const xdev = {
-  note: 'this is an object to work on browser side',
-  version: '0.5',
-  serverPostUrl: '/post_'
+
+
+
+const xs = {
+  //this is main object
+
+  get info() {
+    return {
+      program:"xdev_b is a tool for software development. Working in web browser side and co-working with xdev server side for seamless integration.",
+      web:'',
+      version:'0.1',
+      contact:'mutita.org@gmail.com',
+      date:'2023-06-13'
+    }
+  },
+
+  serverPostUrl:'/xpost',
+  serverGetUrl:'/xget'
+
 }
 
 //data model
 
 class Wrap {
-  id = Date.now() + '-' + xdev.random()
+  id = Date.now() + '-' + xs.random()
   to = ''
   from = ''
   subj = ''
@@ -37,24 +68,65 @@ class Wrap {
 
 
 // the $ interface
-xdev.$ = async function(x) {
+xs.$ = async function(x) {
 
   switch (Object.keys(x)[0]) {
 
+// new block -------------------------------    
+
+    case 'get':
+      //get command to xserver/xdb
+      
+      if (x.get) {
+        xs.send( await xs.wrap(x) )
+
+      } else {
+        return {
+          msg:'Wrong input',
+          success: false,
+          from:'xs.$get'
+        }
+      }
+      break
+
+    case 'set':
+      // set msg to the xdb
+      // xs.$({set:--data--, to:'xdb.product'})
+      // <button onclick="xs.$({set: xs.readForm2(thisForm), to:'xdb.user'})"
+      //#tested ok, m20230616
+
+      if (x.set && x.to) { //valid check
+        /*let msg = await xs.enc(
+          JSON.stringify(x),
+          core.security.key 
+        )*/
+
+        xs.send( await xs.wrap(x) )
+      }
+
+      break
+
+//----------------------------------------
+
     case 'xcert':
       /**
-       * xdev.$({xcert:--msg--, key:--key--, sig:--sig-- })
+       * xdev.$({
+       *    xcert:--msg--, 
+       *    key:--key--, 
+       *    sig:--sig-- 
+       * })
+       * 
        * to sign just put msg & key
        * to verify put all the msg, key and signature
        */
 
       if (x.xcert && x.key && !x.sig) {
         //sign
-        return xdev.xcert(x.xcert, x.key)
+        return xs.xcert(x.xcert, x.key)
 
       } else if (x.xcert && x.key && x.sig) {
         //verify
-        return xdev.xcert(x.xcert, x.key, x.sig)
+        return xs.xcert(x.xcert, x.key, x.sig)
       
       } else {
         return 'ERROR: wrong input'
@@ -67,19 +139,19 @@ xdev.$ = async function(x) {
     case 'genKey':
 
       if (x.genKey == 'aes') {
-        return xdev.genKey()
+        return xs.genKey()
       }
 
       break
 
 
     case 'encrypt':
-      return xdev.encrypt(x.encrypt, x.key)
+      return xs.encrypt(x.encrypt, x.key)
       break
 
 
     case 'decrypt':
-      return xdev.decrypt(x.decrypt, x.key)
+      return xs.decrypt(x.decrypt, x.key)
       break
 
       
@@ -93,8 +165,8 @@ xdev.$ = async function(x) {
 // default algor = AES-GCM
 
 //1-----------------------------------------
-xdev.random = function () {
-  //  xdev.random()
+xs.random = function () {
+  //re Uint32Array, the random is in the re[0] eg, 3660119685
 
   const arr = new Uint32Array(1) //1
   return self.crypto.getRandomValues(arr)
@@ -102,16 +174,22 @@ xdev.random = function () {
 
 
 //2-----------------------------------------
-xdev.uuid = function () {
-  //  xdev.uuid()
+xs.uuid = function () {
+  //re standard uuid eg 92798ca1-0bd5-4c32-bb9a-493c9e8050b2
 
   return self.crypto.randomUUID()
 }//ok
 
 
 //3-----------------------------------------
-xdev.hash = async function (words, algor=256) {
-  //  xdev.hash() | ...hash(2) | ...hash(256) | ...so on
+xs.hash = async function (words, algor=256) {
+  /*  xs.hash() | .hash(2) | .hash(256) | ...
+
+      #eg  xs.hash('words')   ...this is default = SHA-256'
+          xs.hash('words',3)    ...this is SHA-384
+      #status: ok
+      #testBy: m   
+  */
 
   //make it easier to set the algorithm
   switch (algor) {
@@ -160,7 +238,7 @@ xdev.hash = async function (words, algor=256) {
 
 
 //4-------------------------------------------------
-xdev.xcert = async function (msg, key, sig) {
+xs.xcert = async function (msg, key, sig) {
   /**
    * Certifies message using hash/sha256. This f does 2 things (1) sign and (2) verify. If we put msg & key this is the sign, if we put msg, key & sig then this is verify
    * 
@@ -178,7 +256,7 @@ xdev.xcert = async function (msg, key, sig) {
       return 'ERROR: input type'
     }
 
-    return xdev.hash(msg + key)
+    return xs.hash(msg + key)
   
   } else if (msg && key && sig) {
     //verify
@@ -186,7 +264,7 @@ xdev.xcert = async function (msg, key, sig) {
       return 'ERROR: input type'
     }
 
-    let _sig = await xdev.hash(msg + key)
+    let _sig = await xs.hash(msg + key)
     return (_sig == sig)? true:false
 
   } else {
@@ -205,7 +283,7 @@ xdev.xcert = async function (msg, key, sig) {
 
 
 //5-----------------------------------------
-xdev.genKey = async function (algor='aes') {
+xs.genKey = async function (algor='aes') {
   //  xdev.genKey('rsa'|'hmac'|'aes'|'ecdsa')
 
 //RSA-OAEP
@@ -231,7 +309,7 @@ xdev.genKey = async function (algor='aes') {
       ['sign','verify']
     )//ok, get 1 key
 
-    key.export = await xdev.exportKey(key,'hmac')
+    key.export = await xs.exportKey(key,'hmac')
     return key
     //ok
   
@@ -256,7 +334,7 @@ xdev.genKey = async function (algor='aes') {
       ['encrypt','decrypt']
     )
 
-    key.export = await xdev.exportKey(key)
+    key.export = await xs.exportKey(key)
     return key
     //ok
 
@@ -290,13 +368,16 @@ function hex2buf(hex) {
 
 
 //6-----------------------------------------
-xdev.enc = async function ( msg, key) {
-  return xdev.encrypt( msg, key)
+xs.enc = async function ( msg, key) {
+  //msg must be string or non-object
+  //if msg is number, it treats as '123456'
+  //if msg is [111,222], treats as '111,222'
+  return xs.encrypt( msg, key)
 }//ok, make it a little bit shorter
 
 
 
-xdev.encrypt = async function( msg, key) {
+xs.encrypt = async function( msg, key) {
   //AES-GCM
 
   let key_ = hex2buf(key)
@@ -316,7 +397,7 @@ xdev.encrypt = async function( msg, key) {
     new TextEncoder().encode(msg)
   )
 
-  return xdev.buffer2base64(iv_) + xdev.buffer2base64(cx)
+  return xs.buffer2base64(iv_) + xs.buffer2base64(cx)
 }
 
 
@@ -399,7 +480,7 @@ xdev.encrypt = async function (msg, key, cert='', algor='aes') {
 
 
 //7-----------------------------------------
-xdev.buffer2hex = function (buffer) {
+xs.buffer2hex = function (buffer) {
   //  xdev.buffer2hex(buffer) ...gets hex code
 
   //buffer to hex
@@ -415,7 +496,7 @@ xdev.buffer2hex = function (buffer) {
 
 
 //8-----------------------------------------
-xdev.buffer2base64 = function (buffer) {
+xs.buffer2base64 = function (buffer) {
   //  xdev.buffer2base64(buffer) ...gets base64 codes
 
   const st = String.fromCharCode.apply(
@@ -428,7 +509,7 @@ xdev.buffer2base64 = function (buffer) {
 
 
 //9-----------------------------------------
-xdev.base64ToBuffer = function (base64) {
+xs.base64ToBuffer = function (base64) {
   //  xdev.base64ToBuffer(base64) ...gets buffer
 
   return new Uint8Array(
@@ -439,7 +520,7 @@ xdev.base64ToBuffer = function (base64) {
 
 
 //10-----------------------------------------
-xdev.buffer2utf8 = function (buffer) {
+xs.buffer2utf8 = function (buffer) {
   //  xdev.buffer2utf8(buffer) ...gets utf8 codes
 
   return new TextDecoder('utf-8').decode(
@@ -456,12 +537,12 @@ xdev.buffer2utf8 = function (buffer) {
 
 
 //11------------------------------------------------------
-xdev.dec = async function (cx, key) {
-  return xdev.decrypt(cx, key)
+xs.dec = async function (cx, key) {
+  return xs.decrypt(cx, key)
 }
 
 
-xdev.decrypt = async function (cx, key) {
+xs.decrypt = async function (cx, key) {
   /**
    * the input cx has format: [iv(16)][msgx][tag(16)]
    */
@@ -575,7 +656,7 @@ xdev.decrypt = async function (seal, key, cert='', algor='aes') {
 
 
 //12-----------------------------------------
-xdev.exportKey = async function(key, format='aes') {
+xs.exportKey = async function(key, format='aes') {
   //  xdev.exportKey(key, 'priKey'|'pubKey'|'raw')
   //  output is base64
 
@@ -591,7 +672,7 @@ xdev.exportKey = async function(key, format='aes') {
       key
     )
 
-    return xdev.buffer2base64(key_) //don't put the PEM wrapper  
+    return xs.buffer2base64(key_) //don't put the PEM wrapper  
   
   } else {
     return 'ERROR! wrong input'
@@ -603,7 +684,7 @@ xdev.exportKey = async function(key, format='aes') {
 
 
 //13-----------------------------------------
-xdev.importKey = async function(key,format='aes') {
+xs.importKey = async function(key,format='aes') {
   //  xdev.importKey(key || key,'pubKey'|'aes'|'raw')  
 
   //get the base64 in and convert into a buffer
@@ -661,7 +742,7 @@ xdev.importKey = async function(key,format='aes') {
 
 
 //14----------------------------------------------
-xdev.sign = async function (msg, key, algor='hmac') {
+xs.sign = async function (msg, key, algor='hmac') {
   // take HMAC is the defaul sign algorithm
 
   //check the msg
@@ -678,7 +759,7 @@ xdev.sign = async function (msg, key, algor='hmac') {
       msg_
     )
   
-    return xdev.buffer2base64(buffer)
+    return xs.buffer2base64(buffer)
     //ok
 
 //HMAC    
@@ -689,7 +770,7 @@ xdev.sign = async function (msg, key, algor='hmac') {
     try {
       if (key.match(/^[0-9a-zA-Z/=+]+$/)) {
         //the key is the exported one not obj
-        key = await xdev.importKey(key,'hmac')
+        key = await xs.importKey(key,'hmac')
       }
     } catch {
       //the key is obj
@@ -703,7 +784,7 @@ xdev.sign = async function (msg, key, algor='hmac') {
     )
 
     //return xdev.buffer2base64(buffer)
-    return xdev.buffer2hex(buffer)
+    return xs.buffer2hex(buffer)
     //ok
   }
   
@@ -712,7 +793,7 @@ xdev.sign = async function (msg, key, algor='hmac') {
 
 
 //15-------------------------------------------------
-xdev.verify = async function (msg, signature, key, algor='hmac') {
+xs.verify = async function (msg, signature, key, algor='hmac') {
   // HMAC is default verify algor
   //const msg_ = new TextEncoder().encode(msg)
 
@@ -726,7 +807,7 @@ xdev.verify = async function (msg, signature, key, algor='hmac') {
     return await crypto.subtle.verify(
       { name:'ECDSA', hash:{name:'SHA-384'} },
       key,
-      xdev.base64ToBuffer(signature),
+      xs.base64ToBuffer(signature),
       new TextEncoder().encode(msg)
     )
     //ok
@@ -739,7 +820,7 @@ xdev.verify = async function (msg, signature, key, algor='hmac') {
     try {
       if (key.match(/^[0-9a-zA-Z/+=]+$/)) {
         //it's base64
-        key = await xdev.importKey(key,'hmac')
+        key = await xs.importKey(key,'hmac')
       }
     } catch {
       //it's not base64, assumes the correct key
@@ -760,24 +841,43 @@ xdev.verify = async function (msg, signature, key, algor='hmac') {
 
 
 //16----------------------------------------------------------
-xdev.uuidx = function() {
+/*
+xs.uuidx = function() {
   //gen special uuid which is simply a timestamp but no dup
   //to prevent dup, we take t2 not t1
   let t1 = t2 = Date.now()
   while (t2 == t1) { t2 = Date.now()}
   return t2
 }//ok
+*/
+
+xs.uuidx = function() {
+  // xdev.uuidx() ...get unique timestamp
+
+  let t0 = Date.now()
+  let t1 = Date.now()
+  
+  while (t1==t0) {
+    t1 = Date.now()
+  }
+
+  let coding = t1.toString() 
+  let id = coding.slice(0,-5) + '-' + coding.slice(-5)
+  return id
+  //output like: '16860282-70442' makes it easier to check by eyes
+}//ok, m/20230606
+
 
 
 //17---------------------------------------------
-xdev.utf8ToBuffer = function (msg) {
+xs.utf8ToBuffer = function (msg) {
   return new TextEncoder().encode(msg)
 }//ok
 
 
 
 //18---------------------------------------------
-xdev.passKey = async function (passHash) {
+xs.passKey = async function (passHash) {
   //generate AES-GCM key from a password, this key will be unexactable, and should be destroyed at unnecessarily.
 
   //key material
@@ -793,7 +893,7 @@ xdev.passKey = async function (passHash) {
   //key
   return crypto.subtle.deriveKey(
     { name:'PBKDF2',
-      salt: xdev.utf8ToBuffer('xTKrg5fX-9l_'), //fix this
+      salt: xs.utf8ToBuffer('xTKrg5fX-9l_'), //fix this
       iterations: 100000,
       hash:'SHA-256'  
     },
@@ -810,11 +910,11 @@ xdev.passKey = async function (passHash) {
 
 
 //19----------------------------------------------
-xdev.promptKey = async function () {
+xs.promptKey = async function () {
   //gen an AES-GCM key from user prompt's password
 
-  return await xdev.passKey(
-    await xdev.hash(
+  return await xs.passKey(
+    await xs.hash(
       prompt('password:')
     )
   )
@@ -822,10 +922,10 @@ xdev.promptKey = async function () {
 
 
 //20------------------------------------------------
-xdev.promptHash = async function () {
+xs.promptHash = async function () {
   //prompt to get words and gen hash from it
 
-  return xdev.hash(
+  return xs.hash(
     prompt('words:')
   )
 }
@@ -835,7 +935,7 @@ xdev.promptHash = async function () {
 
 //21------------------------------------------------
 //randomW is a random code tha containing only a-zA-Z nothing else
-xdev.randomW = function (length=16) {
+xs.randomW = function (length=16) {
   //gen a js var style code contains only a-zA-Z
 
   let code = ''
@@ -852,7 +952,7 @@ xdev.randomW = function (length=16) {
 
 
 //22--------------------------------------------
-xdev.password = function (length=12) {
+xs.password = function (length=12) {
   //gen random password from 92 characters
 
   let pass = ''
@@ -869,18 +969,38 @@ xdev.password = function (length=12) {
 
 
 //23---------------------------------------------
-xdev.vaultAdd = async function (x) {
-  // x = {label:value, label2:..., } ...can put many key:value pairs
-  //the output is at xdev.vault in base64 encrypted format
+xs.vaultAdd = async function (x) {
+  /**
+   * xs.vaultAdd() v0.1 m20230613
+   * 
+   * This func creates and encrypted message from user's input and put in the xs.vault . After that user can get data back by using the xs.vaultGet(). These 2 func will prompt for password to use for encrypt/decrypt. User can continue to add more secret data into it and retrieve when she needs, by supplying the correct password.
+   * 
+   * xs.vaultAdd({name:'john', label:value, label:value, ...})
+   * 
+   * #devnote
+   * - fixed bug on block 2: not work for number value, now fixed. 
+   * - changed returning error to obj-based
+   * m20230613
+   *  
+   */
 
-  //check input
+  //check input must be obj and not blank, not array
   if (!x || typeof x != 'object' || !Object.keys(x).length
-    || Array.isArray(x)) return 'ERROR/vaultAdd: invalid input'
+    || Array.isArray(x)) return {
+      
+      func:'xs.vaultAdd()',
+      success: false,
+      msg:"wrong input"
+    }
 
   //reject if found any empty label 
   for (label in x) {
-    if (!x[label] || x[label] == '' 
-      || !Object.keys(x[label]).length ) return 'ERROR/vaultAdd: invalid label' 
+    if (x[label] == '') return {
+      
+        func:'xs.vaultAdd()', 
+        success: false, 
+        msg:"wrong label"
+      }  
   }
 
 
@@ -889,19 +1009,19 @@ xdev.vaultAdd = async function (x) {
   if (Object.keys(x).length > 1) {
     //has several labels-----------------------
 
-    if (!xdev.vault) {
+    if (!xs.vault) {
       //firstly add
-      xdev.vault = await xdev.enc(
+      xs.vault = await xs.enc(
         JSON.stringify(x), 
-        await xdev.promptHash()
+        await xs.promptHash() //prompt for pass and then hash it
       )
 
     } else {
-      //more add
+      //more add if the xs.vault already exist
 
-      let key = await xdev.promptHash()
+      let key = await xs.promptHash() //prompt for pass
       let gold = JSON.parse(
-        await xdev.dec(xdev.vault, key)
+        await xs.dec(xs.vault, key)
       ) 
 
       for (label in x) {
@@ -913,7 +1033,7 @@ xdev.vaultAdd = async function (x) {
         }
       }
 
-      xdev.vault = await xdev.enc(
+      xs.vault = await xs.enc(
         JSON.stringify(gold), 
         key
       )
@@ -925,32 +1045,36 @@ xdev.vaultAdd = async function (x) {
     //has only 1 label-------------------------
      
     //if vault not already existed
-    if (!xdev.vault) {
+    if (!xs.vault) {
 
       //firstly add
-      xdev.vault = await xdev.enc(
+      xs.vault = await xs.enc(
         JSON.stringify(x),  
-        await xdev.promptHash()
+        await xs.promptHash()
       )
 
     } else {
       //if vault already existed
-      let key = await xdev.promptHash()
+      let key = await xs.promptHash()
       
       let gold = JSON.parse(
-        await xdev.dec(xdev.vault, key)
+        await xs.dec(xs.vault, key)
       ) 
       let label = Object.keys(x)
 
       if (label in gold) {
         //dup
-        return 'ERROR/vaultAdd: label already existed, skipped'
+        return {
+          func:'xs.vaultAdd()',
+          success: false,
+          msg:'label already existed, skipped'
+        }
 
       } else {
         //label not duplicated
         gold[label] = x[label]
 
-        xdev.vault = await xdev.enc(
+        xs.vault = await xs.enc(
           JSON.stringify(gold), 
           key
         )
@@ -963,22 +1087,41 @@ xdev.vaultAdd = async function (x) {
 
 
 //24----------------------------------------------
-xdev.vaultGet = async function (label) {
-  //label is the key of the obj that saved in the vault
+xs.vaultGet = async function (label) {
+  /**
+   * xs.vaultGet() v0.1
+   * 
+   * This func gets data that encrypted by the xs.vaultAdd() and then prompt for the user's password. If password correct it returns the data of the label the user supplied.
+   * 
+   *  xs.vaultGet('label')
+   * 
+   *  label is the key of data that added by the func xs.vaultAdd()
+   * 
+   * #devnote
+   * - finished some codes, change error to obj-base, tested. m20230613
+   */
 
-  if (!label || typeof label != 'string') return 'ERROR/vaultGet: invalid input'
+  if (!label || typeof label != 'string') return {
+    func:'xs.vaultGet()',
+    success: false,
+    msg:'wrong input, nothing done'
+  }
 
   let gold = JSON.parse(
-    await xdev.dec( 
-      xdev.vault, 
-      await xdev.promptHash()
+    await xs.dec( 
+      xs.vault, 
+      await xs.promptHash()
     )
   ) 
   
   if (label in gold) {
     return gold[label]
   } else {
-    return 'ERROR/vaultGet: no data for this label'
+    return {
+      func:'xs.vaultGet()',
+      success: false,
+      msg:'wrong label'
+    } 
   }
 }//ok
 
@@ -995,7 +1138,24 @@ m/20230509
 //25----------------------------------------------
 /* if put {people: {...} }   the people is the collection
  */
-xdev.db = function (x) {
+xs.db = function (x) {
+  /**
+   * xs.db() v0.1 20230613
+   * 
+   * This is very simple database utilizing the browser's localStorage to store data. It behaves like a data base so you can read and write data into it.
+   * 
+   * #sample
+   *    
+   *    xs.db()   ...this is the read of the whole db
+   *    xs.db().goods   ...read and select for the 'goods' collection
+   *    xs.db( {collection:{...}} )   ...this creates new collection and inserts obj data into it
+   * 
+   * 
+   * #devnote
+   * - review codes m20230613
+   * 
+   *  
+   */
 
   var db = {} //this is main db v name
 
@@ -1048,12 +1208,12 @@ xdev.db = function (x) {
           if (Array.isArray(x[col])) { //many docs
   
             for (doc of x[col]) {
-              doc._id = xdev.uuidx() //assign id to each doc
+              doc._id = xs.uuidx() //assign id to each doc
               db[col].push(doc)
             }
   
           } else { //1 doc
-            x[col]._id = xdev.uuidx()
+            x[col]._id = xs.uuidx()
             db[col].push(x[col]) 
           }
         }
@@ -1073,13 +1233,13 @@ xdev.db = function (x) {
             if (Array.isArray( x[col] )) {
               //add many docs to existing col
               for (doc of x[col]) {
-                doc._id = xdev.uuidx()
+                doc._id = xs.uuidx()
                 db[col].push(doc) //push into existing col
               } 
   
             } else {
               //add 1 doc to existing col
-              x[col]._id = xdev.uuidx()
+              x[col]._id = xs.uuidx()
               db[col].push( x[col] )
             }
   
@@ -1091,13 +1251,13 @@ xdev.db = function (x) {
               //newly add many docs
   
               for (doc of x[col]) {
-                doc._id = xdev.uuidx()
+                doc._id = xs.uuidx()
                 db[col].push(doc)
               }
   
             } else {
               //newly add 1 doc
-              x[col]._id = xdev.uuidx()
+              x[col]._id = xs.uuidx()
               db[col].push(x[col]) //make it in a
             }
           }
@@ -1140,7 +1300,7 @@ xdev.db = function (x) {
 
 
 //26--------------------------------------------------
-xdev.atime = function (same='hour') {
+xs.atime = function (same='hour') {
 
   let t = new Date()
   let y = t.getFullYear()
@@ -1189,7 +1349,7 @@ xdev.atime = function (same='hour') {
 
 
 //27--------------------------------------------------
-xdev.acode = async function (t=24) {
+xs.acode = async function (t=24) {
 
   switch (t) {
     case 60:
@@ -1220,42 +1380,86 @@ xdev.acode = async function (t=24) {
       t = 'hour' //or 24
   }
 
-  return await xdev.hash(
-    document.body + xdev.atime(t)
+  return await xs.hash(
+    document.body + xs.atime(t)
   )
 }
 
 
 
 //28------------------------------------------
-xdev.send = async function (wrap, urlToSendTo=xdev.serverPostUrl) {
+xs.send = async function (value, urlToSendTo=xs.serverPostUrl) {
   //seal the data and wrap it and send to the server
 
   //A - check server post url
   if (urlToSendTo == '') {
-    return 'invalid input'
+    return {
+      func:'xs.send()',
+      success: false,
+      msg:'Wrong input.'
+    }
   }
 
-  //B - ready & proceed
-  xdev._send = {wrap: wrap} //keep wrap for ref
+  //log
+  if (!xs.sendLog) {
+    xs.sendLog = {
+      req: value,
+      resp:''
+    }
+  } else {
+    xs.sendLog.req = value 
+  }
 
+  //convert
+  if (typeof value == 'object') value = JSON.stringify(value)
+
+
+  //B - ready & proceed
+  //xs._send = {wrap: wrap} //keep wrap for ref
+
+  
+  //connect
   fetch(
     urlToSendTo,
     {
       method:'POST',
       headers: {'Content-Type':'application/json; charset=utf-8'},
-      body: JSON.stringify(wrap)
+      body: value 
     }
   
-  ).then( resp => {
+  ).then( re => {
     //console.log(resp) //resp obj
-    return resp.json() //make it json
+    return re.json() //make it json
   
-  }).then( resp => {
+  }).then( re => {
     //work on the resp here
-    xdev._send.resp = resp
+    //xs._send.resp = resp
+
+    if (re.wrap) {
+
+      xs.sendLog.resp = re
+
+      xs.unwrap(re).then(msg => {
+    
+        if (msg.msg && msg.from) {
+          //this is resp from xs.$set command
+          alert(`Msg: ${msg.msg}\nFrom: ${msg.from}\nid: ${msg.id}\nTime: ${msg.time}`)
+        } else {
+          //this is resp from xs.$get command
+          console.log("Got data from the server.")
+        }
+      })
+
+    } else {
+      xs.sendLog.resp = re 
+      //if not wrap just put it in
+    }
+
+    
+    
     //console.log(resp)
 
+/*    
     //verify the msg from xserver
     if (resp.cert) {
       //has certification
@@ -1263,15 +1467,15 @@ xdev.send = async function (wrap, urlToSendTo=xdev.serverPostUrl) {
       let cert = resp.cert
       resp.cert = ''
   
-      xdev.$({
+      xs.$({
         xcert: JSON.stringify(resp),
         key: core.security.salt,
         sig: cert
       })
   
       .then(certified => {
-        xdev._send.resp.verified = certified
-        xdev._send.resp.cert = cert
+        xs._send.resp.verified = certified
+        xs._send.resp.cert = cert
   
         if (certified) {
           //true
@@ -1281,15 +1485,22 @@ xdev.send = async function (wrap, urlToSendTo=xdev.serverPostUrl) {
         }
   
         console.log(
-          xdev._send.resp 
+          xs._send.resp 
         )
-      })
 
+
+      })
     } else {
       //has no cert
-      console.log('invalid message')
+      //console.log('invalid message')
+
+      return {
+        func:'xs.send()',
+        success: false,
+        msg:'wrong message'
+      }
     }
-    
+*/    
 
 
   })
@@ -1297,9 +1508,109 @@ xdev.send = async function (wrap, urlToSendTo=xdev.serverPostUrl) {
 }//ok /m 20230512 
 
 
+xs.send2 = async function (value) {
+  /**
+   * func: xs.send2() 
+   * for: enhancing from xs.send() to include some data wrapping & encryption inside it.
+   * staff: M
+   * created: 20230615
+   * 
+   * #use
+   *      xs.send2(formEl | any value)
+   *      xs.send2(form1) 
+   */
+
+  if (value instanceof HTMLFormElement) {
+    let formx = xs.readForm2(value)
+
+    let cipher = await xs.$({
+      encrypt: JSON.stringify(formx),
+      key: core.security.key
+    })
+
+    xs.send({wrap: cipher})
+
+  }
+} 
+
+
+xs.wrap = async function(data,key=core.security.key) {
+  //wrap data before sending to xserver
+  //let w = await xs.wrap(obj)
+  //returns {wrap:'--base64 encrypted string--'}
+  //#tested ok, m20230616
+
+  if (typeof data == 'object') {
+    data = JSON.stringify(data)
+  }
+
+  return {
+    wrap: await xs.enc(data, key)
+  }
+}
+
+
+xs.unwrap = async function(wrappedObj,key=core.security.key) {
+  //unwrap wrapped-data
+  //let uw = await xs.unwrap(wrapObj)
+  //return data before wrapping, if it's obj it gives you obj
+  //#tested ok, m20230616
+
+  if (wrappedObj.wrap) {
+    let re = await xs.dec(wrappedObj.wrap, key)
+    
+    if ( xs.isJson(re) ) {
+      return JSON.parse(re)
+    } else {
+      return re 
+    }
+
+  } else {
+    return {
+      msg:'Wrong input.',
+      success: false ,
+      from: 'xs.unwrap()'
+    }
+  }
+}
+
+
+xs.isJson = function(sample) {
+  //test if the sample Json or not, if yes returns true, not returns false
+  //let check = xs.isJson(aVar)
+  //#tested ok, m20230616
+
+  try {
+    let check = JSON.parse(sample)
+    if (typeof check == 'object') return true 
+    else return false 
+  } catch {
+    return false
+  }
+}
+
+
+xs.isHex = function (sample) {
+  //check if the input hex or not, returning true or false
+  //#tested ok, m20230616
+
+  if (typeof sample == 'string') {
+    if (sample.match(/^[0-9a-f]+$/i)) {
+      return true
+    } else {
+      return false 
+    }
+
+  } else {
+    return false 
+  }
+}
+
+
+
 
 //29-----------------------------------------------------
-xdev.readForm = function (formid) {
+xs.readForm = function (formid) {
   // v0.5 --read form's input then return x of all filled data
 
   //make it smarter by auto recog all input of the form, so just put the formid to this func and it does the rest
@@ -1372,23 +1683,128 @@ xdev.readForm = function (formid) {
 }//ok, m/20230512
 
 
+xs.readForm2 = function (el_s) {
+  /**
+   * xs.readForm2() upgrade the xs.readForm() 
+   * version: 0.1
+   * mutita.org@gmail.com
+   * 
+   * #input
+   *    can be both el & string
+   *    if it's html element, the func just take it
+   *    if it's string, the func will use it to search for the el
+   * 
+   * #output
+   *    {field1:--, field2:--, ...}
+   * 
+   * #use
+   *    xs.readForm2( document.querySelector('form') )
+   *    xs.readForm2('#formid')
+   * 
+   * #devnote
+   *    -tested ok, 
+   *    -put the else block in work() to read all type el in the form and just put strait el.value. May need watching on this do we need to specify the type of input to work more rather than the radio, checkbox, submit? 
+   * 
+   * #bug
+   *    -fixed wrong reading of radio, done /m20230614
+   * 
+   * #lastUpdate: 20230614.0809
+   * #staff: M
+   * 
+   */
+
+  //init
+  let outputx = {}
+
+  //check input
+  if (el_s instanceof HTMLFormElement) {
+    //this is the ready el, just take it
+    return work(el_s)     
+
+  } else if (typeof el_s == 'string') {
+    //this is string, so need to find the el first
+    el_s = document.querySelector(el_s)
+    return work(el_s)
+
+  } else {
+    return {
+      func:'xs.readForm2()',
+      success: false,
+      msg:'wrong input, must be string or html element'
+    }
+  }
+
+
+  //helper or worker
+  function work(el) {
+
+    for (e of el) {
+
+      if (e.type == 'textarea') outputx[e.name] = e.value 
+
+      else if (e.type == 'radio') {
+        if (e.name in outputx) {
+          //skip if already get into the output
+        } else {
+          outputx[e.name] = el[e.name].value
+          //this call get the: el.nameOfinput.value
+        }
+      }  
+      
+      else if (e.type == 'checkbox') {
+
+        if (e.name in outputx) {
+          if (e.checked) outputx[e.name].push(e.value)
+          //this is existing checkbox name, so just add to the end
+        } else {
+          if (e.checked) outputx[e.name] = [e.value]
+          //this is new checkbox name
+        }
+
+      }
+
+      else if (e.type == 'submit') {} //don't do thing
+
+      else {
+        outputx[e.name] = e.value 
+        //for all the rest of input types
+      }
+
+    }
+    return outputx
+
+  }
+}
+
+
+
+
+
+
 //30-----------------------------------------
-xdev.jsonify = function (x) {
+xs.jsonify = function (x) {
   /**
    * make little shorter of the JSON.stringify()
    */
 
+  if (typeof x != 'object') return false 
   return JSON.stringify(x)
 }
 
 
 //31-----------------------------------------
-xdev.parseJson = function (json) {
+xs.jparse = function (j) {
   /**
    * little shorter JSON.parse()
    */
 
-  return JSON.parse(json)
+  try {
+    let read = JSON.parse(j)
+    if (typeof read == 'object') return read 
+    else return false 
+  } catch {
+    return false 
+  }
 }
 
 
@@ -1550,3 +1966,12 @@ m/20230508
 
 
 */
+
+
+
+
+
+/**
+ * Devnote
+ * Changed all 'xdev' object name to 'xs' so all the func/method will be in this form: xs.--func-- ,m20230613-1113
+ */

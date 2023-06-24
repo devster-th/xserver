@@ -129,7 +129,7 @@ function inserts(docs,colName,dbName) {
 
 
 
-function find(query,colName,dbName,option={_id:0},qty=0,order={}) {
+function find(query,colName,dbName,option={/*_id:0*/},qty=0,order={}) {
   //query = {name:/j/}
   //option is projection, e.g., {_id:0, name:1} shows only name
 
@@ -156,6 +156,7 @@ function find(query,colName,dbName,option={_id:0},qty=0,order={}) {
 
   /**
    * added option in the f var so now we can put projection, 20230503
+   * Test with ObjectId = ok m20230611
    */
 }//m,ok
 
@@ -184,16 +185,24 @@ function updates(value,query,colName,dbName) {
 
 
 //enhance version
-function updates2(value,query,colName,dbName,option) {
+function updates2(value,query,colName,dbName) {
 
   /**
    * created m/20230609
    * added option v
    * 
+   *    xdb.updates2({'aaa':'bbb'},{},col,db,'$rename')
    *    
    */
 
+  //check if the first key has no $set or other command
+  if (Object.keys(value)[0].match(!/^\$\w+$/)) {
+    value = {$set: value}
+    //if no $ command, puts $set as default
+  }
 
+
+  //call mongo
   return new Promise( (resolve,reject) => {
 
     mongo.connect(url, (err,dbx) => {
@@ -202,13 +211,15 @@ function updates2(value,query,colName,dbName,option) {
 
       useDb.collection(colName).updateMany(
         query,
-        { $set: value }, 
+        value,  //just pass raw value into it
+
         (err,result) => {
           if (err) reject(err)
           dbx.close()
           resolve(result)
         }
       )
+
     })
   })
 }
@@ -216,10 +227,7 @@ function updates2(value,query,colName,dbName,option) {
 
 
 
-
-
-
-
+/* NOTE USE , use updates2() instead
 function increase(value,query,colName,dbName) {
   // xs.increase({stock:100, price:-10}, {name:'coffee'}, 'product','xdb')
 
@@ -227,7 +235,7 @@ function increase(value,query,colName,dbName) {
    * increase f will do only 1 doc at a time to prevent mistake
    */
 
-
+/*
   return new Promise( (resolve,reject) => {
 
     mongo.connect(url, (err,dbx) => {
@@ -245,7 +253,7 @@ function increase(value,query,colName,dbName) {
       )
     })
   })
-}//ok m/20230606
+}*/ //ok m/20230606
 
 
 
@@ -292,8 +300,218 @@ function dropCol(colName,dbName) {
 
 
 
+function docCount(query,colName,dbName) {
+  //count number of doc resulting from the query
 
-module.exports = {newDb, newCol, inserts, find, updates, increase, deletes, dropCol}
+  return new Promise( (resolve,reject) => {
+
+    mongo.connect(url, (err,dbx) => {
+      if (err) reject(err)
+      const useDb = dbx.db(dbName)
+
+      useDb.collection(colName).countDocuments(query, 
+
+        (err,result) => {
+          if (err) reject(err) 
+          dbx.close()
+          resolve(result) 
+        }
+
+      )
+    })
+  })
+
+  /**
+   * ok, m/20230610
+   */
+}
+
+
+
+function distinct(distinctValue,query,colName,dbName) {
+  //if we query for countries which picking only 1 distinct name from a collection (or from a query), this is for it.
+
+  //e.g., xmongo.distinct('country',{signedUp:true},'exam','xdb')
+
+  return new Promise( (resolve,reject) => {
+
+    mongo.connect(url, (err,dbx) => {
+      if (err) reject(err)
+      const useDb = dbx.db(dbName)
+
+      useDb.collection(colName).distinct(
+        distinctValue,
+        query, 
+
+        (err,result) => {
+          if (err) reject(err) 
+          dbx.close()
+          resolve(result) 
+        }
+
+      )
+
+    })
+  })
+
+  /**
+   * ok, m/20230610
+   */
+}
+
+
+//list collections
+function listCollection(query={},dbName='xdb') {
+  /**
+   * xmongo.listCollection() -- returns col names in array
+   * 
+   * #use
+   *        let c = await xmongo.listCollection()
+   * 
+   * #test OK, m-202306221721
+   * #log
+   *    -added query to the var so we can check if the specified collection name existed in the db or not, by: 
+   *    xmongo.listCollection({name:'customer'})
+   */
+
+  return new Promise( (resolve,reject) => {
+
+    mongo.connect(url, (err,dbx) => {
+      if (err) reject(err)
+      const useDb = dbx.db(dbName)
+
+      useDb.listCollections(query,{nameOnly:true}).toArray(
+        (err,result) => {
+          if (err) reject(err) 
+          dbx.close()
+          resolve(result) 
+        }
+
+      )
+    })
+  })
+
+}
+
+
+
+
+function isCollection(checkName,dbName='xdb') {
+  /**
+   * xmongo.isCollection(checkName) -- returns true/false to check if it exists as collection or not.
+   * 
+   * #use
+   *        if (isCollection('xyz') {...}
+   * 
+   * #test OK, m-202306221934
+   * #log
+   */
+
+  return new Promise( (resolve,reject) => {
+
+    mongo.connect(url, (err,connection) => {
+      if (err) reject(err)
+      const useDb = connection.db(dbName)
+
+      useDb.listCollections({name:checkName},{nameOnly:true}).toArray(
+        (err,result) => {
+          if (err) reject(err) 
+          connection.close()
+
+          if (result != '') resolve(true)
+          else resolve(false) 
+        }
+
+      )
+    })
+  })
+
+}
+
+
+
+
+
+
+
+//list db
+function listDb(dbName='xdb') {
+  /**
+   * listDb() -- returns list of db existed in the connected mongo
+   * 
+   * #use -- Get the names of the db from output.databases which is the array.
+   * 
+   * #tested OK, m-202306221818
+   */
+
+  return new Promise( (resolve,reject) => {
+
+    mongo.connect(url).then( connection => {
+      const dbAdmin = connection.db(dbName).admin()
+  
+      dbAdmin.listDatabases((err,list) => {
+        if (err) reject(err)
+        //console.log(list)
+        connection.close()
+        resolve(list)  
+      })
+    })
+
+  })
+}
+
+
+
+
+function isDb(checkName,dbName='xdb') {
+  /**
+   * isDb(name) -- returns true if the db exists, false if not.
+   * 
+   * #use -- if (isDb('xdb')) {...}
+   * 
+   * #tested OK, m-202306221956
+   */
+
+  return new Promise( (resolve,reject) => {
+
+    mongo.connect(url).then( connection => {
+      const dbAdmin = connection.db(dbName).admin()
+  
+      dbAdmin.listDatabases((err,list) => {
+        if (err) reject(err)
+        //console.log(list)
+        connection.close()
+
+        const existed = list.databases.find(d => d.name == checkName)
+        
+        if (existed) resolve(true)
+        else resolve(false)  
+      })
+    })
+
+  })
+}
+
+
+
+
+// export -----------------------------------
+module.exports = {
+  newDb, 
+  newCol, 
+  inserts, 
+  find, 
+  updates, 
+  deletes, 
+  dropCol, 
+  updates2,
+  docCount,
+  distinct,
+  listCollection,
+  listDb,
+  isCollection,
+  isDb 
+}
 
 
 /*
