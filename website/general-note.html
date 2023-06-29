@@ -32,7 +32,7 @@ SEARCH
 NEW NOTE
 <form id="generalnote_form" name="generalNote" action="/xget">
   <div>
-    1. Note <textarea name="note" rows="8" style="width:100%"></textarea><br>
+    1. Note* <textarea name="note" rows="8" style="width:100%" required onchange="time.value=new Date().toISOString()" autofocus></textarea><br>
     2. Tag <input name="tag" type="text" size="30"><br>
     3. By <input name="by" type="text" value="M"><br>
     4. Time <input id="time" name="time" type="text"><br>
@@ -45,8 +45,8 @@ NEW NOTE
 </form>
 
 <script>
-  let t = new Date
-  time.value = t.toISOString() 
+  //let t = new Date
+  //time.value = t.toISOString() 
 </script>
 
 </body>

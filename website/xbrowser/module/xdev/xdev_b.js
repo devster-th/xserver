@@ -1,12 +1,15 @@
 /**
- * xdev_b.js
- * This is xdev for browser. A tool that helping software development easier.
- * version: 0.1
- * license: none
- * web: ''
+ * xdev_b.js -- is a toolbox for developing software based on js & node.js. This module works on browser side. You'll need to use the xdev.js in the server too.
+ * 
+ * There're 2 files (a) xdev.js for xserver, (b) xdev_b.js for the xbrowser.
+ * 
+ * version:   0.1
+ * license:   none
+ * doc:       xdev-guid.html (not created yet)
+ * web:       ''
  * createdDate: 20230613
- * lastUpdated: 20230614.0811
- * staff: mutita.org@gmail.com 
+ * lastUpdated: 20230628.1655
+ * staff:     M 
  * 
  * #use
  *      <head>
@@ -14,12 +17,10 @@
  *      </head>
  * 
  *      <script>
- *          el = xs.readForm2('#formid')
+ *          let el = xs.readForm2(formid)
+ *          let re = $({get:'customer'})
  *      </script>
  */
-
-
-
 
 const xs = {
   //this is main object
@@ -38,6 +39,12 @@ const xs = {
   serverGetUrl:'/xget'
 
 }
+
+
+
+
+
+
 
 //data model
 
@@ -78,7 +85,8 @@ xs.$ = async function(x) {
       //get command to xserver/xdb
       
       if (x.get) {
-        xs.send( await xs.wrap(x) )
+        return xs.send(x)
+        
 
       } else {
         return {
@@ -101,7 +109,9 @@ xs.$ = async function(x) {
           core.security.key 
         )*/
 
-        xs.send( await xs.wrap(x) )
+        xs.send(x).then(re => {
+          return re //! need to check this further
+        })
       }
 
       break
@@ -1350,6 +1360,7 @@ xs.atime = function (same='hour') {
 
 //27--------------------------------------------------
 xs.acode = async function (t=24) {
+  //this is another simple kind of certifying an html doc
 
   switch (t) {
     case 60:
@@ -1388,123 +1399,94 @@ xs.acode = async function (t=24) {
 
 
 //28------------------------------------------
-xs.send = async function (value, urlToSendTo=xs.serverPostUrl) {
+xs.send = function (value, urlToSendTo=XBROWSER.xserver.postUrl) {
   //seal the data and wrap it and send to the server
+  /**
+   * xs.send() -- wraps obj and send to xserver in POST method. When get response from the xserver, it unwraps then return the msg out to the caller.
+   * 
+   * #use     let re = xs.send({...})
+   * #test    OK, m20230628 
+   * #note    use Promise inside the f to easier returning output
+   * #staff   M
+   */
 
-  //A - check server post url
-  if (urlToSendTo == '') {
-    return {
-      func:'xs.send()',
-      success: false,
-      msg:'Wrong input.'
-    }
-  }
+  return new Promise((resolve,reject) => {
 
-  //log
-  if (!xs.sendLog) {
-    xs.sendLog = {
-      req: value,
-      resp:''
-    }
-  } else {
-    xs.sendLog.req = value 
-  }
-
-  //convert
-  if (typeof value == 'object') value = JSON.stringify(value)
-
-
-  //B - ready & proceed
-  //xs._send = {wrap: wrap} //keep wrap for ref
-
-  
-  //connect
-  fetch(
-    urlToSendTo,
-    {
-      method:'POST',
-      headers: {'Content-Type':'application/json; charset=utf-8'},
-      body: value 
-    }
-  
-  ).then( re => {
-    //console.log(resp) //resp obj
-    return re.json() //make it json
-  
-  }).then( re => {
-    //work on the resp here
-    //xs._send.resp = resp
-
-    if (re.wrap) {
-
-      xs.sendLog.resp = re
-
-      xs.unwrap(re).then(msg => {
-    
-        if (msg.msg && msg.from) {
-          //this is resp from xs.$set command
-          alert(`Msg: ${msg.msg}\nFrom: ${msg.from}\nid: ${msg.id}\nTime: ${msg.time}`)
-        } else {
-          //this is resp from xs.$get command
-          console.log("Got data from the server.")
-        }
-      })
-
-    } else {
-      xs.sendLog.resp = re 
-      //if not wrap just put it in
-    }
-
-    
-    
-    //console.log(resp)
-
-/*    
-    //verify the msg from xserver
-    if (resp.cert) {
-      //has certification
-
-      let cert = resp.cert
-      resp.cert = ''
-  
-      xs.$({
-        xcert: JSON.stringify(resp),
-        key: core.security.salt,
-        sig: cert
-      })
-  
-      .then(certified => {
-        xs._send.resp.verified = certified
-        xs._send.resp.cert = cert
-  
-        if (certified) {
-          //true
-  
-        } else {
-          //false
-        }
-  
-        console.log(
-          xs._send.resp 
-        )
-
-
-      })
-    } else {
-      //has no cert
-      //console.log('invalid message')
-
-      return {
-        func:'xs.send()',
+    //A - check server post url
+    if (urlToSendTo == '') {
+      reject(
+        {from:'xs.send()',
         success: false,
-        msg:'wrong message'
-      }
+        msg:'Wrong input.'}
+      ) 
     }
-*/    
+
+    //log
+    XBROWSER.sendLog.req = value 
+    XBROWSER.sendLog.resp = '' //reset the value of resp 
 
 
-  })
+    //convert, wrap
+    if (typeof value == 'object') value = JSON.stringify(value)
+    
+    xs.wrap(value).then(wrapped => {
 
+      fetch(
+        urlToSendTo,
+        {
+          method:   'POST',
+          headers:  {'Content-Type':'application/json; charset=utf-8'},
+          body:      JSON.stringify(wrapped)
+        }
+      
+      ).then( re => {
+        //console.log(resp) //resp obj
+        return re.json() //make it json
+      
+      }).then( re => {
+        //work on the resp here
+        //xs._send.resp = resp
+  
+        if (re.wrap) {
+  
+          //XBROWSER.sendLog.resp = re
+  
+          xs.unwrap(re).then(msg => {
+            //console.log(msg)
+            XBROWSER.sendLog.resp = msg 
+  
+            if (msg.msg && msg.from) {
+              //this is resp from xs.$set command
+  
+              alert(`Msg: ${msg.msg}\nFrom: ${msg.from}\nid: ${msg.id}\nTime: ${msg.time}`)
+            
+            } else {
+              //this is resp from xs.$get command
+              console.log("Got data from the server.")
+            }
+  
+            resolve(msg)  //unwrapped msg
+          })
+  
+  
+        } else {
+          XBROWSER.sendLog.resp = re 
+          //if not wrap just put it in
+          resolve(re) 
+        }
+  
+      })/*.catch(
+        reject({
+          msg:      "Fail sending.",
+          success:  false,
+          from:     'xs.send()'
+        })
+      )*/
+
+    })
+
+  })//promise block 
+  
 }//ok /m 20230512 
 
 
@@ -1525,7 +1507,7 @@ xs.send2 = async function (value) {
 
     let cipher = await xs.$({
       encrypt: JSON.stringify(formx),
-      key: core.security.key
+      key:     XBROWSER.security.key
     })
 
     xs.send({wrap: cipher})
@@ -1534,7 +1516,7 @@ xs.send2 = async function (value) {
 } 
 
 
-xs.wrap = async function(data,key=core.security.key) {
+xs.wrap = async function(data,key=XBROWSER.security.key) {
   //wrap data before sending to xserver
   //let w = await xs.wrap(obj)
   //returns {wrap:'--base64 encrypted string--'}
@@ -1550,7 +1532,7 @@ xs.wrap = async function(data,key=core.security.key) {
 }
 
 
-xs.unwrap = async function(wrappedObj,key=core.security.key) {
+xs.unwrap = async function(wrappedObj,key=XBROWSER.security.key) {
   //unwrap wrapped-data
   //let uw = await xs.unwrap(wrapObj)
   //return data before wrapping, if it's obj it gives you obj
@@ -1807,9 +1789,177 @@ xs.jparse = function (j) {
   }
 }
 
+//----------------------------------------------
+xs.showData = function (data,toElement,opt) {
+  /**
+   * xs.showData() -- takes data in array or obj or any format and show it in the specified html element.
+   * 
+   * #test  OK for table now m-20230628.2245
+   * #note  -auto make table header is done but needs enhance to make it Title case and in case the first x in a is not completed heading may need to do something to complete it.
+   *        -the _table-header option for table is OK now, m20230629.1034
+   */
+
+  if (toElement.tagName == 'TABLE') {
+    let htmlCode = ''
+    var noPresetTableHeader 
+
+    //make header ... opt = {tableHeader:'aaa bbb ccc'}
+    if (opt && opt.tableHeader) {
+      opt.tableHeader = opt.tableHeader.split(' ')
+      htmlCode += '<tr>'
+
+      opt.tableHeader.forEach(h => {
+        htmlCode += '<th>' + h + '</th>'
+      })
+      
+      htmlCode += '</tr>'
+      toElement.innerHTML = htmlCode
+    
+    } else {
+      //if not, will auto make header from the data
+      noPresetTableHeader = true 
+    }
+
+    //make table body
+    if (data) {
+      if (noPresetTableHeader) {
+        //make header from data
+        htmlCode += '<tr>'
+        for (k in data[0]) {
+          htmlCode += '<th>' + xs.toTitleCase(k) + '</th>'
+        }
+        htmlCode += '</tr>'
+      }
+
+      //make table body
+      data.forEach(d => {
+        htmlCode += '<tr>'
+        for (k in d) {
+          htmlCode += '<td>' + d[k] + '</td>'
+        }
+        htmlCode += '</tr>'
+      })
+      toElement.innerHTML = htmlCode 
+    }
+  
+  //select    
+  } else if (toElement.tagName == 'SELECT') {
+    let htmlCode = ''
+    data.forEach(choice => {
+      htmlCode += '<option>' + choice[Object.keys(choice)[0]] + '</option>'
+    })
+    toElement.innerHTML = htmlCode
+  
+  //list
+  } else if (toElement.tagName.match(/OL|UL/)) {
+    let htmlCode = ''
+    data.forEach(list => {
+      htmlCode += '<li>' + list[Object.keys(list)[0]] + '</li>'
+    })
+    toElement.innerHTML = htmlCode 
+  }
+}
 
 
 
+// autoFill ------------------------------------------------
+xs.autoFill = function() {
+  /**
+   * xs.autoFill() -- scans through the page and automatically fill datas into the element your specified.
+   * 
+   * #use   just put it in the script part at bottom of the page.
+   * #tested OK, m-20230628.2240
+   */
+  const toFill = document.querySelectorAll('[_autofill]')
+
+  toFill.forEach(ele => {
+    let commandToGetContent = ele.getAttribute('_content')
+    eval('command = ' + commandToGetContent)
+
+    xs.$(command).then(dat => {
+      //now got data, will show it on ele
+
+      //check table option
+      let opt = ''
+
+      if (ele.tagName == 'TABLE') {
+        let valu = ele.getAttribute('_table-header')
+        if (valu) {
+          opt = {tableHeader: valu} 
+        }
+      }
+
+      xs.showData(dat,ele,opt)
+    })
+  })
+}
+
+
+
+
+// make Title case ----------------------------------------
+xs.toTitleCase = function (strin) {
+  //xs.makeTitleCase() -- make the input string a Title case, e.g., if gets 'thailand', makes it 'Thailand'
+  //#tested OK, m20230628.1947
+  //needs more enhance eg if have multi-words, make it from snake, camel, etc.
+
+  let part = strin.split(' ')
+
+  for (i=0; i < part.length; i++) {
+    var firstChar = part[i].charAt(0).toUpperCase()
+    part[i] = firstChar + part[i].slice(1)
+  }
+  return part.join('') 
+}
+xs.toTitle = xs.toTitleCase 
+
+// make camel case -------------------------------
+xs.toCamelCase = function (strin) {
+  //assumes input is multi words eg 'user name', makes it 'userName'
+  //#tested OK, m20230628.2000
+
+  let part = strin.split(' ')
+  for (i=1; i < part.length; i++) {
+    var firstChar = part[i].charAt(0).toUpperCase()
+    part[i] = firstChar + part[i].slice(1)
+  }
+  return part.join('')
+}
+xs.toCamel = xs.toCamelCase 
+
+// make snake case -------------------------------------
+xs.toSnakeCase = function (strin) {
+  //assumes input is multi-words or space separations
+  //#tested OK, m20230628.2003
+
+  return strin.replaceAll(' ','_')
+}
+xs.toSnake = xs.toSnakeCase 
+
+//make dash case -----------------------------
+xs.toDashCase = function (strin) {
+  return strin.replaceAll(' ','-')
+}
+xs.toDash = xs.toDashCase 
+
+
+
+//define a global var here -----------------------------
+globalThis.XBROWSER = {
+  info: "This is a global object to be used across browser codes.",
+  security: {
+    serverid: '35af4272-c5c2-48c7-8a37-6ed1a703a3f6',
+    sessionid: xs.uuid(),
+    salt: 'Ac+G_^;axLHq',
+    key:'c40b93b2dfb61810e5ad22d132de54b7e718d10f66a8f523379826de95dbadf1',
+    serverUrl: '/xpost'
+  },
+  xserver: {
+    getUrl: '/xget',
+    postUrl: '/xpost'
+  },
+  sendLog: {req:'', resp:''}
+}
 
 
 

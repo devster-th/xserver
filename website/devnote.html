@@ -36,40 +36,41 @@ NEW NOTE
 <form id="devnote_form" name="newDevnote" action="/xget">
   <div>
     1. Number <input id="noteNum" name="noteNum" type="text"><br>
-    2. Ref <input name="ref" type="text"><br>
-    3. Title <input name="title" type="text" style="width:80%"><br>
-    4. Type <select name="type">
-          <option>--please choose one--</option>
+    2. Title* <input name="title" type="text" style="width:80%" required onchange="time.value=new Date().toISOString()" autofocus><br>
+    3. Type <select name="type">
+          <option>note</option>
           <option>bug</option>
           <option>error</option>
           <option>idea</option>
           <option>issue</option>
-          <option>note</option>
           <option>question</option>
           <option>task</option>
           <option>topic</option>
           <option>update</option>
           <option>else</option>
       </select><br>
-    5. Message <textarea name="msg" cols="35" rows="3" style="width:100%"></textarea><br>
-    6. Project <input name="project" type="text"><br>
-    7. Module <input name="module" type="text"><br>
-    8. Function <input name="func" type="text"><br>
-    9. Code block <input name="codeBlock" type="text"><br>
-    10. App <input name="app" type="text"><br>
-    11. Db <input name="db" type="text"><br>
-    12. File <input name="file" type="text"><br>
-    13. Tag <input name="tag" type="text"><br>
-    14. Category <input name="category" type="text"><br>   
-    15. Status <select name="status">
+    4. Message <textarea name="msg" cols="35" rows="3" style="width:100%"></textarea><br>
+    5. Due date <input name="due" type="date"><br>
+    6. Ref <input name="ref" type="text"><br>
+    7. Project <input name="project" type="text"><br>
+    8. Module <input name="module" type="text"><br>
+    9. Function <input name="func" type="text"><br>
+    10. Code block <input name="codeBlock" type="text"><br>
+    11. App <input name="app" type="text"><br>
+    12. Db <input name="db" type="text"><br>
+    13. Language <input name="lang" type="text"><br>
+    14. File <input name="file" type="text"><br>
+    15. Tag <input name="tag" type="text"><br>
+    16. Category <input name="category" type="text"><br>   
+    17. Status <select name="status">
       <option>new</option>
       <option>resolved</option>
       <option>need verify</option>
       <option>cancel</option>
     </select><br>
-    16. Status note <input name="statusNote" type="text"><br>
-    17. By <input name="by" type="text" value="M"><br>
-    18. Time <input id="time" name="time" type="text"><br>
+    18. Status note <input name="statusNote" type="text"><br>
+    19. By <input name="by" type="text" value="M"><br>
+    20. Time <input id="time" name="time" type="text"><br>
   </div>
 
   <br>
@@ -81,7 +82,7 @@ NEW NOTE
 
 <script>
   noteNum.value = xs.uuidx() 
-  time.value = new Date().toISOString() 
+  //time.value = new Date().toISOString() 
 </script>
 
 </body>

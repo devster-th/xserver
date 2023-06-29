@@ -22,9 +22,9 @@
 <form id="newUser_form">
 
   <div>
-    1. Your prefered Username <input name="username" type="text" size="16"><br>
+    1. Your prefered Username* <input name="username" type="text" size="16" required><br>
 
-    2. Your prefered password <input name="password" type="password" size=""><br>
+    2. Your prefered password* <input name="password" type="password" size="" required><br>
 
     3. Your prefered PIN <input name="pin" type="number" size="8"><br>
 
@@ -38,7 +38,7 @@
 
     5. Gender: <input name="gender" type="radio" value="female"> Female, <input name="gender" type="radio" value="male"> Male, <input name="gender" type="radio" value="LGBTQ"> LGBTQ, <input name="gender" type="radio" value="unspecified"> Unspecified<br>
 
-    6. Your firstname <input name="firstName" type="text"><br>
+    6. Your firstname* <input name="firstName" type="text" required><br>
 
     7. Your lastname <input name="lastname" type="text"><br>
 
@@ -47,6 +47,7 @@
     9. Your prefered language: <input type="checkbox" name="language" value="thai"> Thai, <input type="checkbox" name="language" value="english"> English, <input type="checkbox" name="language" value="japanese"> Japanese, <input type="checkbox" name="language" value="chinese"> Chinese, <input type="checkbox" name="language" value="tagalog"> Tagalog<br><br>
 
     10. Program you'd like to subscribe for? <select name="program">
+      <option>---</option>
       <option>News</option>
       <option>Learning</option>
       <option>Travel</option>
@@ -69,7 +70,7 @@
 
 <button onclick="xs.$({
   set: xs.readForm2(newUser_form),
-  to:'xdb.user'
+  to:  'user'
 })">Submit</button>
 
 

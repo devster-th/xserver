@@ -316,6 +316,7 @@ async function $(x) {
           && Object.keys(x.get)[0] == 'distinct') {
 
             //distinct mode
+            // $({ get:{distinct:'brand'}, from:'product' })
 
             return xmongo.distinct(
               x.get.distinct,
@@ -431,7 +432,26 @@ async function $(x) {
         && Object.keys(x.to) != false) {
         //have to provide x.set & x.to and must be data inside, not blank
 
-        var [db,col] = x.to.split('.')
+//this block will support the... xs.$(s{set:{..},to:'product'}) so don't need the always... to:'xdb.product'
+
+        //var [db,col] = x.to.split('.')
+        var db,col
+        var part = x.to.split('.')
+        
+        if (part.length == 1 && await xmongo.isCollection(part[0])) {
+          // xs.$({set:{...}, to:'product' })
+          db = XDEV.db.dbName 
+          col = part[0]
+        
+        } else if (part.length == 2) {
+          //assumes we have to:'db.col' 
+          db = part[0]
+          col = part[1]
+        
+        } else {
+          return false 
+        }
+//--------------------------------------
 
         if (!x.filter) {
           //no filter is the new/insert mode

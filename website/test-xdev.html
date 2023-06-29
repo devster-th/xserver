@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<head>
+<script src="/xbrowser/module/xdev/xdev_b.js"></script>
+<style>
+  table {width:100%}
+  table, tr, th,td {border:1px solid black; border-collapse:collapse}
+</style>
+</head>
+<body>
+<h1>test xdev</h1>
+
+Table of our products:
+<table id="tbl" 
+  _autofill 
+  _table-header="Product Part# UnitPrice" 
+  _content="{get:'name partNum price',from:'product'}">
+</table>
+
+<p>What's customer name? <select id="selectCust" 
+  _autofill 
+  _content="{get:'customer{}.name'}">
+</select></p>
+
+
+List of brands:
+<ol _autofill _content="{get:'product{}.brand'}"></ol>
+
+
+<script>
+//const $ = xs.$ 
+
+//show()
+
+xs.autoFill()
+
+
+
+
+</script>
+</body>
+</html>
