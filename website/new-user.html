@@ -4,10 +4,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <!--load styles here-->
-<!--<link rel="stylesheet" href="/deeji/deeji.css">-->
+<!--<link rel="stylesheet" href="/deeji/deeji.css">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style></style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">-->
+<style>
+  * {font-family: sans-serif;}
+  p, input, textarea, select, li, button {font-size: 110%}
+
+</style>
 
 <!--load scripts here-->
 <script src="/xbrowser/module/xdev/xdev_b.js"></script>
@@ -15,11 +19,11 @@
 
 
 </head>
-<body class="w3-container">
-<h1 class="w3-text-blue">new user form</h1>
-<p class="w3-large">New user signup form</p>
+<body>
+<h1 style="color:rgb(67, 139, 103)">newUser_form</h1>
 
-<form id="newUser_form">
+<form id="newUser_form" 
+  _validRule="{username:'required;length:4-20;wordsOnly',password:'required;length:10-20;1symbol;1capital;1number',pin:'required;numbersOnly;length:6-6',email:'required',firstName:'required;length:1-20;wordsOnly',lastname:'required;length:1-20;wordsOnly', gender:'required', age:'value:1-150', language:'required', program:'notNone', note:'required'}">
 
   <div>
     1. Your prefered Username* <input name="username" type="text" size="16" required><br>
@@ -35,19 +39,20 @@
   <hr>
 
   <div>
-
-    5. Gender: <input name="gender" type="radio" value="female"> Female, <input name="gender" type="radio" value="male"> Male, <input name="gender" type="radio" value="LGBTQ"> LGBTQ, <input name="gender" type="radio" value="unspecified"> Unspecified<br>
+    <div _input-frame>
+    5. Gender: <input name="gender" type="radio" value="female"> Female, <input name="gender" type="radio" value="male"> Male, <input name="gender" type="radio" value="LGBTQ"> LGBTQ, <input name="gender" type="radio" value="unspecified"> Unspecified</div>
 
     6. Your firstname* <input name="firstName" type="text" required><br>
 
     7. Your lastname <input name="lastname" type="text"><br>
 
     8. How old are you? <input name="age" type="number" size="4"><br>
-
-    9. Your prefered language: <input type="checkbox" name="language" value="thai"> Thai, <input type="checkbox" name="language" value="english"> English, <input type="checkbox" name="language" value="japanese"> Japanese, <input type="checkbox" name="language" value="chinese"> Chinese, <input type="checkbox" name="language" value="tagalog"> Tagalog<br><br>
+    
+    <div _input-frame>
+    9. Your prefered language: <input type="checkbox" name="language" value="thai"> Thai, <input type="checkbox" name="language" value="english"> English, <input type="checkbox" name="language" value="japanese"> Japanese, <input type="checkbox" name="language" value="chinese"> Chinese, <input type="checkbox" name="language" value="tagalog"> Tagalog</div>
 
     10. Program you'd like to subscribe for? <select name="program">
-      <option>---</option>
+      <option>none</option>
       <option>News</option>
       <option>Learning</option>
       <option>Travel</option>
@@ -66,13 +71,22 @@
 
   </div>
 
-</form>
+</form><br>
 
-<button onclick="xs.$({
-  set: xs.readForm2(newUser_form),
-  to:  'user'
-})">Submit</button>
+<button onclick="submit()">Submit</button>
 
+<script>
+function submit() {
+  let data = xs.readForm2(newUser_form)
+  if (data._invalid) {
+    alert("Fail! \nPlease check the inputs and resubmit again.")
+  } else {
+    xs.$({set:data, to:'user'})
+    newUser_form.reset()
+  }
+}
+
+</script>
 
 </body>
 </html>

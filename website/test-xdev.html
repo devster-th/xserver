@@ -9,10 +9,44 @@
 <body>
 <h1>test xdev</h1>
 
+<img src="data:image/png;base64,R0lGODlhDAAMAKIFAF5LAP/zxAAAANyuAP/gaP///wAAAAAAACH5BAEAAAUALAAAAAAMAAwAAAMlWLPcGjDKFYi9lxKBOaGcF35DhWHamZUW0K4mAbiwWtuf0uxFAgA7">
+
+
+<table id="testTable">
+  <tr><th>Name</th><th>Age</th><th>Sex</th></tr>
+  <tr><td>jack</td><td>45</td><td>asdf</td></tr>
+  <tr><td>ssssss</td><td>564</td><td>fsd</td></tr>
+  <tr><td>dfdffffff</td><td>7878</td><td>sdf</td></tr>
+  <tr hidden><td>jack</td><td>45</td><td>asdf</td></tr>
+  <tr hidden><td>ssssss</td><td>564</td><td>fsd</td></tr>
+  <tr hidden><td>dfdffffff</td><td>7878</td><td>sdf</td></tr>
+</table>
+<span style="cursor:pointer;font-size:20px; padding-left:4px; padding-right:4px; color:blue" onclick="toggle(this,testTable)">+</span><br><br>
+
+
+
+
+<script>
+  function toggle(actor,ele) {
+
+    if (actor.innerText == '+') { //state = hide , symbol = +
+      actor.innerText = '--'
+      let ro = ele.querySelectorAll('[hidden]') 
+      ro.forEach(r => r.hidden = false) //unhide
+    
+    } else if (actor.innerText == '--') { //state = show, -
+      actor.innerText = '+'
+      for (i=0; i < ele.rows.length; i++) {
+        if (i > 4) ele.rows[i].hidden = true 
+      }
+    }
+  }
+</script>
+
 Table of our products:
 <table id="tbl" 
   _autofill 
-  _table-header="Product Part# UnitPrice" 
+  table-header="Product Part# UnitPrice" 
   _content="{get:'name partNum price',from:'product'}">
 </table>
 
@@ -26,14 +60,37 @@ List of brands:
 <ol _autofill _content="{get:'product{}.brand'}"></ol>
 
 
+Please put your name <input id="yourName" type="text"><br><br>
+
+SPECIAL CHARACTERS<br>
+&circ; &#710; &caron; &#711; <br>
+<span id="aaa">&circ;&caron;</span>
+
+
+
+
+<h2>convert pic to base64</h2>
+<input type="file" accept="image/*" id="picFile" onchange="ff(this,event)">
+
 <script>
 //const $ = xs.$ 
 
 //show()
 
 xs.autoFill()
-
-
+function ff(ele, event) {
+  const f = event.target.files
+  if (f.length > 0) {
+    const [imageFile] = f 
+    const fileReader = new FileReader()
+    fileReader.onload = () => {
+      const srcData = fileReader.result 
+      console.log(srcData)
+      //outputt = srcData 
+    }
+    fileReader.readAsDataURL(imageFile)
+  }
+}
 
 
 </script>

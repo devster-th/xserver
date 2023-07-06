@@ -4,38 +4,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <!--load styles here-->
-<!--<link rel="stylesheet" href="/deeji/deeji.css">-->
+<!--<link rel="stylesheet" href="/deeji/deeji.css">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style></style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">-->
+<style>
+  * {font-family: sans-serif;}
+  p, input, textarea, select, li, button {font-size: 110%}
+</style>
 
 <!--load scripts here-->
 <script src="/xbrowser/module/xdev/xdev_b.js"></script>
 <script src="/xbrowser/core_b.js"></script>
 
 </head>
-<body class="w3-container">
-<h1 class="w3-text-green">general note</h1>
-<p class="w3-large">Whatever you want to note, note it:</p>
+<body>
+<h1 style="color:coral">general note</h1>
+<p>This page utilizes the GET method.</p>
 
-<hr>
+
 
 SEARCH
 <form id="search_form" name="searchGeneralNote" action="/xget">
-  <input id="search" name="search" type="search">
+  <input id="search" name="search" type="search" size="35">
   <input name="_xs" value="{getFrom:'xdb.generalNote'}" hidden>
   <input type="submit" value="Search">
 </form>
 
-<hr>
+<br><br>
 
 NEW NOTE
-<form id="generalnote_form" name="generalNote" action="/xget">
+<form id="generalNote_form" name="generalNote" action="/xget">
   <div>
-    1. Note* <textarea name="note" rows="8" style="width:100%" required onchange="time.value=new Date().toISOString()" autofocus></textarea><br>
+    1. Note* <textarea name="note" rows="16" style="width:100%" required onchange="time.value=new Date().toISOString()" autofocus></textarea><br>
     2. Tag <input name="tag" type="text" size="30"><br>
-    3. By <input name="by" type="text" value="M"><br>
-    4. Time <input id="time" name="time" type="text"><br>
+    3. By <input name="by" type="text" value="M" size="30"><br>
+    4. Time <input id="time" name="time" type="text" size="35"><br>
   </div>
 
   <br>

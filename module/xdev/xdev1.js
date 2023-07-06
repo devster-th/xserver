@@ -1155,7 +1155,13 @@ class Wrap {
 // helper for get, set, del --------------------------
 
 function filterHelp(filter) {
-
+  /**
+   * filterHelp -- helps the xs.$get & $set to filter the query in mongodb. It converts the x-language into mongodb query language.
+   * 
+   * #test  OK, m20230630.2128
+   * #note  added the *word* in the filter features
+   * 
+   */
   // #1. first check
   if (filter == '' || filter == '*' || filter == 'all' /*|| !Object.keys(filter).length*/ ) {
 
@@ -1231,11 +1237,19 @@ function filterHelp(filter) {
 
     // A* ...FIRST WORDS & *
     else if (typeof filter[k] == 'string' 
-      && filter[k].match(/[^*]+\*$/)) {
+      && filter[k].match(/^[^*]+\*$/)) {
         //wild card like name:'j*' >> name:/^j/
         filter[k] = filter[k].replace('*','')
         eval(`filter[k] = /^${filter[k]}/i`)
     }
+
+    // *word* ...wildcard sandwiches the search word
+    else if (typeof filter[k] == 'string'
+      && filter[k].match(/^\*.+\*$/) ) {
+        //eg... filter:{ name: *jac* } ..result will same as /jac/
+        filter[k] = filter[k].slice(1,-1)
+        eval(`filter[k] = /${filter[k]}/i`)
+      }
 
     // _exist , _inexist 
     else if (typeof filter[k] == 'string' && filter[k].match(/_exist|_inexist/)) {

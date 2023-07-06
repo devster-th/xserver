@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<head>
+  <script src="/xbrowser/module/xdev/xdev_b.js"></script>
+  <style>
+    * {font-family: sans-serif;}
+    p,input,li,select,textarea,button {font-size: 120%;}
+    table {border-collapse: collapse; width:100%}
+    table select, table input {background-color:lightcyan; padding:0; margin:0; border:0 solid white; width:100%}
+    th,td {border:1px solid gray}
+    tr:hover, select:hover, button:hover {background-color: lightslategray;}
+    h3 {padding-bottom: 0; margin-bottom: 0;}
+    .L {text-align: left;}
+    .C {text-align: center;}
+    .R {text-align: right;} 
+    
+    .table-control {color:blue; cursor: pointer;}
+    .active-button {background-color: lightskyblue;}
+    .inactive-button {background-color:'';}
+    
+    .draft {background-color: antiquewhite; border:1px solid lightgray}
+    .approved {background-color: greenyellow; border:1px solid lightgray}
+    .cancel {background-color: orange; border:1px solid lightgray}
+  </style>
+</head>
+<body>
+<h1>Quotation #{new}</h1>
+  Status: <span id="doc_status" name:"docStatus" class="draft">DRAFT</span><br><br>
+  
+  Date: <input id="doc_date" name="doc_date" type="text" style="width:300px; background-color: white;"><br>
+
+  Doc number: <input id="doc_num" name="docNum" type="text" style="width:300px; background-color: white;"><br><br>
+  
+  For <select id="for_cust" name="forCust" _autofill _content="{get:'customer{}.name'}" onchange="showCustInfo()">
+    <option>Select name of customers</option>
+  </select> &nbsp;<span id="custInfo"></span><br>
+  
+  From <select id="from_org" name="fromOrg" onchange="showOrgInfo()">
+    <option>Issuer of this doc</option>
+  </select> &nbsp;<span id="orgInfo"></span><br>
+
+  <h3>Products</h3> 
+
+  <!--table controller-->
+  <span id="add_controller" class="table-Control" title="Add a product row" onclick="newProdLine()">[ + ]</span> &nbsp;<span id="del_controller" class="table-control" title="Delete a product row" onclick="delProdLine()" hidden>[ - ]</span><br>
+
+  <!--product table-->
+  <table id="prod_table" style="background-color:lightcyan;">
+
+    <tr><th style="width:5%">#</th><th style="width:40%">Product</th><th style="width:12%">Qty</th><th style="width:18%">Unit price</th><th>Total</th></tr>
+
+    <!--line #1-->
+    <tr onchange="prodChange(this)"><td class="C">1</td><td><select><option>Select a product</option></select></td><td class="R"><input type="text" size="4" value="1" class="R"></td><td class="R"><td class="R"></td></tr>
+
+    <!--sum-->
+    <tr><td colspan="4" class="R">Sum</td><td id="sum_value" class="R"></td></tr>
+
+    <tr><td colspan="4" class="R"><select id="tax_select" style="width:240px" class="R">
+      <option>VAT 7%</option>
+      <option>WHT 3% (services)</option>
+      <option>WHT 5% (rental)</option>
+    </select></td><td id="tax_value" class="R"></td></tr>
+
+    <tr><td colspan="4" class="R">Net price</td><td id="net_value" class="R"></td></tr>
+  </table>
+
+  <!--terms & conditions-->
+  <h3 style="margin-bottom:0; padding-bottom:0">Terms & conditions</h3>
+  Template <select>
+    <option>Select terms template</option>
+    <option>Net 30</option>
+    <option>Monthly services fees</option>
+    <option>Milestone services fees</option>
+    <option>Cash on delivery</option>
+  </select>
+
+  <textarea id="terms_conditions" rows="5" style="width:100%">
+  1. THB currency, excluded tax
+  2. Net 30
+  3. 1 year warranty included
+  4. Valid 30 days from this document date
+  </textarea><br><br>
+
+  Special note<br> 
+  <textarea id="special_note" style="width:100%" placeholder="A note that beyonds the terms."></textarea><br>
+
+  <h3 style="margin-bottom:0; padding-bottom:0">Authorization</h3>
+  
+  Created by: <input id="created_by" name="createdBy" type="text" value="DonnieYen@goodCompany.com" size="30"><br> 
+  <button id="save_button" class="active-button" onclick="saveDoc()">1. Save as draft</button> <button id="request_button" disabled>2. Request approval</button><br>
+
+  Approved by: <button id="approve_button" disabled>3. Approve</button> <input id="approved_by" name="approvedBy" type="text" value=""><br>
+  
+  Approval code: <input id="approval_code" name="approvalCode" type="text"><br>
+
+  Document URL: <textarea id="doc_url" name="docUrl" cols="35"></textarea><br>
+
+  <button id="share_button" disabled>4. Share to client</button>
+
+<h3 style="margin-bottom:0; padding-bottom:0">Disclaimer</h3>
+<p id="disclaim" style="margin-top:0; padding-top:0">This document is issued by {} for {} only. Other party outside these 2 organizations are inappropriate to access any of this information. The access code will be given right after issuance of this document. Any info about this document please contact {}.</p>
+
+<script>
+////////////////////////////////////////////////////////////
+//var
+doc_date.value = new Date().toISOString()
+doc_num.value = xs.uuidx()  
+xs.el('h1').innerText = 'Quotation #' + doc_num.value.slice(-5)
+
+let prodLineCount = 1 
+let quotObj = {}
+
+//xs.autoFill()
+
+// data & var
+const org = [
+  {name:'nexWorld', address:'Bangkok, Thailand'},
+  {name:'mutita.org', address:'Nakorn Pathom, Thailand'}
+]
+xs.showData(org, from_org).then( showOrgInfo() )
+
+var customer, product, prodName = [], custName = []
+
+//customer
+xs.$({get:'name address', from:'customer'}).then(re => {
+  customer = re
+
+  customer.forEach(doc => {
+    custName.push({name: doc.name})
+  })
+
+  xs.showData(custName, for_cust).then(
+    showCustInfo()
+
+  )
+})
+
+//product
+xs.$({get:'name price', from:'product'}).then(re => {
+  product = re
+
+  product.forEach( doc => {
+    prodName.push({name: doc.name})
+  })
+
+  //show product in the table
+  xs.showData(
+    prodName, 
+    xs.tableCell(prod_table,1,1).firstChild //select
+  ).then( prodChange() )
+})
+
+
+//xs.showData(product, product1)
+
+
+
+// functions
+
+
+function showCustInfo() {
+  let thisCust = customer.find(cus => cus.name == for_cust.value) 
+  custInfo.textContent = thisCust.address 
+}
+
+function showOrgInfo() {
+  let thisOrg = org.find(org => org.name == from_org.value)
+  orgInfo.textContent = thisOrg.address
+}
+
+function prodChange(callerEle) {
+  var row 
+  if (callerEle) {
+    row = callerEle.rowIndex
+  } else {
+    callerEle = prod_table.rows[1]
+    row = 1
+  }  
+
+  let prodName = callerEle.cells[1].firstChild.value
+  let thisProd = product.find(prod => prod.name == prodName)
+
+  if (thisProd.price.toString().match(/^\d+\.\d{2,}/)) thisProd.price = thisProd.price.toString().match(/^\d+\.\d{2}/) //if decimal > 2 cut to 2 
+
+  //unit price
+  let unitPrice = thisProd.price 
+  xs.tableCell(prod_table,row,3).textContent = xs.tradeVal(thisProd.price) 
+
+  //qty
+  let qty = Number(xs.tableCell(prod_table,row,2).firstChild.value)  
+
+  //total
+  let total = (qty * unitPrice) 
+  xs.tableCell(prod_table,row,4).textContent = xs.tradeVal(total) //xs.makeTradeValueNumber(total)  
+
+  //sum .....enhance for multiple product rows
+  var sum = 0
+  if (prodLineCount > 1) {
+    //multi-product
+    for (i=1; i <= prodLineCount; i++) {
+      sum = sum + Number(xs.tableCell(prod_table, i, 4).textContent.replaceAll(',','') )
+    }
+  } else {
+    //1 product line
+    sum = total 
+  }
+  sum_value.textContent = xs.tradeVal(sum) //xs.makeTradeValueNumber(sum)  
+  
+  let taxVal = sum * 0.07
+  tax_value.textContent = xs.tradeVal(taxVal) 
+  
+  let netVal = sum + taxVal 
+  net_value.textContent = xs.tradeVal(netVal) 
+
+}
+
+function deci2(numInString) {
+  if (typeof numInString != 'string') numInString = numInString.toString()
+
+  if (numInString.match(/^\d+\.\d{2,}/)) {
+    //good to touch
+    return numInString.match(/^\d+\.\d{2}/)
+  } else {
+    return numInString //not touch
+  }
+}
+
+
+function newProdLine() {
+  let newEle = document.createElement('tr')
+  newEle.setAttribute('onchange',"prodChange(this)")
+
+  newEle.innerHTML = `<td class="C">${prodLineCount + 1}</td><td><select><option>Select a product</option></select></td><td class="R"><input type="text" size="4" value="1" class="R"></td><td class="R"><td class="R"></td>`
+
+  prod_table.rows[prodLineCount].after(newEle)
+  prodLineCount++
+
+  xs.showData(
+    prodName, 
+    xs.tableCell(prod_table, prodLineCount, 1).firstChild
+  ).then( prodChange(prod_table.rows[prodLineCount]) )
+
+  del_controller.hidden = false // on the [-] control to allow deletion
+}
+
+
+function delProdLine() {
+  //delete the last line up until the 2nd, the first can't be deleted
+  if (prodLineCount > 1) {
+    let confirmed = confirm("Are'you sure to delete the last line of product?")
+    
+    if (confirmed) {
+      prod_table.rows[prodLineCount].remove()
+      prodLineCount--
+      if (prodLineCount == 1) del_controller.hidden = true 
+    }
+  }
+}
+
+function saveDoc() {
+
+  //if prodLineCount > 1 then collect them in array
+  var prodData = []
+
+  for (row=1; row <= prodLineCount; row++) {
+    prodData.push(
+      { name: xs.tableCell(prod_table,row,1).firstChild.value,
+        qty:  xs.tableCell(prod_table,row,2).firstChild.value,
+        unitPrice: xs.tableCell(prod_table,row,3).textContent,
+        total: xs.tableCell(prod_table,row,3).textContent     
+      }
+    )
+  }
+
+  //collect data to obj
+  quotObj = {
+    docStatus:    doc_status.textContent,
+    docDate:      doc_date.value,
+    docNum:       doc_num.value,
+    for:          for_cust.value,
+    from:         from_org.value,
+    product:      prodData,
+    sum:          sum_value.textContent,
+    tax:          tax_select.value,
+    netValue:     net_value.textContent,
+    terms:        terms_conditions.value,
+    specialNote:  special_note.value,
+    createdBy:    created_by.value,
+    approvedBy:   approved_by.value,
+    approvalCode: approval_code.value,
+    docUrl:       doc_url.value,
+    disclaim:     disclaim.textContent
+  }
+
+  //insert to db
+  xs.$({set:quotObj, to:'quotation'})
+
+  //disable [save] button
+  save_button.disabled = true 
+}
+
+</script>
+</body>
+</html> 

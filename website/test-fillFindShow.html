@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<head>
+<script src="/xbrowser/module/xdev/xdev_b.js"></script>
+<style>
+  table {width:100%}
+  table, tr, th,td {border:1px solid black; border-collapse:collapse}
+  tr:hover, input:hover, textarea:hover, select:hover, button:hover {background-color: lightcyan;}
+</style>
+</head>
+<body>
+<h1 style="position:sticky; top:0">test fill, find & show</h1>
+
+<p>FILL OR FIND</p>
+
+<form id="offer">
+  Product* <input name="product" type="text" size="35" required autofocus onchange="time.value=new Date().toISOString();partNum.value=xs.uuidx()"><br>
+  Brief* <textarea name="brief" cols="40" rows="3" required></textarea><br>
+  Part number* <input id="partNum" name="partNum" type="text" required><br>
+  Unit price* <input name="unitPrice" type="number" size="6" required><br>
+
+  Currency* <input name="currency" type="text" value="THB" required size="5"><br>
+  Available stock* <input name="availStock" type="number" size="10" required><br>
+
+  <hr>
+  Unit of measure* <input name="uom" type="text" size="10" required><br>
+
+  Category <input name="category" type="text"><br>
+
+  ShipFrom* <input name="shipFrom" type="text" required><br>
+  Ship via* <input name="shipVia" type="checkbox" value="land"> Land <input name="shipVia" type="checkbox" value="sea"> Sea <input name="shipVia" type="checkbox" value="air"> Air <input name="shipVia" type="checkbox" value="internet"> internet<br>  
+
+  Quality certified: <input name="cert" type="radio" value="yes"> Yes <input name="cert" type="radio" value="no"> No<br>
+  Terms <input name="terms" type="text"><br>
+
+  Status <select name="status">
+      <option></option>
+      <option>Active</option>
+      <option>Pause</option>
+      <option>Inactive</option>
+    </select><br>
+  <hr>
+
+  Shared by* <input name="sharedBy" type="text" required><br>
+  Owner* <input name="owner" type="text" required><br>
+  Contact* <input name="contact" type="text" size="35" required><br>
+  Shared time <input id="time" name="sharedTime" type="text" size="35"><br>
+  Rating <input name="rate" type="text" size="10"><br>
+  Note <input name="note" type="text" size="35"><br>
+
+</form><br>
+<button onclick="xs.$({set: xs.readForm2(offer), to:'offer'});offer.reset()">Share</button> <button onclick="find()">Find</button>
+
+<hr>
+<div id="showHere"></div>
+
+
+
+<script>
+//const $ = xs.$ 
+
+async function find() {
+  let fil = xs.readForm2(offer)
+  for (k in fil) {
+    if (!fil[k]) delete fil[k]
+  }
+  delete fil.partNum
+  delete fil.sharedTime
+  
+  console.log(fil)
+
+  let found = await xs.$({
+    get:'all',
+    from:'offer', 
+    filter: fil 
+  })
+
+  xs.showData(found,showHere)
+}
+
+
+
+
+</script>
+</body>
+</html>

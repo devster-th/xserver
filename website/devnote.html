@@ -4,10 +4,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <!--load styles here-->
-<!--<link rel="stylesheet" href="/deeji/deeji.css">-->
+<!--<link rel="stylesheet" href="/deeji/deeji.css">
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style></style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">-->
+<style>
+  * {font-family: sans-serif}
+  p, input, textarea, select, li, button {font-size: 110%}
+</style>
 
 <!--load scripts here-->
 <script src="/xbrowser/module/xdev/xdev_b.js"></script>
@@ -15,28 +18,32 @@
 
 
 </head>
-<body class="w3-container">
-<button style="position:fixed;top:0;right:0" onclick="if (searchBox.hidden==true) searchBox.hidden=false; else searchBox.hidden=true">search on/off</button>
+<body>
 
-
-<h1 class="w3-text-red">devnote</h1>
-Note anything about your dev works here:
-
-<div id="searchBox" hidden>
-SEARCH
-  <form id="search_form" action="/xget">
-    <input name="search" type="search">
-    <input name="_xs" value="{getFrom:'xdb.devnote'}" hidden>
-    <input type="submit" value="Search">
-  </form>
+<!--page top controller-->
+<div style="text-align:right; font-size:small; position:fixed; top:0; right:0">
+  <button id="_goMostLeft" disabled onclick="dataNav(0)">|&lt;</button><button id="_goLeft" disabled onclick="dataNav(XBROWSER.showDataSpace.index - 1)">&lt;</button><input id="_showDataIndex" type="text" size="4" style="text-align:center;" disabled onchange="dataNav(this.value)"><button id="_goRight" disabled onclick="dataNav(XBROWSER.showDataSpace.index + 1)">&gt;</button><button id="_goMostRight" disabled onclick="dataNav(XBROWSER.showDataSpace.data.length - 1)">&gt;|</button>
+  
+  <!--<button onclick="if (searchDiv.hidden == true) {searchDiv.hidden = false; this.innerHTML = 'search ^'} else {searchDiv.hidden = true; this.innerHTML = 'search v'}">search v</button>-->
 </div>
 
-<hr>
-NEW NOTE 
-<form id="devnote_form" name="newDevnote" action="/xget">
+
+<!--page name-->
+<h1 style="position:sticky; top:0; color:olive">devnote</h1>
+
+<!--search form-->
+<form style="padding:0 16px 0 0">
+  <input id="searchBox" type="text" placeholder="Put your search text here." style="width:100%;">
+</form>
+<button onclick="xsearch()">Search</button><br><br>
+
+
+<!--fill form-->
+<form id="devnote_form" style="margin-top:16px" onchange="changex()" _validRule="{title:'required', msg:'required'}">
   <div>
+    0. System id <input name="_id" type="text" size="30" value="To be generated at server." disabled><br>
     1. Number <input id="noteNum" name="noteNum" type="text"><br>
-    2. Title* <input name="title" type="text" style="width:80%" required onchange="time.value=new Date().toISOString()" autofocus><br>
+    2. Title* <input name="title" type="text" style="width:80%" required onchange="noteNum.value=xs.uuidx(); time.value=new Date().toISOString()" autofocus><br>
     3. Type <select name="type">
           <option>note</option>
           <option>bug</option>
@@ -49,41 +56,103 @@ NEW NOTE
           <option>update</option>
           <option>else</option>
       </select><br>
-    4. Message <textarea name="msg" cols="35" rows="3" style="width:100%"></textarea><br>
+    4. Message* <textarea name="msg" cols="35" rows="3" style="width:100%" required></textarea><br>
     5. Due date <input name="due" type="date"><br>
-    6. Ref <input name="ref" type="text"><br>
-    7. Project <input name="project" type="text"><br>
-    8. Module <input name="module" type="text"><br>
-    9. Function <input name="func" type="text"><br>
-    10. Code block <input name="codeBlock" type="text"><br>
-    11. App <input name="app" type="text"><br>
-    12. Db <input name="db" type="text"><br>
-    13. Language <input name="lang" type="text"><br>
-    14. File <input name="file" type="text"><br>
-    15. Tag <input name="tag" type="text"><br>
-    16. Category <input name="category" type="text"><br>   
+    6. Ref <input name="ref" type="text" size="30"><br>
+    <hr>
+    7. Project <input name="project" type="text" size="30"><br>
+    8. Module <input name="module" type="text" size="30"><br>
+    9. Function <input name="func" type="text" size="30"><br>
+    10. Code block <input name="codeBlock" type="text" size="30"><br>
+    11. App <input name="app" type="text" size="30"><br>
+    12. Db <input name="db" type="text" size="30"><br>
+    13. Language <input name="lang" type="text" size="30"><br>
+    14. File <input name="file" type="text" size="30"><br>
+    <hr>
+    15. Tag <input name="tag" type="text" size="30"><br>
+    16. Category <input name="category" type="text" size="30"><br>   
     17. Status <select name="status">
       <option>new</option>
       <option>resolved</option>
       <option>need verify</option>
       <option>cancel</option>
     </select><br>
-    18. Status note <input name="statusNote" type="text"><br>
-    19. By <input name="by" type="text" value="M"><br>
-    20. Time <input id="time" name="time" type="text"><br>
+    18. Status note <input name="statusNote" type="text" size="30"><br>
+    19. Tested <select name="testedResult">
+      <option></option>
+      <option>OK</option>
+      <option>Fail</option>
+      <option>Testing</option>
+      <option>Pause</option>
+      <option>Cancel</option>
+    </select><br>
+    20. Test note <textarea name="testNote" type="text" rows="1" cols="30"></textarea><br>
+    21. By <input name="by" type="text" value="M"><br>
+    22. Time <input id="time" name="time" type="text" size="35"><br>
   </div>
 
   <br>
   
+  <!--page bottom control
   <input name="_xs" type="text" value="{setTo:'xdb.devnote'}" hidden>
-  <input type="submit" value="Submit">
-
+  <input type="submit" value="Submit">-->
 </form>
 
-<script>
-  noteNum.value = xs.uuidx() 
-  //time.value = new Date().toISOString() 
-</script>
+<button id="save_button" onclick="xs.$({set:xs.readForm2(devnote_form), to:'devnote'})">Save</button> <button id="update_button" onclick="xs.$({set:xs.readForm2(devnote_form), to:'devnote', filter:{noteNum: noteNum.value}})" disabled>Update</button> 
 
+<script>
+  //noteNum.value = xs.uuidx() 
+  //time.value = new Date().toISOString() 
+
+/**
+ * Normally does text search in devnote collection but if we put * it will take whole docs.
+ * @returns - show data in the form
+ */
+async function xsearch() {
+  if (searchBox.value == '*') {
+    xs.$({get:'devnote'}).then(data => { //take all
+      xs.showData(data, devnote_form)
+      XBROWSER.showDataSpace.mode = 'read'
+      save_button.disabled = true 
+    })
+
+  } else { //text search
+    xs.$({
+      get:'', from:'devnote',
+      filter: {$text:{$search: searchBox.value}} 
+    }).then(data => {
+      xs.showData(data, devnote_form)
+      XBROWSER.showDataSpace.mode = 'read'
+      save_button.disabled = true 
+    })
+  }
+}
+
+
+/**
+ * if the fill form changes, work on the update.
+ * @returns - shows [Update] button and if clicked save the data.
+  */
+
+function changex() {
+  if (XBROWSER.showDataSpace.mode == 'read') {
+    update_button.disabled = false 
+    time.value = new Date().toISOString()
+  }
+}
+
+
+/**
+ * dataNav(index) - moves the index value according to the user's click.
+ * @params {number} index - data index
+ * @returns - keeps index value in XB, show data, disable page buttons  
+ */
+function dataNav(index) {
+  XBROWSER.showDataSpace.index = Number(index)
+  xs.showData()
+  save_button.disabled = update_button.disabled = true 
+}
+
+</script>
 </body>
 </html>

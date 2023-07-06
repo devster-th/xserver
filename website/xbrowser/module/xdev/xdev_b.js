@@ -22,6 +22,10 @@
  *      </script>
  */
 
+
+
+//const e = require("express")
+
 const xs = {
   //this is main object
 
@@ -83,18 +87,7 @@ xs.$ = async function(x) {
 
     case 'get':
       //get command to xserver/xdb
-      
-      if (x.get) {
-        return xs.send(x)
-        
-
-      } else {
-        return {
-          msg:'Wrong input',
-          success: false,
-          from:'xs.$get'
-        }
-      }
+      return xs.send(x)
       break
 
     case 'set':
@@ -102,8 +95,9 @@ xs.$ = async function(x) {
       // xs.$({set:--data--, to:'xdb.product'})
       // <button onclick="xs.$({set: xs.readForm2(thisForm), to:'xdb.user'})"
       //#tested ok, m20230616
+      //#note   -now if the data has _invalid property won't send to xserver, m20230701.1959
 
-      if (x.set && x.to) { //valid check
+      if (x.set && x.to && !x.set._invalid) { //valid check
         /*let msg = await xs.enc(
           JSON.stringify(x),
           core.security.key 
@@ -112,6 +106,8 @@ xs.$ = async function(x) {
         xs.send(x).then(re => {
           return re //! need to check this further
         })
+      } else {
+        alert("Fail, there's invalid data. \nPlease correct it and try again. \nThank you.")
       }
 
       break
@@ -1665,19 +1661,25 @@ xs.readForm = function (formid) {
 }//ok, m/20230512
 
 
-xs.readForm2 = function (el_s) {
+xs.readForm2 = function (el_s, validRule={}, noticeStyle='1px solid orange') {
   /**
    * xs.readForm2() upgrade the xs.readForm() 
    * version: 0.1
    * mutita.org@gmail.com
    * 
    * #input
+   * @param {HTMLElement | string} el_s - element of the form 
    *    can be both el & string
    *    if it's html element, the func just take it
    *    if it's string, the func will use it to search for the el
    * 
+   * @param {object} validRule - put the validation rule
+   *    can be from the form ele's _validRule , or an obj
+   *    noticeStyle is set with default but can be changed
+   * 
    * #output
    *    {field1:--, field2:--, ...}
+   *    if there's invalid will get ... name:'<invalid>' and the property outputObject._invalid:true will also added
    * 
    * #use
    *    xs.readForm2( document.querySelector('form') )
@@ -1709,20 +1711,53 @@ xs.readForm2 = function (el_s) {
     return work(el_s)
 
   } else {
-    return {
-      func:'xs.readForm2()',
+
+    let re = {
+      func:'xs.readForm2',
       success: false,
       msg:'wrong input, must be string or html element'
     }
+
+    XBROWSER.readFormLog = re //keep in log ...!not work
+    return re
   }
 
 
-  //helper or worker
+  /**
+   * Helps the xs.readForm2 to get value from the form.
+   * @param {string | HTMLElement} el 
+   * @returns {object} - containing form data as properties
+   * @version 0.1
+   * @author M 
+   * @time 20230702.1116
+   * @test OK, but working on enhancement
+   */
   function work(el) {
+    //get value from the input 'el' and put in 'outputx'
 
-    for (e of el) {
+    if (Object.keys(validRule) == '' ) {
+      eval('validRule =' + el.getAttribute('_validRule') )
+      //if no user's validRule, get it from attribute, if both are none just keep it right there (output will be true if no rule)
+    }
 
-      if (e.type == 'textarea') outputx[e.name] = e.value 
+    if (validRule == null) validRule = {}
+
+
+    for (e of el) { //loop form ele
+
+      if (e.type == 'textarea') {
+        outputx[e.name] = e.value
+
+        if ( xs.validate(outputx[e.name], validRule[e.name]) ) {
+          //pass
+          if (e.style.border == noticeStyle) e.style.border = ''
+        } else {
+          //invalid
+          outputx[e.name] += '<invalid>'
+          e.style.border = noticeStyle
+          outputx._invalid = true 
+        }
+      }  
 
       else if (e.type == 'radio') {
         if (e.name in outputx) {
@@ -1730,8 +1765,25 @@ xs.readForm2 = function (el_s) {
         } else {
           outputx[e.name] = el[e.name].value
           //this call get the: el.nameOfinput.value
+
+          if ( xs.validate(outputx[e.name], validRule[e.name]) ) {
+            //pass
+            if (e.parentElement.tagName == 'DIV' && e.parentElement.hasAttribute('_input-frame')) {
+              //there's a div box so we can give notice
+              e.parentElement.style.border = '' //reset if any
+            }
+
+          } else {
+            //invalid
+            if (e.parentElement.tagName == 'DIV' && e.parentElement.hasAttribute('_input-frame')) {
+              outputx[e.name] = '<invalid>' 
+              e.parentElement.style.border = noticeStyle
+              outputx._invalid = true
+            }
+             
+          }
         }
-      }  
+      }//ok  
       
       else if (e.type == 'checkbox') {
 
@@ -1739,17 +1791,56 @@ xs.readForm2 = function (el_s) {
           if (e.checked) outputx[e.name].push(e.value)
           //this is existing checkbox name, so just add to the end
         } else {
-          if (e.checked) outputx[e.name] = [e.value]
+          if (e.checked) {
+            outputx[e.name] = [e.value]
+          } else {
+            outputx[e.name] = [] //put blank in
+          }
           //this is new checkbox name
         }
 
+        //check value in the checkbox
+        let lastIndexOfCheckbox = el[e.name].length -1 
+
+        if (e.value == el[e.name][lastIndexOfCheckbox].value) {
+          //this is last ele of the checkbox group
+          if ( xs.validate(outputx[e.name], validRule[e.name]) ) {
+            //valid
+            if (e.parentElement.tagName == 'DIV' && e.parentElement.hasAttribute('_input-frame')) {
+              e.parentElement.style.border = ''
+            }
+
+          } else {
+            //invalid
+            if (e.parentElement.tagName == 'DIV' && e.parentElement.hasAttribute('_input-frame')) {
+              outputx[e.name] = '<invalid'
+              e.parentElement.style.border = noticeStyle
+              outputx._invalid = true 
+            }
+
+          }
+        }
       }
 
       else if (e.type == 'submit') {} //don't do thing
 
       else {
-        outputx[e.name] = e.value 
         //for all the rest of input types
+        //the <select> is also in this block
+
+        if (!e.disabled) { //if not disabled
+          outputx[e.name] = e.value 
+
+          if ( xs.validate(outputx[e.name], validRule[e.name]) ) {
+            //pass
+            if (e.style.border == noticeStyle) e.style.border = ''           
+          } else {
+            //invalid
+            outputx[e.name] += '<invalid>'
+            e.style.border = noticeStyle
+            outputx._invalid = true
+          }
+        }
       }
 
     }
@@ -1789,8 +1880,17 @@ xs.jparse = function (j) {
   }
 }
 
-//----------------------------------------------
-xs.showData = function (data,toElement,opt) {
+/**
+ * xs.showData - show data in object or array to html elements.
+ * @param {object} data - {name: ,age: ,sex: , ...}
+ * @param {HTMLElement} toElement - table, ol, ul, select, ...
+ * @param {object} opt - {tableHeader:'Name Age Sex'}
+ * @returns html element that shows the input data
+ * @version 0.1
+ * @author M 
+ * @tested OK m20230702.1722
+ */
+xs.showData = async function (data, toElement, opt) {
   /**
    * xs.showData() -- takes data in array or obj or any format and show it in the specified html element.
    * 
@@ -1799,6 +1899,23 @@ xs.showData = function (data,toElement,opt) {
    *        -the _table-header option for table is OK now, m20230629.1034
    */
 
+  //create obj to keep some var
+  if (!XBROWSER.showDataSpace) {
+    XBROWSER.showDataSpace = {
+      data: data,
+      toElement: toElement,
+      opt: opt,
+      index: 0 //default starting pointer if data is array
+    }
+  }  
+
+  //so the input can be all blank and then the f will take from its space
+  if (!data) data = XBROWSER.showDataSpace.data 
+  if (!toElement) toElement = XBROWSER.showDataSpace.toElement 
+  if (!opt) opt = XBROWSER.showDataSpace.opt 
+
+
+  //each type of ele needs different format so each following blocks handle formats
   if (toElement.tagName == 'TABLE') {
     let htmlCode = ''
     var noPresetTableHeader 
@@ -1851,15 +1968,140 @@ xs.showData = function (data,toElement,opt) {
     toElement.innerHTML = htmlCode
   
   //list
-  } else if (toElement.tagName.match(/OL|UL/)) {
+  } else if (toElement.tagName?.match(/OL|UL/)) {
     let htmlCode = ''
     data.forEach(list => {
       htmlCode += '<li>' + list[Object.keys(list)[0]] + '</li>'
     })
     toElement.innerHTML = htmlCode 
+  } 
+
+
+  //form
+  else if (toElement.tagName == 'FORM') {
+    if (!XBROWSER.showDataSpace.index) {
+      XBROWSER.showDataSpace.index = 0 //pointer to the obj in array
+    } 
+    let index = XBROWSER.showDataSpace.index //shorter
+
+    
+
+    if (Array.isArray(data)) {
+      //the data is array, assuming that it is array of obj
+      //start with the first obj, array[0]
+    
+      //top controller
+      if (index < 0) {
+        //cannot lower than 0
+        XBROWSER.showDataSpace.index = 0
+        return false 
+      } else if (index > (data.length - 1)) {
+        //cannot > max record
+        XBROWSER.showDataSpace.index = data.length - 1 
+        return false
+      } else {
+        //show index at the top controller
+        _showDataIndex.value = index + '/' + (data.length - 1) 
+      }
+    
+      //enable the < > controls
+      _goLeft.disabled = _goRight.disabled = _goMostLeft.disabled = _goMostRight.disabled = false 
+
+      //loop form's fields
+      for (el of toElement) {
+        if (el.type == 'submit') {/*skip*/}
+
+        else if (el.type == 'date') {
+          if (data[index][el.name]?.match(/^\d{4}-\d{2}-\d{2}/) ) {
+            //data is iso date format, correct
+            el.value = data[index][el.name]?.match(/^\d{4}-\d{2}-\d{2}/) //take only yyyy-mm-dd
+          } else {
+            //not iso date format, put null
+            el.value = '' 
+          }
+        } else {
+          //not submit & not date, most typical types
+          el.value = data[index][el.name]
+        }
+      }
+
+
+    } else if (typeof data == 'object') {
+      //assumes that it is obj with fields, just fill obj fields to form
+
+      _showDataIndex.value = '0/0' //only 1 obj shows
+      //_goLeft.disabled = _goRight.disabled = true 
+
+      for (el of toElement) {
+        el.value = data[el.name]
+      }
+    } else {
+      //wrong
+      return false 
+    }
+            
+  }
+
+
+  //will show like simple obj in column way ...a very plain way
+  else {
+    let htmlCode = ''
+
+    if (typeof data == 'object' && !Array.isArray(data)) {
+      data = [data]
+    }
+
+    data.forEach(obj => { //loop the array
+      htmlCode += '<table>'
+      let count = 1
+      var hideState = ''
+
+      for (key in obj) { //loop each obj in each array index
+        if (count == 1) {
+          //we'll make first row 'bold' for clearer distinct each table
+          htmlCode += `<tr ${hideState}><td style="width:25%"><b>` + key + '</b></td><td><b>' + obj[key] + '</b></td></tr>'
+        } else {
+          if (count > 5) hideState = 'hidden'
+          htmlCode += `<tr ${hideState}><td style="width:25%">` + key + '</td><td>' + obj[key] + '</td></tr>'
+        }
+        count++
+      }
+      htmlCode += '</table><span style="font-size:20px;cursor:pointer;color:blue" onclick="xs.expandTable(this,this.previousSibling)" title="Click to expand or shrink this table.">+</span><br><br>'
+    })
+
+    toElement.innerHTML = htmlCode
   }
 }
 
+
+xs.expandTable = function(actor, tableEle) {
+  /**
+   * #brief
+   * xs.expandTable -- helps xs.showData when the xs.showData shows data in table in a short-mode (collapsed more rows if if has many). So this func expands it.
+   * 
+   * #input
+   * 'actor' is the element that user clicks on it, (uses symbol + & -- for user to click, below the table)
+   * 'tableEle' is the table element to be expand or collapse.
+   * 
+   * #output -- the table will expand if it collapsed, and will collapse if it expanded.
+   * 
+   * #tested OK, m-20230701.1822
+   */
+
+  if (actor.innerText == '+') { //state = hide , symbol = +
+    actor.innerText = '--'
+    actor.style.backgroundColor = 'yellow'
+    let ro = tableEle.querySelectorAll('[hidden]') 
+    ro.forEach(r => r.hidden = false) //unhide
+  
+  } else if (actor.innerText == '--') { //state = show, -
+    actor.innerText = '+'
+    actor.style.backgroundColor = ''
+    for (i=0; i < tableEle.rows.length; i++) {
+      if (i > 4) tableEle.rows[i].hidden = true 
+    }
+  }
+}
 
 
 // autoFill ------------------------------------------------
@@ -1941,6 +2183,252 @@ xs.toDashCase = function (strin) {
   return strin.replaceAll(' ','-')
 }
 xs.toDash = xs.toDashCase 
+
+
+
+
+/**
+ * To validate the data against the rule.
+ * @param {string} data - usually a string from an input field 
+ * @param {object} rule - such as {name:'required;wordsOnly', ...}
+ * @returns {boolean} - true is valid, false is invalid
+ * @author M 
+ * @version 0.1
+ * @lastUpdate 20230702.1359
+ * @note added notNone rule
+ */
+xs.validate = function(data, rule) {
+  /**
+   * xs.validate -- validates each data against the provided rules for that data. Returns true/false.
+   * Will use this in the xdev server as well and to validate the mongodb inputting the data.
+   * 
+   * #input
+   *    'data' -- string, usually from the form's input
+   *    'rule' -- string language describing the rules such as: 'required;wordsOnly; ...'
+   * 
+   * #use   let isValid = xs.validate(data,'required;wordsOnly;length:4-20')
+   * 
+   * #output -- returns true if valid, false for invalid
+   * 
+   * #test  OK, for few basic features, m-20230629.1913
+   */
+  
+
+  var validity = true //initialized, if any false happens, change this and return the false/invalid
+
+  if (!rule) return true //{success:false, msg:"Wrong input.", from:'xs.validate'}
+    //so if don't have rule just pass it (return true)
+
+  let part = rule.split(';')
+
+  part.forEach(ru => {
+    ru = ru.trim()
+
+    // required
+    if (ru == 'required') {
+      if (data == '' || !data) validity = false 
+    } 
+    
+    // wordsOnly
+    if (ru == 'wordsOnly') {
+      if (!data.match(/^[a-zA-Z ]+$/)) validity = false  
+    }
+
+    // length:4-20
+    if ( ru.match(/^length:(\d+)-(\d+)$/) ) {
+      let ext = ru.match(/^length:(\d+)-(\d+)$/)
+      if (data.length < Number(ext[1]) || data.length > Number(ext[2]) ) validity = false   
+    }
+
+    // value:18-60
+    if ( ru.match(/^value:(\d+)-(\d+)$/) ) {
+      let ext = ru.match(/^value:(\d+)-(\d+)$/)
+      if (Number(data) < Number(ext[1]) || Number(data) > Number(ext[2]) ) validity = false 
+    }
+
+    // 1symbol
+    if ( ru == '1symbol') {
+      if ( !data.match(/[\-+*/._%^?\<\>\(\)$~!|\\= ]/) ) validity = false 
+    }
+
+    // noSymbol
+    if ( ru == 'noSymbol') {
+      if ( data.match(/[\-+*/._%^?\<\>\(\)$~!|\\= ]/) ) validity = false
+    }
+
+    // 1number
+    if (ru == '1number') {
+      if (!data.match(/\d/)) validity = false 
+    }
+
+    // numbersOnly
+    if (ru == 'numbersOnly') {
+      if (data.match(/\D/) ) validity = false 
+    }
+
+    // 1capital
+    if (ru == '1capital') {
+      if ( !data.match(/[A-Z]/) ) validity = false 
+    }
+
+    // capitalOnly
+    if (ru == 'capitalOnly') {
+      if (!data.match(/^[A-Z]+$/) ) validity = false 
+    }
+
+    // 1small
+    if (ru == '1small') {
+      if ( !data.match(/[a-z]/) ) validity = false 
+    }
+
+    // smallOnly
+    if (ru == 'smallOnly') {
+      if (!data.match(/^[a-z]+$/) ) validity = false 
+    }
+
+    // isoDate
+    if (ru == 'isoDate') {
+      let part = data.split('-')
+      if (part.length != 3) validity = false
+      if (part[0].length > 4) validity = false
+      if ( Number(part[1]) > 12 ) validity = false
+      if ( Number(part[2]) > 31 ) validity = false 
+    }
+
+    // noSpace
+    if (ru == 'noSpace') {
+      if ( data.match(/\s/) ) validity = false 
+    }
+
+    // 2decimal
+    if (ru == '2decimal') {
+      if (!data.match(/^\d+.\d{1,2}$/)) validity = false 
+    }
+
+    // notNone ...for select input, this is the same as 'required'
+    if (ru == 'notNull') {
+      if (data.match(/^$/i) ) validity = false 
+    }
+
+  })
+
+  return validity   
+}
+
+
+
+
+
+/**
+ * el(strin) - shorten the way to find an html element.
+ * @param {string} strin -- like '#ele_id', any complies to document.querySelector
+ * @returns {HTMLElement} -- the element that you can work further
+ * @created 20230702.1639
+ * @author m
+ * @version 0.1
+ * @tested OK 20230702.1645
+ */
+xs.el = function(strin) {
+  return eval(`document.querySelector('${strin}')`)
+}
+
+
+/**
+ * els(strin) - similar to el() but look for many elements.
+ * @param {string} strin -- compliance to document.querySelectorAll
+ * @returns {HTMLElement}
+ * @created 20230702.1642
+ * @author M
+ * @version 0.1 
+ * @tested OK 20230702.1645
+ */
+xs.els = function(strin) {
+  return eval(`document.querySelectorAll('${strin}')`)
+}
+
+
+
+
+/**
+ * xs.tableCell(ele, row, col) - easier to point to a cell in the html table.
+ * @param {HTMLElement} ele 
+ * @param {string|number} row
+ * @param {string|number} col
+ * @returns {HTMLElement} - of the cell 
+ */
+xs.tableCell = function (ele, row, col) {
+  return ele.rows[row].cells[col]
+} 
+
+
+
+/**
+ * xs.tradeVal - makes a numbers string to the trade value format.
+ * @param {string} strin - numbers in string type
+ * @returns {string} - like '1,234,567.50'
+ */
+xs.tradeVal = function(numString) {
+  let fullNum = []
+  var allGood = true 
+  var hasDecimal, num, deci 
+  let outp = []
+
+  //validate
+  if (typeof numString != 'string') numString = numString.toString()
+  
+  if (numString.includes('.')) {
+    fullNum = numString.split('.')
+    if (fullNum[0].match(/^\d+$/) && fullNum[1].match(/^\d+$/) && fullNum.length == 2 ) {
+      //perfect num & decimal value
+      hasDecimal = true
+      allGood = true 
+      num = fullNum[0]
+      deci = fullNum[1]
+    } else {
+      allGood = false 
+    }
+
+  } else {
+    //doesn't have .
+
+    if (numString.match(/^\d+$/)) {
+      //perfect num but no decimal
+      allGood = true
+      hasDecimal = false 
+      num = numString
+    }
+  }
+
+  if (allGood) {
+    while (num) {
+      outp.unshift( num.slice(-3) )
+      num = num.slice(0,-3)
+    }
+
+    if (hasDecimal) {
+      if (deci.length == 1) {
+        deci = deci.toString() + '0'
+      } else {
+        deci = deci.match(/^\d{2}/).toString()
+      }
+
+      return outp.toString() + '.' + deci
+
+    } else {
+      return outp.toString() + '.00'
+    }
+
+  } else {
+    return false //all bad 
+  }
+  
+}
+
+
+
+
+
+
 
 
 

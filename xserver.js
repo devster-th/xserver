@@ -65,7 +65,7 @@ app.get("/xget", (req,resp)=>{
 
   //A) works on the input mainly for certifying msg
   console.log('//--------------------------------------')
-  console.log('//@xserver: received GET message:')
+  console.log('//@xserver: received GET message at ', new Date().toISOString() )
   //console.log(req.ip)
   //console.log(req.method)
   console.log(req.query)
@@ -204,7 +204,7 @@ app.post("/xpost", (req,resp)=> {
 
   //A) certifying msg
   console.log('//---------------------------------------')
-  console.log('//@xserver: received POST msg:')
+  console.log('//@xserver: received POST msg at ', new Date().toISOString() )
   console.log(req.body)
 
   let postMsg = req.body //just put name to avoid confuse
@@ -417,8 +417,7 @@ app.post("/xpost", (req,resp)=> {
 app.listen(XSERVER.port, () => {
   console.log("//////////////////////////////////////////////////////////////////////")
   console.log(
-`@${XSERVER.appName} starts at http://localhost:${XSERVER.port}
-${new Date().toISOString()}\n`
+`@${XSERVER.appName} starts at http://localhost:${XSERVER.port} , ${new Date().toISOString()}`
   )
 
   console.log('A little thing that trying to solve bigger things.')
