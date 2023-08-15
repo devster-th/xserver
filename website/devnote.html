@@ -22,9 +22,21 @@
 
 <!--page top controller-->
 <div style="text-align:right; font-size:small; position:fixed; top:0; right:0">
-  <button id="_goMostLeft" disabled onclick="dataNav(0)">|&lt;</button><button id="_goLeft" disabled onclick="dataNav(XBROWSER.showDataSpace.index - 1)">&lt;</button><input id="_showDataIndex" type="text" size="4" style="text-align:center;" disabled onchange="dataNav(this.value)"><button id="_goRight" disabled onclick="dataNav(XBROWSER.showDataSpace.index + 1)">&gt;</button><button id="_goMostRight" disabled onclick="dataNav(XBROWSER.showDataSpace.data.length - 1)">&gt;|</button>
+  <button id="_goMostLeft" disabled 
+    onclick="dataNav(0)">|&lt;</button><button 
+    
+  id="_goLeft" disabled 
+  onclick="dataNav(XBROWSER.showDataSpace.index - 1)">&lt;</button><input 
   
-  <!--<button onclick="if (searchDiv.hidden == true) {searchDiv.hidden = false; this.innerHTML = 'search ^'} else {searchDiv.hidden = true; this.innerHTML = 'search v'}">search v</button>-->
+  id="_showDataIndex" type="text" size="4" style="text-align:center;" disabled 
+  onchange="dataNav(this.value)"><button 
+  
+  id="_goRight" disabled 
+  onclick="dataNav(XBROWSER.showDataSpace.index + 1)">&gt;</button><button 
+  
+  id="_goMostRight" disabled 
+  onclick="dataNav(XBROWSER.showDataSpace.data.length - 1)">&gt;|</button>
+  
 </div>
 
 
@@ -98,11 +110,25 @@
   <input type="submit" value="Submit">-->
 </form>
 
-<button id="save_button" onclick="xs.$({set:xs.readForm2(devnote_form), to:'devnote'})">Save</button> <button id="update_button" onclick="xs.$({set:xs.readForm2(devnote_form), to:'devnote', filter:{noteNum: noteNum.value}})" disabled>Update</button> 
+<button id="save_button" onclick="xs.$({
+    set:  xs.readForm2(devnote_form), 
+    to:   'devnote'
+  }); this.disabled = true; XBROWSER.showDataSpace.mode = 'read'">Save</button> <button id="update_button" onclick="xs.$({
+    set:  xs.readForm2(devnote_form), 
+    to:   'devnote', 
+    filter: {noteNum: noteNum.value}
+  })" disabled>Update</button> 
+
+
 
 <script>
+//////////////////////////////////////////////////////////////////
   //noteNum.value = xs.uuidx() 
   //time.value = new Date().toISOString() 
+
+
+//XBROWSER.showDataSpace = {mode:'write'}
+
 
 /**
  * Normally does text search in devnote collection but if we put * it will take whole docs.
@@ -129,6 +155,7 @@ async function xsearch() {
 }
 
 
+//---------------------------------------------------------------
 /**
  * if the fill form changes, work on the update.
  * @returns - shows [Update] button and if clicked save the data.
@@ -142,6 +169,7 @@ function changex() {
 }
 
 
+//--------------------------------------------------------------
 /**
  * dataNav(index) - moves the index value according to the user's click.
  * @params {number} index - data index

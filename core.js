@@ -6,55 +6,43 @@
  * web:''
  * contact: mutita.org@gmail.com
  * 
- * @param {*} x 
+ * @param {object} X - can have various properties  
  * @returns 
  */
 
-//core.js
-/*this is core of the app level programs. Any people can dev module.js and then include into this core.js then core.js can pass data to the module.js */
-
-
-
-//sales.$(core,'this is from core')
-
+/*  #use
+          const core = require('./core.js')
+          core.$({do:'something', ...})
+*/
 //the cor.e() takes 2 para, method_ & data_ 
-exports.$ = async function (x) {
-  //get input from deeji.js 
-  // inpu = input that deeji.js sends
-  // metho = fetch method, e.g., post, get, if skip default is 'post'
 
-
+exports.$ = async function (X) {
   
+  switch (X.act) {
+    
+    case 'core_info':
+      return {
+        module: 'core',
+        brief:  "This is main module of the app running in the xserver.",
+        version: '0.1',
+        doc: "Will publish document soon.",
+        contact: 'mutita.org@gmail.com',
+        license: 'none',
+        status: 'active',
+        date: '2023-07-11' 
+      }
+      break
 
-  //1) get & check msg
-  console.log('\n//@core: received msg from @xserver')
-  console.log(x)
-
-
-  //2) work on the msg here ...
-  if (x.method == 'post' && x.subj != 'super password') {
-    let msg = await xs.$({
-      decrypt: x.msg, 
-      key: XSERVER.security.key
-    })
-  
-    console.log('\n//@core: unseal msg:')
-    console.log(msg)
-  
+    default:
+      return {
+        msg: "Invalid input.",
+        success: false,
+        from: 'core.js',
+        time: new Date().toISOString()
+      }
   }
   
-
-  
-
-  //3) then return something back to the caller
-  return {
-    from: core.id,
-    msg:  `OK, your msg #${x.id} is computing`,
-  }
-
   
 
 
 }
-
-//2023-2-20 M/done, changed require on xdev_s.js:10, the way to run module is : module.run(...)

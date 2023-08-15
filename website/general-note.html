@@ -10,6 +10,7 @@
 <style>
   * {font-family: sans-serif;}
   p, input, textarea, select, li, button {font-size: 110%}
+  textarea {font-family: monospace; font-size: 120%}
 </style>
 
 <!--load scripts here-->
@@ -24,7 +25,7 @@
 
 
 SEARCH
-<form id="search_form" name="searchGeneralNote" action="/xget">
+<form id="search_form" name="searchGeneralNote" action="/reqs">
   <input id="search" name="search" type="search" size="35">
   <input name="_xs" value="{getFrom:'xdb.generalNote'}" hidden>
   <input type="submit" value="Search">
@@ -33,9 +34,12 @@ SEARCH
 <br><br>
 
 NEW NOTE
-<form id="generalNote_form" name="generalNote" action="/xget">
+<form id="general_note_form" 
+  name="generalNote" 
+  _validRule="{note:'required'}">
+  
   <div>
-    1. Note* <textarea name="note" rows="16" style="width:100%" required onchange="time.value=new Date().toISOString()" autofocus></textarea><br>
+    1. Note* <textarea name="note" rows="20" style="width:100%" required onchange="time.value=new Date().toISOString()" autofocus></textarea><br>
     2. Tag <input name="tag" type="text" size="30"><br>
     3. By <input name="by" type="text" value="M" size="30"><br>
     4. Time <input id="time" name="time" type="text" size="35"><br>
@@ -43,9 +47,10 @@ NEW NOTE
 
   <br>
   <input name="_xs" type="text" value="{setTo:'xdb.generalNote'}" hidden>
-  <input type="submit" value="Submit">
-
 </form>
+<button onclick="xs.$({set: xs.readForm2(general_note_form), to:'generalNote'}); general_note_form.reset()">Save</button>
+
+
 
 <script>
   //let t = new Date

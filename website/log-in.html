@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+-->
+<style>
+  * {font-family: sans-serif;}
+  p, input, textarea, select, li, button {font-size: 110%}
+  textarea {font-family: monospace; font-size: 120%}
+</style>
+
+<!--load scripts here-->
+<script src="/xbrowser/module/xdev/xdev_b2.js"></script>
+</head>
+
+<body>
+<alert></alert>
+<menu></menu>
+
+<content>
+  <h1>Login</h1>
+  Username <input type="text" id="user_name"><br>
+  Password <input type="password" id="pass_word" onchange="getPassd()"><br>
+  <br>
+  <button>Log in</button>
+</content>
+
+
+<script>
+async function getPassd() {
+  if (user_name.value && pass_word.value) {
+    let vv = {
+      username: user_name.value,
+      passHash: await XB.hash(pass_word.value)
+    }
+    pass_word.value = '****************'
+    console.log(vv)
+  }
+  
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!--load styles here-->
+<!--<link rel="stylesheet" href="/deeji/deeji.css">-->
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style></style>
+
+<!--load scripts here-->
+<script src="/xbrowser/module/xdev/xdev_b.js"></script>
+
+</head>
+<body class="w3-container">
+<h1>homepage/Get form</h1>
+
+<form id="simple" action="/reqs">
+    <!--
+    <p>request <input name="request" size="35"><br>
+     Your message: <input name="message" value="yesssssss"><br>
+    -->
+    message <textarea name="message" rows="2" cols="40"></textarea><br>
+    Are you OK? <input type="radio" name="areYouOK" value="yes"> yes &nbsp; <input type="radio" name="areYouOK" value="no"> no <br>
+    <input type="checkbox" name="likeWhatMusic" value="jazz"> jazz<br>
+    <input type="checkbox" name="likeWhatMusic" value="rock"> rock<br>
+    <input type="checkbox" name="likeWhatMusic" value="folk"> folk<br>
+    <input type="submit" value="Send">
+
+</form>
+
+<hr>
+
+<p>Password <input id="pass" type="password" style="width:100%"></p>
+<button onclick="xdev.hash(pass.value).then(h => {passProc(h);pass.value=''})">Submit</button>
+
+<hr>
+
+<p><a href="page1.html">Post form</a>
+<br><a href="fullWidth.html">full width content</a>
+<br><a href="halfWidth.html">half width content</a>
+<br><a href="testTemplate.html">test template</a>
+<br><a href="deeji.html">deeji page</a>
+<br><a href="xht1.html">xht</a>
+<br><a href="improveTag.html">improveTag</a></p>
+<button onclick="console.log(xev({gen:'xuid'}))">gen xuid</button>
+<button onclick="test()">test</button>
+
+
+
+<hr>
+
+<a href="devnote.html" target="_blank">Devnote</a><br>
+<a href="general-note.html" target="_blank">General note</a><br>
+<a href="new-user.html" target="_blank">New user</a>
+
+
+
+<script>
+async function passProc(hash) {
+    console.log(hash)
+    let pk = await xdev.passKey(hash)
+
+    let x = {name:'mutita'}
+    cipher = await xdev.enc(x, pk)
+    console.log(cipher)
+
+    deci = await xdev.dec(cipher, pk)
+    console.log(deci)
+}
+
+
+
+
+</script>
+
+
+</body>
+</html>
+
+<!--this file is at: /simpleApp/webSite/index.html 
+for testing GET method 
+.
+-->

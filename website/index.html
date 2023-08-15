@@ -1,85 +1,96 @@
 <!DOCTYPE html>
-<html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<!--load styles here-->
-<!--<link rel="stylesheet" href="/deeji/deeji.css">-->
+<!--
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style></style>
+-->
+<style>
+  * {font-family: sans-serif;}
+  p, input, textarea, select, li, button {font-size: 110%}
+  textarea {font-family: monospace; font-size: 120%}
+</style>
 
 <!--load scripts here-->
-<script src="/xbrowser/module/xdev/xdev_b.js"></script>
-
+<script src="/xbrowser/module/xdev/xdev_b2.js"></script>
+<script src="/xbrowser/library/md5/md5.min.js"></script>
 </head>
-<body class="w3-container">
-<h1>homepage/Get form</h1>
 
-<form id="simple" action="/xget">
-    <!--
-    <p>request <input name="request" size="35"><br>
-     Your message: <input name="message" value="yesssssss"><br>
-    -->
-    message <textarea name="message" rows="2" cols="40"></textarea><br>
-    Are you OK? <input type="radio" name="areYouOK" value="yes"> yes &nbsp; <input type="radio" name="areYouOK" value="no"> no <br>
-    <input type="checkbox" name="likeWhatMusic" value="jazz"> jazz<br>
-    <input type="checkbox" name="likeWhatMusic" value="rock"> rock<br>
-    <input type="checkbox" name="likeWhatMusic" value="folk"> folk<br>
-    <input type="submit" value="Send">
+<body>
+<alert></alert>
+<menu></menu>
+<tool></tool>
 
-</form>
-
-<hr>
-
-<p>Password <input id="pass" type="password" style="width:100%"></p>
-<button onclick="xdev.hash(pass.value).then(h => {passProc(h);pass.value=''})">Submit</button>
-
-<hr>
-
-<p><a href="page1.html">Post form</a>
-<br><a href="fullWidth.html">full width content</a>
-<br><a href="halfWidth.html">half width content</a>
-<br><a href="testTemplate.html">test template</a>
-<br><a href="deeji.html">deeji page</a>
-<br><a href="xht1.html">xht</a>
-<br><a href="improveTag.html">improveTag</a></p>
-<button onclick="console.log(xev({gen:'xuid'}))">gen xuid</button>
-<button onclick="test()">test</button>
-
-
-
-<hr>
-
-<a href="devnote.html" target="_blank">Devnote</a><br>
-<a href="general-note.html" target="_blank">General note</a><br>
-<a href="new-user.html" target="_blank">New user</a>
-
+<content>
+  <h1>home</h1>
+  <p>Status: <span id='status'>Inactive</span></p>
+  Username <input id="user_name" type="text"><br>
+  Password <input id="pass_word" type="password" onchange="XB.hash(this.value).then(h => userInfo.passwordHash = h).then(this.value = '')">
+  <br><br>
+  <button onclick="login()">Log in</button>
+  
+</content>
 
 
 <script>
-async function passProc(hash) {
-    console.log(hash)
-    let pk = await xdev.passKey(hash)
+async function init() {
+    if (!XB.secure.sessionId) {
+        XB.secure.sessionId = XB.uuid()
+        sessionStorage.setItem('sessionId', XB.secure.sessionId)
+        
+        if (!XB.ip) {
+            XB.ip = await XB.getIp()
+        } 
+        let re = await XB.$({send:{act:'new_session'}})
+        
+        //certify the packet
+        if (await XB.cert(re)) {
+          //packet is certified
 
-    let x = {name:'mutita'}
-    cipher = await xdev.enc(x, pk)
-    console.log(cipher)
+          //unwrap msg
+          let msg = await XB.dec(re.msg, await XB.makeKey(re))
+          //console.log(msg)
 
-    deci = await xdev.dec(cipher, pk)
-    console.log(deci)
+          if (XB.isJson(msg)) {
+            msg = JSON.parse(msg)
+          }
+
+          //set values
+          XB.active = re.active
+          XB.el('#status').textContent = 'Active'
+          XB.xserver.serverId = re.from
+          XB.secure.salt = msg.yourNewSalt
+          sessionStorage.setItem('active', true)
+          sessionStorage.setItem('serverId', re.from)
+          sessionStorage.setItem('salt', msg.yourNewSalt)
+
+          console.log('everything done!')
+
+        } else {
+          console.log('the resp not certified')
+        }
+    
+      } else {
+        //has sessionId
+        XB.active = true
+        XB.secure.sessionId = sessionStorage.getItem('sessionId')
+        XB.secure.serverId = sessionStorage.getItem('serverId')
+        XB.secure.salt = sessionStorage.getItem('salt')
+        XB.el('#status').textContent = 'Active'
+    }
+}
+init()    
+
+const userInfo = {
+  username: '', passwordHash: ''
+}
+
+async function login() {
+  userInfo.username = user_name.value,
+  console.log(userInfo)
 }
 
 
-
-
 </script>
-
-
 </body>
 </html>
-
-<!--this file is at: /simpleApp/webSite/index.html 
-for testing GET method 
-.
--->

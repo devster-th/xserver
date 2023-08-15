@@ -15,7 +15,6 @@
     
     .table-control {color:blue; cursor: pointer;}
     .active-button {background-color: lightskyblue;}
-    .inactive-button {background-color:'';}
     
     .draft {background-color: antiquewhite; border:1px solid lightgray}
     .approved {background-color: greenyellow; border:1px solid lightgray}
@@ -24,11 +23,11 @@
 </head>
 <body>
 <h1>Quotation #{new}</h1>
-  Status: <span id="doc_status" name:"docStatus" class="draft">DRAFT</span><br><br>
+  Status: <span id="doc_status" name="docStatus" class="draft">DRAFT</span><br><br>
   
-  Date: <input id="doc_date" name="doc_date" type="text" style="width:300px; background-color: white;"><br>
+  Date: <input id="doc_date" name="doc_date" type="text" style="width:300px; background-color: white;" disabled><br>
 
-  Doc number: <input id="doc_num" name="docNum" type="text" style="width:300px; background-color: white;"><br><br>
+  Doc number: <input id="doc_num" name="docNum" type="text" style="width:300px; background-color: white;" disabled><br><br>
   
   For <select id="for_cust" name="forCust" _autofill _content="{get:'customer{}.name'}" onchange="showCustInfo()">
     <option>Select name of customers</option>
@@ -41,7 +40,7 @@
   <h3>Products</h3> 
 
   <!--table controller-->
-  <span id="add_controller" class="table-Control" title="Add a product row" onclick="newProdLine()">[ + ]</span> &nbsp;<span id="del_controller" class="table-control" title="Delete a product row" onclick="delProdLine()" hidden>[ - ]</span><br>
+  <span id="add_controller" class="table-control" title="Add a product row" onclick="newProdLine()">[ + ]</span> &nbsp;<span id="del_controller" class="table-control" title="Delete a product row" onclick="delProdLine()" hidden>[ - ]</span><br>
 
   <!--product table-->
   <table id="prod_table" style="background-color:lightcyan;">
@@ -85,16 +84,16 @@
 
   <h3 style="margin-bottom:0; padding-bottom:0">Authorization</h3>
   
-  Created by: <input id="created_by" name="createdBy" type="text" value="DonnieYen@goodCompany.com" size="30"><br> 
-  <button id="save_button" class="active-button" onclick="saveDoc()">1. Save as draft</button> <button id="request_button" disabled>2. Request approval</button><br>
+  Created by: <input id="created_by" name="createdBy" type="text" size="30"><br> 
+  <button id="save_button" class="active-button" onclick="save()">1. Save as draft</button> <button id="request_button" disabled onclick="requestApprov()">2. Request approval</button><br>
 
-  Approved by: <button id="approve_button" disabled>3. Approve</button> <input id="approved_by" name="approvedBy" type="text" value=""><br>
+  Approved by: <button id="approve_button" disabled onclick="approve()">3. Approve</button> <input id="approved_by" name="approvedBy" type="text" value="" disabled><br>
   
-  Approval code: <input id="approval_code" name="approvalCode" type="text"><br>
+  Approval code: <input id="approval_code" name="approvalCode" type="text" disabled><br>
 
-  Document URL: <textarea id="doc_url" name="docUrl" cols="35"></textarea><br>
+  Document URL: <textarea id="doc_url" name="docUrl" cols="35" disabled></textarea><br>
 
-  <button id="share_button" disabled>4. Share to client</button>
+  <button id="share_button" disabled onclick="share()">4. Share to client</button>
 
 <h3 style="margin-bottom:0; padding-bottom:0">Disclaimer</h3>
 <p id="disclaim" style="margin-top:0; padding-top:0">This document is issued by {} for {} only. Other party outside these 2 organizations are inappropriate to access any of this information. The access code will be given right after issuance of this document. Any info about this document please contact {}.</p>
@@ -108,6 +107,10 @@ xs.el('h1').innerText = 'Quotation #' + doc_num.value.slice(-5)
 
 let prodLineCount = 1 
 let quotObj = {}
+let docId = ''
+let createdBy = 'Donnie Yen'
+created_by.value = createdBy 
+let approvedBy = 'Jacky Chan'
 
 //xs.autoFill()
 
@@ -242,7 +245,7 @@ function newProdLine() {
   del_controller.hidden = false // on the [-] control to allow deletion
 }
 
-
+//------------------------------------------------------
 function delProdLine() {
   //delete the last line up until the 2nd, the first can't be deleted
   if (prodLineCount > 1) {
@@ -256,7 +259,8 @@ function delProdLine() {
   }
 }
 
-function saveDoc() {
+//--------------------------------------------------------
+async function save() {
 
   //if prodLineCount > 1 then collect them in array
   var prodData = []
@@ -292,11 +296,71 @@ function saveDoc() {
   }
 
   //insert to db
-  xs.$({set:quotObj, to:'quotation'})
+  let re = await xs.$({
+    set: quotObj, 
+    to:'quotation', 
+    _act:'new_quotation'
+  })
+  docId = re.id 
 
   //disable [save] button
+  save_button.hidden = true 
   save_button.disabled = true 
+  save_button.classList.remove('active-button')
+  request_button.disabled = false 
+  request_button.classList.add('active-button')
 }
+
+
+//------------------------------------------------------
+async function requestApprov() {
+  let msg = prompt("Please put your note. (optional)")
+  alert("There's a quotation for you to approve.")
+  request_button.hidden = true 
+  approve_button.classList.add('active-button')
+  approve_button.disabled = false 
+
+  
+}
+
+
+//-----------------------------------------------------
+async function approve() {
+  let approved = confirm("Are you confirmed?")
+  
+  if (approved) {
+
+    let re = await xs.$({
+      set: {
+        approvedDoc: docId,
+        by: approvedBy  
+      },
+      to:'approval'
+    })
+
+    doc_status.textContent = 'APPROVED'
+    approved_by.value = approvedBy 
+    approval_code.value = re.id
+    doc_url.value = 'http://domain.com/doc/' + docId + '.html'
+    
+    approve_button.hidden = true
+    share_button.classList.add('active-button')
+    share_button.disabled = false 
+  }
+}
+
+
+function share() {
+  alert("The quotation is now sharable to other people.")
+  share_button.hidden = true 
+}
+
+
+
+
+
+
+
 
 </script>
 </body>

@@ -97,19 +97,29 @@ xs.$ = async function(x) {
       //#tested ok, m20230616
       //#note   -now if the data has _invalid property won't send to xserver, m20230701.1959
 
-      if (x.set && x.to && !x.set._invalid) { //valid check
-        /*let msg = await xs.enc(
-          JSON.stringify(x),
-          core.security.key 
-        )*/
+      return new Promise((resolve,reject) => {
 
-        xs.send(x).then(re => {
-          return re //! need to check this further
-        })
-      } else {
-        alert("Fail, there's invalid data. \nPlease correct it and try again. \nThank you.")
-      }
+        if (x.set && x.to && !x.set._invalid) { //valid check
 
+          xs.send(x).then(re => {
+            resolve(re) 
+          })
+  
+        } else {
+
+          alert(JSON.stringify(
+            { msg: "Fail, invalid data.",
+              success: false,
+              from: 'xs.$set' }
+          ))
+  
+          reject(
+            { msg: "Fail, invalid data.",
+              success: false,
+              from: 'xs.$set' }
+          )
+        }
+      })
       break
 
 //----------------------------------------
@@ -1907,7 +1917,9 @@ xs.showData = async function (data, toElement, opt) {
       opt: opt,
       index: 0 //default starting pointer if data is array
     }
-  }  
+  } else {
+    
+  } 
 
   //so the input can be all blank and then the f will take from its space
   if (!data) data = XBROWSER.showDataSpace.data 
@@ -2440,11 +2452,11 @@ globalThis.XBROWSER = {
     sessionid: xs.uuid(),
     salt: 'Ac+G_^;axLHq',
     key:'c40b93b2dfb61810e5ad22d132de54b7e718d10f66a8f523379826de95dbadf1',
-    serverUrl: '/xpost'
+    serverUrl: '/xserver'
   },
   xserver: {
-    getUrl: '/xget',
-    postUrl: '/xpost'
+    getUrl: '/reqs',
+    postUrl: '/xserver'
   },
   sendLog: {req:'', resp:''}
 }
