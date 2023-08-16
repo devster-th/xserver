@@ -948,7 +948,7 @@ jsdb.changeMode = async function () {
 
 
 
-//--------------------------------------------------
+/*//--------------------------------------------------
 async function makeKey(objIdStr) {
   //get ObjectId in string format then convert to a key (hash256)
   let tt = XD.ObjectId(objIdStr).getTimestamp().getTime()
@@ -959,7 +959,7 @@ async function makeKey(objIdStr) {
   })
   return key
 }
-
+*/
 
 
 
@@ -1011,6 +1011,7 @@ class Packet {
 
 async function cert(packet, salt='') {
   //certify the packet
+  // XS.cert(packet)
 
   if (!packet) return false
   if (!salt) {
@@ -1041,8 +1042,9 @@ async function cert(packet, salt='') {
 
 
 
-async function makeKey (packet, salt='') {
+async function makeKey(packet, salt='') {
   //make key from the packet
+  // XS.makeKey(packet)
   //tested OK, m20230812
 
   if (!packet) return false
@@ -1059,13 +1061,35 @@ async function makeKey (packet, salt='') {
 
 
 
+async function prepPacket(msg, sessionInfo) {
+  //send msg from xserver to peers
+  // XS.send({..msg..}, sessionSalt)
+
+  let packet = new Packet
+  packet.active = sessionInfo.active
+  packet.to = sessionInfo.sessionId
+  packet.from = XSERVER.secure.serverId
+  gotKey = await makeKey(packet, sessionInfo.salt)
+  
+  packet.msg = await XC.$(
+    { encrypt:  JSON.stringify(msg), 
+      key:      gotKey  }
+  )
+
+  return await cert(packet, sessionInfo.salt)
+} 
+
+
+
+
 
 
 // exports -------------------------------------------------
 module.exports = {
   masterKeyFile, $, uuidx, uuid, isHex, 
   isJson, x2html, docNum, runThrough, convert,
-  jsdb, makeKey, password, randomWords, Packet, cert
+  jsdb, makeKey, password, randomWords, Packet, 
+  cert, prepPacket
 }
 
 

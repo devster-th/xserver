@@ -20,25 +20,21 @@ exports.$ = async function (X) {
   
   switch (X.act) {
     
-    case 'core_info':
+    case 'info':
       return {
-        module: 'core',
-        brief:  "This is main module of the app running in the xserver.",
+        moduleName: 'core',
+        brief: 'the core of this xserver platform',
         version: '0.1',
-        doc: "Will publish document soon.",
-        contact: 'mutita.org@gmail.com',
-        license: 'none',
-        status: 'active',
-        date: '2023-07-11' 
+        by: 'nex.world',
+        releasedDate: '2023' 
       }
       break
 
     default:
       return {
         msg: "Invalid input.",
-        success: false,
+        fail: true,
         from: 'core.js',
-        time: new Date().toISOString()
       }
   }
   

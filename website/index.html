@@ -74,7 +74,7 @@ async function init() {
         //has sessionId
         XB.active = true
         XB.secure.sessionId = sessionStorage.getItem('sessionId')
-        XB.secure.serverId = sessionStorage.getItem('serverId')
+        XB.xserver.serverId = sessionStorage.getItem('serverId')
         XB.secure.salt = sessionStorage.getItem('salt')
         XB.el('#status').textContent = 'Active'
     }

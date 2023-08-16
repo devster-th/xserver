@@ -2,21 +2,27 @@
 /* this is a module that will be included into the core.js but the module itself can also call the core's facilities provided through the core v that passed to the module when it calls the module. */
 
 
-exports.$ = function (x) {
+exports.$ = async function (X) {
 
-  console.log('//sales.js test accessing XSERVER')
-  console.log(XSERVER)
+  switch (X.act) {
 
-  console.log('//sales.js: got this data = ')
-  console.log(x)
+    case 'info':
+      return {
+        moduleName: 'sales',
+        brief: "Works on sales functions.",
+        version: '0.2',
+        by: 'nex.world',
+        releasedDate: '2023'
+      }
+      break
 
-  console.log('//sales.js calls on core.message:')
-  core.$({msg:'this is message from sales.js'})
-  
-  console.log('//sales: call xdev:',
-    xdev.random()
-  )
-
+    default:
+      return {
+        msg: "Invalid input.",
+        fail: true,
+        from: 'sales.js'
+      }
+  }
 
 
 

@@ -19,15 +19,17 @@
 
 //load modules
 const express = require("express")
-//const { W } = require("./module/xdev/xdev.js")
-const app     = express()
-//global.core   = require("./core.js")
-const XS = require('./module/xdev/xdev2.js')
+const app   = express()
+const XS    = require('./module/xdev/xdev2.js')
+const XD    = require('./module/xdev/xmongo2.js')
+const XF    = require('./module/xdev/xfile2.js')
+const XC    = require('./module/xdev/xcrypto2.js')
+const core  = require('./module/core/core.js')
+const sales = require('./module/sales/sales.js')
 //global.model = require('./module/xdev/xDataModel.js')
-//global.sales = require('./module/sales/sales.js')
-const XD = require('./module/xdev/xmongo2.js')
-const XF = require('./module/xdev/xfile2.js')
-const XC = require('./module/xdev/xcrypto2.js')
+
+
+
 
 global.XSERVER = {
   appName:  "xserver",
@@ -197,10 +199,112 @@ app.post("/xserver", (req,resp)=> {
   )
 
 
-  //check cert
+  //check if the session active or not
   if (packet.active) { 
     //session already active
 
+    //check xdb
+    XD.$(
+      { find: { sessionId: packet.from },
+        from: 'xdb.session'
+      }
+    
+    ).then(found => {
+      if (found.length == 1 ) found = found[0]
+
+      if (found.active) {
+        //good to work
+
+        XS.cert(packet, found.salt).then(certified => {
+          if (certified) {
+
+            //now unwrap the packet.msg
+            XS.makeKey(packet, found.salt).then(gotKey => {
+
+              //unwrap packet.msg
+              return XC.$(
+                { decrypt:  packet.msg,
+                  key:      gotKey
+                }
+              )
+            
+            }).then(unwrappedMsg => {
+              packet.msg = JSON.parse(unwrappedMsg)
+              console.log(packet.msg)
+
+              if (packet.msg.module) {
+                //this is action for a module
+                /*
+                  like 
+                    { act:'order', 
+                      input:{partNum:xxx}, 
+                      module:'sales' } 
+                */
+
+                //run the module
+                //like sales.$({..input..})
+                try {
+
+                  let module = eval(packet.msg.module)
+                  console.log(module)         
+
+                  module.$(packet.msg).then(result => {
+                    //this is resp from the module
+                    console.log(result)
+
+                    //prep packet to send to XB
+                    return XS.prepPacket(result, found)
+                    
+                  }).then(rePacket => {
+                      console.log(rePacket)
+
+                      //log
+                      XD.$(
+                        { add:  rePacket,
+                          to:   'xdb.log' }
+                      )
+
+                      //send back to XB
+                      resp.json(rePacket)
+                  
+                  }).catch(error => {
+                    console.log(error)
+                  })
+
+                } catch {
+                  console.log('module error')
+                }
+                
+
+
+              } else {
+                //not for module but for the xserver
+                //like {act: 'log_in', input:{...} }
+
+                console.log('this is XS works')
+
+                //should run by: XS.$( <<msg>> )
+              }
+            })
+            
+            
+
+          } else {
+            //packet not certified, will reject
+            console.log('packet not certified')
+
+          }
+        })
+      } else {
+        //the session is expired
+        console.log('session expired')
+
+      }
+
+    })
+
+/*
+    // response
     let rePacket = new XS.Packet
     rePacket.from = XSERVER.secure.serverId
     rePacket.to = packet.from
@@ -219,7 +323,7 @@ app.post("/xserver", (req,resp)=> {
 
       resp.json(rePacket)
     })
-
+*/
 
 
 
@@ -240,11 +344,11 @@ app.post("/xserver", (req,resp)=> {
           //console.log(gotKey)
 
           return XC.$(
-            { decrypt: packet.msg, key: gotKey }
+            { decrypt:  packet.msg, 
+              key:      gotKey }
           )
         
         }).then(unwrappedMsg => {
-          
           packet.msg = JSON.parse(unwrappedMsg)
           //console.log(packet)
 
@@ -280,10 +384,11 @@ app.post("/xserver", (req,resp)=> {
                 rePacket.active = true
 
                 rePacket.msg = {
-                  act:                  'response_to_new_session_request',
-                  refPacketId:          packet.id,
-                  registrationApproved: true,
-                  yourNewSalt:          salt, 
+                  act: 'response',
+                  msg: 'Your new session is now activated.',
+                  refPacketId:      packet.id,
+                  sessionActivated: true,
+                  yourNewSalt:      salt, 
                 }
                 
                 XS.makeKey(rePacket).then(gotKey => {
@@ -317,11 +422,14 @@ app.post("/xserver", (req,resp)=> {
 
                 
               } else {
-                //sessionId found, already exist so will reject the request
+                //sessionId found, already exist so will reject the request or do something
 
+                /*
                 resp.json({
                   msg:'session already existed.'
-                })
+                })*/
+
+                console.log('session already active')
               }
 
             })// end XD block
@@ -329,9 +437,12 @@ app.post("/xserver", (req,resp)=> {
 
           } else {
             //other actions
-            resp.json({
+
+            console.log('this is inactive session & for other action other than new_session')
+
+            /*resp.json({
               msg:"Invalid action."
-            })
+            })*/
 
           }
 
@@ -340,9 +451,12 @@ app.post("/xserver", (req,resp)=> {
         
       } else {
         //not certified
-        resp.json(
+
+        /*resp.json(
           { msg:"Packet not certified." }
-        )
+        )*/
+
+        console.log('packet not certified')
       }
 
     })//end cert block
