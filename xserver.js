@@ -107,69 +107,7 @@ app.get("/reqs", (req,resp)=>{
     to: 'actionLog'
   })*/
 
-
-  //work on embedded getFrom, setTo
-  if (getMsg._xs) {
-    eval('_xs =' + getMsg._xs)
-    delete getMsg._xs //before pass it to the db
-
-    let xsKey = Object.keys(_xs)[0]
-
-    //write mode
-    if ( xsKey == 'setTo') {
-      xs.$({set:getMsg, to: _xs.setTo}).then(re => {
-
-        if (re.insertedCount) { //success
-          resp.send(`<h1>Successfully save data.</h1>
-          <p><b>from:</b> @xserver<br>
-          <b>success:</b> true<br>
-          <b>id:</b> ${re.insertedIds[0]}<br>
-          <b>time:</b> ${new Date().toISOString()}</p>`)
-        
-        } else { //fail
-          resp.send(`<h1>Fail to save data.</h1>
-          <p><b>from:</b> @xserver<br>
-          <b>success:</b> false<br>
-          <b>id:</b> ${xs.uuid()}<br>
-          <b>time:</b> ${new Date().toISOString()}`)
-        }
-        
-      })
-    
-    //read mode
-    } else if (xsKey == 'getFrom' && Object.keys(getMsg)[0] == 'search') {
-
-      xs.$({
-        get:'',from: _xs.getFrom, 
-        filter: {$text:{$search: getMsg.search }}
-
-      }).then(re => {
-
-
-        //work on this block to display in html
-        console.log(re)
-
-
-        //console.log(outputHtml)
-        let htmlOutput = xs.x2html(re)
-
-        if (htmlOutput.success == false) {
-          resp.send('<h1>Not found.</h1>')
-        } else {
-          resp.send( htmlOutput )
-        }
-
-      }) //then
-    
-    } else {
-      //other embedded command of _xs, for future, now return false first
-      resp.send(false)
-    }
-
-  } else {
-    //not embedded command of _xs
-    resp.send(false)
-  }
+  resp.send("<h1>Still don't do the GET work. Comeback later, sorry :'(</h1>")
 
 
 }) //xget block
@@ -186,7 +124,8 @@ app.get("/reqs", (req,resp)=>{
 app.post("/xserver", (req,resp)=> {
 
   //A) certifying msg
-  console.log('\n--POST packet, ', new Date().toISOString() )
+  console.log('-----------------------------------------------------')
+  console.log('--POST packet, ', new Date().toISOString() )
   console.log('--reqs packet = ', req.body)
   console.log('--reqs ip = ', req.ip ,'\n')
 
@@ -199,6 +138,7 @@ app.post("/xserver", (req,resp)=> {
   )
 
 
+  // ACTIVE ---------------------------------------------------
   //check if the session active or not
   if (packet.active) { 
     //session already active
@@ -213,12 +153,12 @@ app.post("/xserver", (req,resp)=> {
       if (found.length == 1 ) found = found[0]
 
       if (found.active) {
-        //good to work
+        //in the xdb.session also active so the session is good to work with
 
         XS.cert(packet, found.salt).then(certified => {
           if (certified) {
 
-            //now unwrap the packet.msg
+            //packet is certified, now unwrap the packet.msg
             XS.makeKey(packet, found.salt).then(gotKey => {
 
               //unwrap packet.msg
@@ -236,9 +176,9 @@ app.post("/xserver", (req,resp)=> {
                 //this is action for a module
                 /*
                   like 
-                    { act:'order', 
-                      input:{partNum:xxx}, 
-                      module:'sales' } 
+                    { act: 'order', 
+                      docNum: 'xxx', 
+                      module: 'sales' } 
                 */
 
                 //run the module
@@ -280,8 +220,36 @@ app.post("/xserver", (req,resp)=> {
               } else {
                 //not for module but for the xserver
                 //like {act: 'log_in', input:{...} }
+                // this for the core.js works
 
-                console.log('this is XS works')
+                console.log('if no module specified, regards it as for core module')
+
+                packet.msg.sessionId = packet.from
+
+                core.$(packet.msg).then(re => {
+                  console.log('return from core: ', re)
+
+                  if (!re) re = {
+                    module: 'core',
+                    msg:    'none'
+                  }
+                  return XS.prepPacket(re, found)
+                
+                }).then(rePacket => {
+                  console.log(rePacket)
+
+                  //log
+                  XD.$(
+                    { add:  rePacket,
+                      to:   'xdb.log' }
+                  )
+
+                  //send back to XB
+                  resp.json(rePacket)
+
+                }).catch(error => {
+                  console.log(error)
+                })
 
                 //should run by: XS.$( <<msg>> )
               }
@@ -295,6 +263,7 @@ app.post("/xserver", (req,resp)=> {
 
           }
         })
+
       } else {
         //the session is expired
         console.log('session expired')
@@ -331,6 +300,7 @@ app.post("/xserver", (req,resp)=> {
 
   
   } else {
+    //  INACTIVE ----------------------------------------
     //session not active, needs to register session
 
     //check cert
@@ -450,13 +420,13 @@ app.post("/xserver", (req,resp)=> {
         })//end of XS.makeKey block
         
       } else {
-        //not certified
+        //not certified, probaby something wrong at the XB, like someone hacking it, so we don't allow this browser to get in.
 
         /*resp.json(
           { msg:"Packet not certified." }
         )*/
 
-        console.log('packet not certified')
+        console.log('packet not certified, will block this session/browser/access')
       }
 
     })//end cert block
@@ -487,34 +457,17 @@ app.listen(XSERVER.port, () => {
 
 
 // 5 - child functions ///////////////////////////////////////
+//function f(){}
 
-function xrespond(m) {
-  //this for xserver() to respond to all request; must use this f all the time
-
-  
-}
 
 
 
 // 6 - test //////////////////////////////////////////////////
-function testScript() {
+//function testScript() {}
 
 //put all test command here
 
-  let msg = JSON.stringify(
-    {name:'mutita',ag:55,sex:'male'}
-  ) 
-
-  let key = xs.random()
-  let salt = xs.random()
-  console.log('key: '+key, '\nsalt: '+salt)
-
-  let seal = xs.$({encrypt:msg,userKey:key, salt:salt}).then(seal => {
-    console.log(seal)
-
-    xs.$({decrypt:seal.cipherText, secureKey:seal.key, iv:seal.iv}).then( text => console.log(text))
-  })
 
 
-}
+
 

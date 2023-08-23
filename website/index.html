@@ -1,14 +1,29 @@
 <!DOCTYPE html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!--
+
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
--->
+
 <style>
+  /* standard elements */
+  body {margin:0; padding:0}
   * {font-family: sans-serif;}
-  p, input, textarea, select, li, button {font-size: 110%}
-  textarea {font-family: monospace; font-size: 120%}
+  p, input, textarea, select, li, button, label {font-size: 130%}
+
+  /* custom elements */
+  content {display: block; margin-left: 8px}
+  content h1 {color:RosyBrown}
+  
+  alert {cursor: pointer;}
+  /*alert:hover {border:1px solid lightgray}*/
+
+  menu {z-index: 30;}
+  menu-item {font-size:36px; position:; left:0}
+
+  /* class */
+
+
 </style>
 
 <!--load scripts here-->
@@ -17,22 +32,78 @@
 </head>
 
 <body>
-<alert></alert>
-<menu></menu>
-<tool></tool>
+<!-- top right corner -->
+<div style="position:fixed; top:4px; right:4px; display:inline-block">
+  <alert id="ale_rt" class="fa fa-exclamation w3-xxlarge w3-text-yellow" style="margin-top:0 16px; padding:0 16px; display:none" onclick="mes_sage.hidden=false"></alert>
 
-<content>
-  <h1>home</h1>
-  <p>Status: <span id='status'>Inactive</span></p>
-  Username <input id="user_name" type="text"><br>
-  Password <input id="pass_word" type="password" onchange="XB.hash(this.value).then(h => userInfo.passwordHash = h).then(this.value = '')">
-  <br><br>
-  <button onclick="login()">Log in</button>
+  <logo class="fa fa-pagelines" style="padding:0 8px 0 16px; margin-left:16px; font-size:36px; color:green" onclick="ale_rt.style.display='inline'"></logo>
+</div>
+
+
+
+<!-- menu icon & menu box -->
+
+<menu-icon class="fa fa-caret-right w3-xxxlarge w3-btn" style="position:fixed; left:4px; top:50%; padding-left:4px; padding-right:4px" onclick="me_nu.hidden=false"></menu-icon>
+
+
+
+<div id="me_nu" class="w3-bar-block w3-gray" style="width:80%; position:fixed; left:0; bottom:0; z-index: 30" hidden>
+  <menu-item class="w3-bar-item w3-button w3-padding-24" 
+    onclick="loadLoginForm(); me_nu.hidden=true"><i class="fa fa-sign-in"></i> &nbsp; Log in</menu-item>
   
+    <menu-item class="w3-bar-item w3-button w3-padding-24"><i class="fa fa-coffee"></i> &nbsp; Products</menu-item>
+  <menu-item class="w3-bar-item w3-button w3-padding-24"><i class="fa fa-dollar"></i> &nbsp; Sales</menu-item>
+  <menu-item class="w3-bar-item w3-button w3-padding-24"><i class="fa fa-line-chart"></i> &nbsp; My business</menu-item>
+  <menu-item class="w3-bar-item w3-button w3-padding-24"><i class="fa fa-male"></i> &nbsp; My profile</menu-item>
+  <hr>
+  <menu-item class="w3-bar-item w3-button w3-padding-24"><i class="fa fa-sign-out"></i> &nbsp; Log out</menu-item>
+  <menu-item class="w3-bar-item w3-button w3-padding-24" onclick="me_nu.hidden=true"><i class="fa fa-close"></i> &nbsp; Close</menu-item>
+</div>
+
+
+<!-- quick tools at lower part of the screen -->
+<tool style="display:block; position:fixed; bottom:60px; left:40px">
+  <search class="fa fa-search" style="font-size:46px; color:lightgray; cursor:pointer"></search>
+  <!--
+  <i class="fa fa-share-alt" style="font-size:46px; color:lightgray; cursor:pointer; margin-left:50px"></i><i class="fa fa-comment-o" style="font-size:46px; color:lightgray; cursor:pointer; margin-left:50px"></i>
+  -->
+</tool>
+
+
+<!-- message box -->
+
+<message id="mes_sage" class="w3-panel w3-pale-yellow w3-card-4" style="position:fixed; width:80%; margin-left:10%; margin-top:40%" hidden>
+  <msg-label class="w3-tag w3-blue w3-small" style="display:inline-block; left:0; margin-left:0; position:relative">NORMAL</msg-label>
+  <h1>Title of message</h1>
+  <p>This is the message that is showing when the user clicks on the alert icon or when the app tells something important to the user.</p>
+  <br><br>
+
+  <div style="text-align:;">
+    <button class="w3-btn w3-lightgray" style="background-color: lightgray; padding:8px 16px" onclick="mes_sage.hidden=true">Close</button><br><br>
+  </div>
+</message>
+
+
+
+<!-- content -->
+<content class="w3-container">
+  
+  <!-- this is log in content 
+  <h1>Please log in</h1>
+  <p>Before you can do anything beyond the browsing for general contents you have to log-in first so that you can do everything this platform provides.</p>
+  <br>
+  <label>Username</label> <input class="w3-input w3-border" id="user_name" type="text"><br>
+  <label>Password</label> <input class="w3-input w3-border" id="pass_word" type="password" onchange="XB.hash(this.value).then(h => userInfo.passwordHash = h).then(this.value = '')">
+  <br><br>
+  <button class="w3-btn w3-blue" onclick="login()">Log in</button>
+  -->
+
+
 </content>
 
 
 <script>
+////////////////////////////////////////////////////////////////////
 async function init() {
     if (!XB.secure.sessionId) {
         XB.secure.sessionId = XB.uuid()
@@ -57,7 +128,6 @@ async function init() {
 
           //set values
           XB.active = re.active
-          XB.el('#status').textContent = 'Active'
           XB.xserver.serverId = re.from
           XB.secure.salt = msg.yourNewSalt
           sessionStorage.setItem('active', true)
@@ -76,7 +146,6 @@ async function init() {
         XB.secure.sessionId = sessionStorage.getItem('sessionId')
         XB.xserver.serverId = sessionStorage.getItem('serverId')
         XB.secure.salt = sessionStorage.getItem('salt')
-        XB.el('#status').textContent = 'Active'
     }
 }
 init()    
@@ -87,8 +156,62 @@ const userInfo = {
 
 async function login() {
   userInfo.username = user_name.value,
-  console.log(userInfo)
+  userInfo.passwordHash = await XB.passwordRealHash(
+    userInfo.username, 
+    userInfo.passwordHash
+  )
+
+  XB.$({
+    send: {
+      act:          'log_in',
+      username:     userInfo.username,
+      passwordHash: userInfo.passwordHash
+    }
+
+  }).then(re => {
+    return XB.makeKey(re).then(gotKey => {
+      return XB.dec(
+        re.msg,
+        gotKey
+      )
+    })
+
+  }).then(msg => {
+    //console.log(msg)
+    msg = JSON.parse(msg)
+
+    if (msg.log_in) {
+      XB.el('content').innerHTML = msg.content
+    } else {
+      XB.el('content').innerHTML = msg.content
+    }
+  })
+  //console.log(userInfo)
 }
+
+
+
+function loadLoginForm() {
+  console.log('load login form')
+
+  XB.$({send:
+    { act:'load_login_content'  }
+
+  }).then(respPacket => {
+    return XB.readPacketMsg(respPacket)
+  }).then(msg => {
+    console.log(msg)
+    XB.el('content').innerHTML = msg.content
+  })
+}
+
+
+
+
+
+
+
+
 
 
 </script>

@@ -1064,6 +1064,7 @@ async function makeKey(packet, salt='') {
 async function prepPacket(msg, sessionInfo) {
   //send msg from xserver to peers
   // XS.send({..msg..}, sessionSalt)
+  // the msg is obj
 
   let packet = new Packet
   packet.active = sessionInfo.active
@@ -1080,7 +1081,17 @@ async function prepPacket(msg, sessionInfo) {
 } 
 
 
-
+/**
+ * XB.passwordRealHash - makes the password hash more secure
+ * @param {string} username 
+ * @param {string/hex} passwordHash 
+ * @returns hash/hex/sha256/64 digits
+ */
+async function passwordRealHash (username, passwordHash) {
+  return XC.$({ hash:
+    username + passwordHash + "D+DHDqyDC~P9"
+  })
+}
 
 
 
@@ -1089,7 +1100,7 @@ module.exports = {
   masterKeyFile, $, uuidx, uuid, isHex, 
   isJson, x2html, docNum, runThrough, convert,
   jsdb, makeKey, password, randomWords, Packet, 
-  cert, prepPacket
+  cert, prepPacket, passwordRealHash
 }
 
 

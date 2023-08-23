@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<head>
+  <style>
+    p, li, textarea, input {font-size: 105%;}
+    textarea {width:100%; font-family: 'Courier New', Courier, monospace;}
+    blue {color: blue}
+  </style>
+
+</head>
+<body>
+<h1>xserver dev document</h1>
+<p>Content</p>
+<ol>
+  <li><a href="#data_right">Data right</a></li>
+</ol>
+
+
+
+
+<h2 id="data_right">Data right</h2>
+<p>Each doc will have <blue>_xdb</blue> section like this:</p>
+<textarea rows="20">
+xdb.data
+  { aaa:    ,
+    bbb:    ,
+    ccc:    ,
+    _xdb: {
+      owner: '',
+      docRight: {
+        owner:'CRUD',
+        org: 'R',
+        pub: 'R'
+      },
+      fieldRight: {
+        aaa: { notOwner:'R(last 4 digit)'}
+      },
+      revision:[
+        {modifiedTime: , by: }
+      ]
+      
+    }
+  }
+</textarea>
+
+<p>The <blue>_xdb</blue> field will be used by <blue>xserver</blue> to handle <blue>roles, rights</blue>, and other things.</p>
+
+
+
+</body>
+</html>

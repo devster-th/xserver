@@ -2514,4 +2514,30 @@ async function init() {
 init()
 
 
+/**
+ * XB.passwordRealHash - makes the password hash more secure
+ * @param {string} username 
+ * @param {string/hex} passwordHash 
+ * @returns hash/hex/sha256/64 digits
+ */
+XB.passwordRealHash = async function (username, passwordHash) {
+  return XB.hash(
+    username + passwordHash + "D+DHDqyDC~P9"
+  )
+}
 
+
+
+XB.readPacketMsg = async function (receivedPacket) {
+  //get the received packet from the XB.$send command and get the msg out from the packet
+
+  return XB.makeKey(receivedPacket).then(gotKey => {
+    return XB.dec(
+      receivedPacket.msg,
+      gotKey
+    )
+
+  }).then(msgJson => {
+    return JSON.parse(msgJson)
+  })
+}
