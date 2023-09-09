@@ -89,7 +89,7 @@ XB.$ = async function(X) {
       if (!X.to) X.to = XB.xserver.postUrl
       let packet = new XB.Packet
       
-      let re = XB.makeKey(packet).then(key => {
+      let reMsg = XB.makeKey(packet).then(key => {
         //wrap msg
         return XB.enc(
           JSON.stringify(X.send), key
@@ -128,10 +128,13 @@ XB.$ = async function(X) {
           console.log(re)
         })*/
 
-        return reObj
+        return reObj  //this is responsed packet
+      
+      }).then(rePkg => {
+        return XB.readPacketMsg(rePkg)
       })
 
-      return re
+      return reMsg  //this is the responsed msg/ obj
       break
 
 
@@ -2529,7 +2532,7 @@ XB.passwordRealHash = async function (username, passwordHash) {
 
 
 XB.readPacketMsg = async function (receivedPacket) {
-  //get the received packet from the XB.$send command and get the msg out from the packet
+  /*  get the received packet from the XB.$send command and get the msg out from the packet */
 
   return XB.makeKey(receivedPacket).then(gotKey => {
     return XB.dec(
@@ -2540,4 +2543,103 @@ XB.readPacketMsg = async function (receivedPacket) {
   }).then(msgJson => {
     return JSON.parse(msgJson)
   })
+}
+
+
+
+
+/*  Returns the text data url for the picture picked by user.
+    how:  <input type="file" onchange="XB.dataUrlFromPicFile(this).then(dataUrl => ...)">
+    tested: ok, m20230830 
+    -works with png, jpg, jpeg  /m20230904 
+*/
+XB.readPicFileAsDataUrl = async function (inputEl) {
+  return new Promise((resolve,reject) => {
+    //const getFile = event.target.files[0]
+    const getFile = inputEl.files[0]
+    const FR = new FileReader
+    FR.readAsDataURL(getFile)
+
+    FR.onloadend = () => {
+      resolve(FR.result) 
+    }
+
+    FR.onerror = () => {
+      reject(FR.error)
+    }
+  })
+}
+
+
+/*  Returns text string from the text file picked by user.
+    how:  <input type="file" onchange="XB.readTextFile(this).then(strin => ... )"
+    tested: ok, m20230830   */
+XB.readTextFile = async function (inputEl) {
+  return new Promise((resolve,reject) => {
+    let getFile = inputEl.files[0]
+    let FR = new FileReader()
+    FR.readAsText(getFile)
+
+    FR.onload = () => {
+      resolve(FR.result) 
+    }
+
+    FR.onerror = () => {
+      reject(FR.error)
+    }
+  })
+}
+
+
+
+
+XB.savePngFile = function (imgEle, fileName) {
+  //get pic from tag <img> then download to file, only png 
+
+  if (!imgEle) return {msg:"Wrong input.", success:false} 
+  if (!fileName) fileName = Date.now() + '.png'
+  if (!fileName.match(/\w+.png$/)) fileName = fileName + '.png'
+
+
+  let canvas = document.createElement('canvas')
+  canvas.width = imgEle.clientWidth
+  canvas.height = imgEle.clientHeight
+  let context = canvas.getContext('2d')
+  context.drawImage(imgEle,0,0)
+
+  canvas.toBlob( 
+    blob => {
+      let link = document.createElement('a')
+      link.download = fileName
+      link.href = URL.createObjectURL(blob)
+      link.click()
+      URL.revokeObjectURL(link.href)
+    },
+    'image/png' //png is default
+  )
+  /*  
+  works ok, further work: need to handle multiple formats. m20230831
+  changed to receive element from the onclick event, m20230904
+  */
+}
+
+
+
+
+XB.saveTextFile = function (text, fileName) {
+  // save text to fileName
+
+  if (!text) return {msg:"Wrong input.", success:false} 
+  if (!fileName) fileName = Date.now() + '.txt'
+  if (!fileName.match(/\w+.txt$/)) fileName = fileName + '.txt'
+  
+  let link = document.createElement('a')
+  link.download = fileName
+  let blob = new Blob([text],{type:'text/plain'})
+  link.href = URL.createObjectURL(blob)
+  link.click()
+  URL.revokeObjectURL(link.href)
+  /* note
+  tested OK, m20230904
+  */
 }

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="./xbrowser/module/xdev/xdev_b2.js"></script>
+<style>
+  p, input, textarea, button {font-size: 120%}
+  * {font-family: sans-serif}
+</style>
+</head>
+<body>
+<h1>JustNote -- save to mutita.justNote</h1>
+<form id="just_note">
+  Tag <input name="tag" type="text"><br>
+  Note<br> 
+  <textarea name="note" rows="10" style="width:100%"></textarea>
+  By <input name="by" type="text" value="M">
+</form>
+<br>
+<button onclick="save()">Save</button> <button onclick="just_note.reset()">New</button>
+
+
+<script>
+function save() {
+  XB.$({send:{
+
+    act: 'save_justnote',
+    note: just_note.note,
+    tag: just_note.tag,
+    by: just_note.by
+
+  }}).then(rePkg => {
+    return XB.readPacketMsg(rePkg)
+  }).then(msg => {
+    alert(JSON.stringify(msg))
+  })
+}
+</script>
+</body>
+</html>

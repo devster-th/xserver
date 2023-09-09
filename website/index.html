@@ -4,31 +4,34 @@
 
 <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-ios.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-2021.css">
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-highway.css">
 
 <style>
   /* standard elements */
+  html {scroll-behavior: smooth}
   body {margin:0; padding:0}
-  * {font-family: sans-serif;}
+  /* * {font-family: sans-serif;} */
   p, input, textarea, select, li, button, label {font-size: 130%}
 
   /* custom elements */
   content {display: block; margin:0}
-  content h1 {color:RosyBrown}
-  
+  /*content h1 {color:RosyBrown}*/
   alert {cursor: pointer;}
   basket {cursor: pointer}
   /*alert:hover {border:1px solid lightgray}*/
-
   menu {z-index: 30;}
   menu-item {font-size:36px; position:; left:0}
-
   card {display:block}
   card-name {cursor: pointer;}
   card-name:hover {background-color: lightgray;}
   vendor-logo {cursor:pointer}
   pic-frame {display:block; position:relative}
   pic-mark {position:absolute; top:8px; left:8px}
-
+  quick-order {display:none}
+  order-qty {position:absolute; bottom:20px; right:140px}
+  more {cursor:pointer}
 
 
 
@@ -40,86 +43,152 @@
 <!--load scripts here-->
 <script src="/xbrowser/module/xdev/xdev_b2.js"></script>
 <script src="/xbrowser/library/md5/md5.min.js"></script>
+<script src="/xbrowser/variable.js"></script>
 </head>
 
-<body>
+<body class="w3-content" style="max-width:600px">
 
 
-<!-- content -->
-<content>
+<!-- content / this is where all the content shown to the user -->
+<content id="con_tent" class="w3-container">
 
-  <!-- sample product -->
-  <card partNum="3000">
-    <pic-frame>
-      <img src="./pic/latte.jpg" style="width:100%; cursor: pointer;" onclick="toggleDisplay(this.parentElement.querySelector('check')); bas_ket.style.display='inline'">
-      <pic-mark class="w3-xxlarge w3-opacity w3-text-gray">#3000</pic-mark>
-      <check class="fa fa-check-circle w3-xxxlarge w3-text-white" style="position:absolute; right:8px; bottom:8px; display:none"></check>
-    </pic-frame>
+  <div class="w3-card-4 w3-section">
+    <img src="./pic/mpox.png" style="width:100%">
+  </div>
 
-    <div class="w3-container">
-      <card-name class="w3-xxlarge" title="Click to see product's detail.">Hot latte</card-name> &nbsp; <vendor-logo class="fa fa-odnoklassniki-square w3-xlarge" title="Click to see vendor's detail."></vendor-logo> &nbsp; <span class="w3-tag w3-small w3-red">HOT</span> <span class="w3-tag w3-small w3-blue">THB 75.00</span> &nbsp;&nbsp; <star class="fa fa-star w3-xlarge"></star><star class="fa fa-star w3-xlarge"></star><star class="fa fa-star w3-xlarge"></star><star-half class="fa fa-star-half-o w3-xlarge"></star-half><br>
-      <card-brief class="w3-large">A cup of coffee for you whatever the time is, this coffee cup is waiting for you, ... at our cafe'</card-brief> &nbsp; <order class="w3-tag w3-gray" style="cursor: pointer;" title="Click to order this product.">ORDER</order>
-    </div><br><br>
-  </card>
+  <div card_id="1000" class="w3-card-4 w3-container w3-section w3-display-container w3-pale-yellow" style="min-height:130px">
+    <i class="fa fa-user-circle-o w3-xxxlarge w3-margin w3-display-topleft"></i><br>
+    <p class="w3-xlarge w3-margin-left w3-display-topleft" style="margin-top:70px">John</p>
 
-  <card>
-    <pic-frame>
-      <img src="./pic/noodle.jpeg" style="width:100%; cursor: pointer;" onclick="toggleDisplay(this.parentElement.querySelector('check'))">
-      <pic-mark class="w3-xxlarge w3-opacity w3-text-gray">#4300</pic-mark>
-      <check class="fa fa-check-circle w3-xxxlarge w3-text-white" style="position:absolute; right:8px; bottom:8px; display:none"></check>
-    </pic-frame>
-    <div class="w3-container">
-      <card-name class="w3-xxlarge">Yen Ta Foh</card-name> &nbsp; <span class="w3-tag w3-small w3-blue">THB 55.00</span> <span class="w3-tag w3-small w3-orange">RUNNING OUT OF STOCK</span> &nbsp;&nbsp; <star class="fa fa-star w3-xlarge"></star><br>
-      <card-brief class="w3-large">Another very best taste of Thai Foods but this one transfered from Chinese. The taste is adapted to Thai style since long long ago. Can't miss.</card-brief>
-    </div><br><br>
-  </card>
+    <p class="w3-xlarge" style="margin-left:80px">Hey!, how're you? <br>Shall we have lunch?
+    <br>ssssssssssssss sssssssssss sssssssss</p>
+    <span class="w3-display-bottomright w3-margin-right w3-text-brown">10min ago</span>
+  </div>
 
-  <card>
-    <pic-frame>
-      <img src="./pic/cake.jpg" style="width:100%; cursor: pointer;" onclick="toggleDisplay(this.parentElement.querySelector('check'))">
-      <pic-mark class="w3-xxlarge w3-text-gray w3-opacity">#5100</pic-mark>
-      <check class="fa fa-check-circle w3-xxxlarge w3-text-white" style="position:absolute; right:8px; bottom:8px; display:none"></check>
-    </pic-frame>
-    <div class="w3-container">
-      <card-name class="w3-xxlarge">Brownie that never brown like this</card-name> &nbsp; <span class="w3-tag w3-small w3-blue">THB 120.00</span> <span class="w3-tag w3-small w3-yellow">NEW</span><br>
-      <card-brief class="w3-large">You never seen this kind of brownies before I guarantee. This is one of the best of your chances. Jump!</card-brief>
-    </div><br><br>
-  </card>
+  <div class="w3-card-4 w3-container w3-green w3-display-container w3-section" style="height:130px">
+    <i class="fa fa-btc w3-display-topleft w3-xxxlarge w3-margin"></i>
+    <p class="w3-xlarge" style="margin-left:80px">Your new order #2563<br>valued = BTC 32,152.00</p>
+    <span class="w3-display-bottomright w3-margin-right w3-text-brown">9min ago, from Tesla, inc.</span>
+  </div>
+
+  <div class="w3-panel w3-pink w3-card-4 w3-section w3-display-container">
+    <p><i class="fa fa-info-circle w3-xxlarge"></i> &nbsp; There'll be lions on the street soon. Careful!</p>
+    <span class="w3-display-bottomright w3-margin-right w3-text-black">8min ago, A zoo, New York City</span>
+  </div>
+
+  <div class="w3-cell-row">
+    <div class="w3-card-4 w3-display-container w3-cell">
+      <img src="./pic/sandwich.jpeg" width="100%">
+      <span class="w3-display-bottomleft w3-black w3-xxlarge">฿ 100.-</span>
+    </div>
+    <div class="w3-card-4 w3-display-container w3-cell">
+      <img src="./pic/latte.jpg" width="100%">
+      <span class="w3-display-bottomleft w3-black w3-xxlarge">฿ 120.-</span>
+    </div>
+  </div>
+  
+  <div class="w3-panel w3-leftbar w3-light-grey w3-display-container">
+    <p class="w3-xxlarge w3-serif w3-text-brown"><i>"Yo! Maybe the world can stop spinning somedays."</i></p>
+    <p class="w3-text-gray">Someone who inexisted</p>
+    <span class="w3-display-bottomright w3-margin-right w3-text-brown">09:00am, Hitler</span>
+  </div>
+
+  <div class="w3-row w3-pale-green w3-card-4">
+    <div class="w3-col s4">
+      <img src="./pic/F43L3MEXoAA4PCH.jpeg" style="width:100%">
+    </div>
+    <div class="w3-container w3-col s8">
+      <p class="w3-xlarge ">This video is very good :-D<br>
+      You have to watch it now, now, now.</p>
+    </div>
+  </div>
+
+  
+<!--
+  <div name="approve_card" class="w3-card-4 w3-container w3-display-container w3-pale-blue w3-section">
+    <h1 class="w3-serif w3-text-red"><i>Will you approve this?</i></h1>
+    <br>
+    <form class="w3-xlarge">
+      <input type="radio" value="yes" name="action" class="w3-radio"> Yes, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <input type="radio" value="no" name="action" class="w3-radio"> No
+    </form>
+      
+    <br>
+    <br>
+    <button class="w3-btn w3-margin-bottom w3-blue" onclick="xyz(this)">Confirm my action</button><br>
+    <span msg=""></span>
+
+    <script>
+      function xyz(el) {
+        let cardEl = el.closest('div[name="approve_card"]')
+        if (cardEl.querySelector('form').action.value == '') {
+          cardEl.querySelector('[msg]').textContent = "You haven't choose anything, please choose one."  
+        } else {
+          cardEl.querySelector('[msg]').textContent = "You have choosen: " + cardEl.querySelector('form').action.value
+        }
+         
+      }
+    </script>
+  </div>
+-->
+
+
+
+  <div class="w3-card-4 w3-container w3-serif w3-section w3-sand">
+    <h1 class="w3-serif w3-text-khaki w-shadow">This is just a text for your reading</h1>
+    <p>People is one of the amazing thing on earth. The people is doing things, goods, bads, and they're doing every day, hours, minutes. They're trying to do things that they think is worth for them to do it.</p>
+  </div>
+
 </content>
 
 
 
 
 
-<!-- top right corner -->
+<!-- logo, alert, basket & other indicator at the top -->
 
-<logo class="fa fa-spinner w3-spin" style="position:fixed; top:4px; right:4px; font-size:36px; color:orangered; z-index:30" onclick="ale_rt.style.display='inline'"></logo>
+<logo class="fa fa-superpowers w3-spin" style="position:fixed; top:4px; right:4px; font-size:36px; color:orangered; z-index:30" onclick="ale_rt.style.display='inline'"></logo>
 
-<basket id="bas_ket" class="fa fa-shopping-basket w3-text-pink" style="position:fixed; top:4px; right:180px; font-size:30px; display:none"> 100</basket>
+<basket id="bas_ket" class="fa fa-shopping-basket w3-text-pink" style="position:fixed; top:4px; right:180px; font-size:30px; display:none" onclick="loadBasketPage()"> 0</basket>
 
-<alert id="ale_rt" class="fa fa-exclamation w3-text-yellow" style="position:fixed; top:4px; right: 100px; font-size:30px; display:none" onclick="mes_sage.hidden=false"> 6</alert>
+<alert id="ale_rt" class="fa fa-exclamation w3-text-yellow" style="position:fixed; top:4px; right: 100px; font-size:30px; display:none" onclick="showAlert(); ale_rt.style.display='none'"> 6</alert>
 
 
 
 
 <!-- menu icon & menu box -->
 
-<menu-icon class="fa fa-caret-right w3-xxxlarge w3-btn w3-text-yellow" style="position:fixed; left:4px; top:50%; padding-left:4px; padding-right:4px;" onclick="me_nu.hidden=false"></menu-icon>
+<menu-icon class="fa fa-caret-right w3-xxxlarge w3-btn w3-text-orange" style="position:fixed; left:4px; top:50%; padding-left:4px; padding-right:4px;" onclick="me_nu.hidden=false"></menu-icon>
 
 
 
-<div id="me_nu" class="w3-bar-block w3-gray" style="width:80%; position:fixed; left:0; bottom:0; z-index: 30" hidden>
+<div id="me_nu" class="w3-bar-block w3-dark-gray w3-text-black" style="width:80%; position:fixed; left:0; bottom:0; z-index: 30" hidden>
+
   <menu-item class="w3-bar-item w3-button w3-padding-24" 
-    onclick="loadLoginForm(); me_nu.hidden=true"><i class="fa fa-sign-in"></i> &nbsp; Log in</menu-item>
+  onclick="loadProfilePage(); me_nu.hidden=true"><i class="fa fa-male"></i> &nbsp; Home</menu-item>
+
+  <menu-item class="w3-bar-item w3-button w3-padding-24" 
+  onclick="loadLoginForm(); me_nu.hidden=true"><i class="fa fa-sign-in"></i> &nbsp; Log in</menu-item>
   
-    <menu-item class="w3-bar-item w3-button w3-padding-24"><i class="fa fa-coffee"></i> &nbsp; Products</menu-item>
-  <menu-item class="w3-bar-item w3-button w3-padding-24"><i class="fa fa-dollar"></i> &nbsp; Sales</menu-item>
-  <menu-item class="w3-bar-item w3-button w3-padding-24"><i class="fa fa-line-chart"></i> &nbsp; My business</menu-item>
-  <menu-item class="w3-bar-item w3-button w3-padding-24"><i class="fa fa-male"></i> &nbsp; My profile</menu-item>
-  <hr>
-  <menu-item class="w3-bar-item w3-button w3-padding-24"><i class="fa fa-sign-out"></i> &nbsp; Log out</menu-item>
-  <menu-item class="w3-bar-item w3-button w3-padding-24" onclick="me_nu.hidden=true"><i class="fa fa-close"></i> &nbsp; Close</menu-item>
+  <menu-item class="w3-bar-item w3-button w3-padding-24" 
+  onclick="loadProductPage(); me_nu.hidden=true"><i class="fa fa-coffee"></i> &nbsp; Products</menu-item>
+  
+  <menu-item class="w3-bar-item w3-button w3-padding-24" 
+  onclick="loadSalesPage(); me_nu.hidden=true"><i class="fa fa-dollar"></i> &nbsp; Sales</menu-item>
+
+  <menu-item class="w3-bar-item w3-button w3-padding-24" 
+  onclick="loadBusinessPage(); me_nu.hidden=true"><i class="fa fa-line-chart"></i> &nbsp; My business</menu-item>
+
+  <menu-item class="w3-bar-item w3-button w3-padding-24" 
+  onclick="loadMoreItemPage(); me_nu.hidden=true"><i class="fa fa-angle-double-right"></i> &nbsp; more items ...</menu-item>
+
+  <hr style="color:gray">
+
+  <menu-item class="w3-bar-item w3-button w3-padding-24" 
+  onclick="logout(); me_nu.hidden=true"><i class="fa fa-sign-out"></i> &nbsp; Log out</menu-item>
+
+  <menu-item class="w3-bar-item w3-button w3-padding-24" onclick="me_nu.hidden=true"><i class="fa fa-close"></i> &nbsp; Close this menu</menu-item>
 </div>
+
 
 
 <!-- quick tools at lower part of the screen -->
@@ -128,30 +197,67 @@
 <input id="search_box" class="w3-input w3-border w3-black w3-round-xxlarge" type="text" style="position:fixed; left:100px; bottom:60px; width:350px; display:none; border:1px solid black" placeholder="Fill words & enter to search." onchange="alert(search_box.value)">  
 
 
-  <!--
-  <i class="fa fa-share-alt" style="font-size:46px; color:lightgray; cursor:pointer; margin-left:50px"></i><i class="fa fa-comment-o" style="font-size:46px; color:lightgray; cursor:pointer; margin-left:50px"></i>
-  -->
+
 
 
 <!-- message box -->
-
-<message id="mes_sage" class="w3-panel w3-pale-green w3-card-4" style="position:fixed; width:80%; left:10%; bottom:20%" hidden>
+<message id="mes_sage" class="w3-panel w3-pale-green w3-card-4" style="position:fixed; width:80%; left:10%; top:60px" hidden>
   <msg-label class="w3-tag w3-blue w3-small" style="display:inline-block; left:0; margin-left:0; position:relative">NORMAL</msg-label>
   <h1>Title of message</h1>
   <p>This is the message that is showing when the user clicks on the alert icon or when the app tells something important to the user.</p>
   <br><br>
 
-  <div style="text-align:;">
-    <button class="w3-btn w3-lightgray" style="background-color: lightgray; padding:8px 16px" onclick="mes_sage.hidden=true; ale_rt.style.display='none'">Close</button><br><br>
+  <div>
+    <button _default class="w3-btn w3-gray" onclick="mes_sage.hidden=true; ale_rt.style.display='none'">Close</button><yesno hidden><button class="w3-btn w3-blue" onclick="msgApprovalIs('yes'); mes_sage.hidden=true">Yes</button> &nbsp; <button class="w3-btn w3-red" onclick="msgApprovalIs('no'); mes_sage.hidden=true"> No&nbsp; </button></yesno><br><br>
   </div>
 </message>
 
 
 
 
-
 <script>
 ////////////////////////////////////////////////////////////////////
+
+const userInfo = {
+  username: '', passwordHash: ''
+}
+
+init()    
+//loadProductCards() //this is very first content for everyone
+
+
+
+
+//----------------------------------------------------------------
+
+//request product cards
+function loadProductCards() {
+  XB.$( {send: { act: 'request_product_cards' } 
+  })/*.then(rePkg => {
+    //console.log(rePkg)
+    return XB.readPacketMsg(rePkg)
+  })*/ 
+  
+  .then(msg => {
+    //console.log(msg)
+
+    let masterIndex = msg.findIndex(item => item.master == true)
+    msg.splice(masterIndex,1)
+
+    loadContent(
+      { template:'card',
+        tagToCreate:'card',
+        data: msg
+      }
+    )
+
+  })
+}
+
+
+//------------------------------------------------------------------
+
+//register sessionId
 async function init() {
     if (!XB.secure.sessionId) {
         XB.secure.sessionId = XB.uuid()
@@ -160,34 +266,34 @@ async function init() {
         if (!XB.ip) {
             XB.ip = await XB.getIp()
         } 
-        let re = await XB.$({send:{act:'new_session'}})
+        let reMsg = await XB.$({send:{act:'new_session'}})
         
         //certify the packet
-        if (await XB.cert(re)) {
+    /*    if (await XB.cert(re)) {
           //packet is certified
 
           //unwrap msg
           let msg = await XB.dec(re.msg, await XB.makeKey(re))
           //console.log(msg)
-
-          if (XB.isJson(msg)) {
-            msg = JSON.parse(msg)
+          if (XB.isJson(reMsg)) {
+            msg = JSON.parse(reMsg)
           }
+*/
 
           //set values
-          XB.active = re.active
-          XB.xserver.serverId = re.from
-          XB.secure.salt = msg.yourNewSalt
+          XB.active =           reMsg.sessionActivated
+          XB.xserver.serverId = reMsg.serverId
+          XB.secure.salt =      reMsg.yourNewSalt
           sessionStorage.setItem('active', true)
-          sessionStorage.setItem('serverId', re.from)
-          sessionStorage.setItem('salt', msg.yourNewSalt)
+          sessionStorage.setItem('serverId', reMsg.serverId)
+          sessionStorage.setItem('salt', reMsg.yourNewSalt)
 
           console.log('everything done!')
-
+/*
         } else {
           console.log('the resp not certified')
         }
-    
+*/    
       } else {
         //has sessionId
         XB.active = true
@@ -196,11 +302,8 @@ async function init() {
         XB.secure.salt = sessionStorage.getItem('salt')
     }
 }
-init()    
 
-const userInfo = {
-  username: '', passwordHash: ''
-}
+//---------------------------------------------------------
 
 async function login() {
   userInfo.username = user_name.value,
@@ -209,14 +312,14 @@ async function login() {
     userInfo.passwordHash
   )
 
-  XB.$({
-    send: {
+  XB.$({send: 
+    {
       act:          'log_in',
       username:     userInfo.username,
       passwordHash: userInfo.passwordHash
     }
 
-  }).then(re => {
+  })/*.then(re => {
     return XB.makeKey(re).then(gotKey => {
       return XB.dec(
         re.msg,
@@ -224,14 +327,31 @@ async function login() {
       )
     })
 
-  }).then(msg => {
-    //console.log(msg)
+  })*/
+  
+  .then(msg => {
+    console.log(msg)
     msg = JSON.parse(msg)
 
-    if (msg.log_in) {
-      XB.el('content').innerHTML = msg.content
+    if (msg.pass) {
+      // msg.pass == true
+      //XB.el('content').innerHTML = msg.content
+      showMessage({
+        title:    msg.content,
+        message:  "You may now close this message box and continue your works on this platform. Happy using :-)",
+        color:    'green' 
+      })
+
+      contentSet('close')
+
     } else {
-      XB.el('content').innerHTML = msg.content
+      // msg.pass == false
+      //XB.el('content').innerHTML = msg.content
+      showMessage({
+        title:    msg.content,
+        message:  "Please try again. If the problem still persists you may need to seek advice from your support/admin.",
+        color:    'yellow'
+      })
     }
   })
   //console.log(userInfo)
@@ -240,19 +360,29 @@ async function login() {
 
 
 function loadLoginForm() {
-  console.log('load login form')
+  //console.log('load login form')
 
+  contentSet('save')
+  con_tent.innerHTML = XV.template.log_in
+
+  /*
   XB.$({send:
     { act:'load_login_content'  }
 
   }).then(respPacket => {
     return XB.readPacketMsg(respPacket)
   }).then(msg => {
-    console.log(msg)
+    //console.log(msg)
     XB.el('content').innerHTML = msg.content
   })
+  */
 }
 
+
+
+
+
+// followin func works for the product card ------------------
 
 function toggleDisplay(el) {
   //toggle any element's display to 'none' & 'inline'
@@ -264,9 +394,493 @@ function toggleDisplay(el) {
 }
 
 
+function orderQty(el, sign) {
+  //control qty of the quick order mini-form
+  // el=element that is clicked, sign='+|-' indicates which sign button the user clicked
+
+  let qty = Number(
+    el.closest('quick-order').querySelector('qty').textContent
+  )
+
+  let basketQty = Number(bas_ket.textContent.trim())
+
+
+  if (sign == '+') {
+    qty += 1
+    bas_ket.textContent = ' ' + (basketQty + 1)
+  } else {
+    if (qty > 0) {
+      qty -= 1
+      bas_ket.textContent = ' ' + (basketQty - 1)
+    } //if the current is 0 just skip
+  }
+
+  el.closest('quick-order').querySelector('qty').textContent = qty
+}
 
 
 
+
+function chooseItem(picEle) {
+  //user clicks on a product pic then it sends that pic ele here
+  let quickOrderSpace = picEle.closest('card').querySelector('quick-order')
+
+  if (quickOrderSpace.style.display != 'block') {
+    quickOrderSpace.querySelector('qty').textContent = '1'
+    quickOrderSpace.style.display = 'block'
+
+    //if the basket hasn't been there yet, show it and put qty=1. But if basket is already there just add 1 to it.
+    if (bas_ket.style.display != 'inline') {
+    bas_ket.textContent = ' 1'
+    bas_ket.style.display = 'inline'
+    } else {
+      //the basket already shown so it must have a value
+      bas_ket.textContent = ' ' + (Number(bas_ket.textContent.trim()) + 1)
+    }
+  }
+}
+
+
+
+function cancelItem(buttonEle) {
+  //user clicks on [cancel] button on the quick order space then sends the button's el here
+
+  let quickOrderEle = buttonEle.closest('card').querySelector('quick-order')
+
+  let remain = (
+    Number(bas_ket.textContent.trim()) - Number(quickOrderEle.querySelector('qty') )
+  )
+
+  if (remain > 0) {
+    bas_ket.textContent = ' ' + remain
+  } else {
+    bas_ket.textContent = ' ' + 0
+  }
+
+  quickOrderEle.style.display = 'none'
+}
+//-----------------------------------------------
+
+
+
+function loadContent(obj) {
+  //get data obj, convert to html and load into <content>
+  /*
+    obj = {
+      data: '<<like obj array containing cards info or 1 obj>>',
+      template: '<<like card>>',
+      tagToCreate: 'card'
+    }
+
+    works for card only so far. Needs more work.
+  */
+
+  if (Array.isArray(obj.data)) {
+    obj.data.forEach(dd => {
+
+      //make many cards
+      let newEl = document.createElement(obj.tagToCreate)
+      newEl.innerHTML = XV.template[obj.template]
+      newEl.querySelector('img').src = XV.picPath + dd.img
+      newEl.querySelector('pic-mark').textContent = dd.pic_mark
+      newEl.querySelector('card-name').textContent = dd.card_name
+      newEl.querySelector('card-brief').textContent = dd.card_brief
+      newEl.querySelector('special-tag').textContent = dd.special_tag
+      newEl.querySelector('price-tag').textContent = dd.price_tag
+
+
+      //add star into the <review>
+      if (dd.review) {
+        for (i=0; i < dd.review; i++) {
+          let newStar = document.createElement('star')
+          newEl.querySelector('review').append(newStar)
+        }
+      }
+
+      XB.el('content').append(newEl)
+    })
+  
+  } else {
+    //make 1 card
+    let newEl = document.createElement(obj.tagToCreate)
+    newEl.innerHTML = XV.template[obj.template]
+    newEl.querySelector('img').src = XV.picPath + obj.data.img
+    newEl.querySelector('pic-mark').textContent = obj.data.pic_mark
+    newEl.querySelector('card-name').textContent = obj.data.card_name
+    newEl.querySelector('card-brief').textContent = obj.data.card_brief
+    newEl.querySelector('special-tag').textContent = obj.data.special_tag
+    newEl.querySelector('price-tag').textContent = obj.data.price_tag
+
+
+    //add star into the <review>
+    if (obj.data.review) {
+      for (i=0; i < obj.data.review; i++) {
+        let newStar = document.createElement('star')
+        newEl.querySelector('review').append(newStar)
+      }
+    }
+
+    XB.el('content').append(newEl)
+  }
+  
+
+  //set class
+  for (tagToSet in XV.class) {
+    let tags = XB.el('content').querySelectorAll(tagToSet.replace('_','-'))
+    for (i=0; i < tags.length; i++) {
+      tags[i].className = XV.class[tagToSet]
+    }
+  }
+
+}
+
+
+//------------------------------------------------------------------
+
+function showAlert() {
+  showMessage({
+    title: "Title of message",
+    message: "Body of message. This is typically 2-3 lines of text.",
+    color: 'yellow',
+    button: 'close',
+    label: 'NORMAL'
+  })
+}
+
+
+
+
+//--------------------------------------------------------------
+
+function showMessage(msgObj) {
+  /*
+      msgObj = {
+        title: "This is title of the message",
+        message: "This is the message body.",
+        label: "<<like NORMAL|ATTENTION|DANGER|...>>",
+        color: '<<like green|yellow|red|...>>',
+        button: '<< default | yesno | blank is default >>'
+      }
+  */
+
+  mes_sage.querySelector('h1').textContent = msgObj.title
+  if (msgObj.message) mes_sage.querySelector('p').textContent = msgObj.message
+  if (msgObj.label) mes_sage.querySelector('msg-label').textContent = msgObj.label
+
+  //color
+  if (msgObj.color) {
+    switch (msgObj.color) {
+      case 'green': 
+        mes_sage.className = 'w3-panel w3-card-4 w3-pale-green'
+        break
+
+      case 'yellow': 
+        mes_sage.className = 'w3-panel w3-card-4 w3-pale-yellow'
+        break
+
+      case 'orange': 
+        mes_sage.className = 'w3-panel w3-card-4 w3-pale-orange'
+        break
+
+      case 'red': 
+        mes_sage.className = 'w3-panel w3-card-4 w3-pale-red'
+        break
+
+      default: 
+        mes_sage.className = 'w3-panel w3-card-4 w3-pale-green'
+        break
+    }
+  }
+
+  if (msgObj.button) {
+    switch (msgObj.button) {
+      case 'yesno': 
+        //show yesno buttons instead of the default [close] button
+        mes_sage.querySelector('button[_default]').style.display = 'none' 
+        mes_sage.querySelector('yesno').hidden = false 
+        break 
+      
+      case 'close': 
+        mes_sage.querySelector('button[_default]').style.display = ''
+        mes_sage.querySelector('yesno').hidden = true
+        break
+
+      default: 
+        mes_sage.querySelector('button[_default]').style.display = ''
+        mes_sage.querySelector('yesno').hidden = true
+    }
+  }
+
+  mes_sage.hidden = false
+}
+
+
+//----------------------------------------------------------------
+
+function contentSet(cmd) {
+  /*  sets the content, handling content
+      cmd like 
+        save - save current content together with its scrollPosition
+        reload - reload the saved content at its scroll position
+  */
+
+  switch (cmd) {
+    case 'save': 
+      XV.contentKeep.html = con_tent.innerHTML
+      XV.contentKeep.scrollPosition = document.documentElement.scrollTop
+      break
+
+    case 'reload': 
+      con_tent.innerHTML = XV.contentKeep.html
+      document.documentElement.scrollTop = XV.contentKeep.scrollPosition
+      break
+
+    case 'close': 
+      if (XV.contentKeep.html) {
+        contentSet('reload')
+      } else {
+        //if there's no saved content then loads the product cards
+        loadProductCards()
+      }
+
+    default: 
+      //future
+
+  }
+}
+
+
+//---------------------------------------------------------
+
+function logout() {
+  showMessage(
+    {
+        title: "Are you logging out?",
+        message: "Your information will be saved in your database and you can always get back to it any time. See you again soon :-)",
+        label: "NORMAL",
+        color: 'yellow',
+        button: 'yesno'
+      }
+  ) 
+  XV.pendingApprovalFor = 'logout'
+}
+
+
+//-----------------------------------------------------------
+
+function msgApprovalIs(cmd) {
+  switch (cmd) {
+    case 'yes': 
+      if (XV.pendingApprovalFor == 'logout') {
+        //generally works, but will need further work to check if it is already logged out
+
+        XB.$({send:
+          {act: 'log_out'}  
+        })/*.then(rePkg => {
+          return XB.readPacketMsg(rePkg)
+        })*/ 
+        
+        .then(msg => {
+          //console.log(msg)
+
+          if (msg.success) {
+            showMessage({
+              title:  "You're now logged out.",
+              message: "See you soon, we've saved all your information securely, don't worry.",
+              label:  'NORMAL',
+              color:  'green',
+              button: 'close'
+            })
+          
+          } else {
+            //fail
+            showMessage({
+              title:  "Something wrong",
+              message: "Please try again but if the problem still persists you may need support from the admin.",
+              label:  'NORMAL',
+              color:  'yellow',
+              button: 'close'
+            })
+          }
+          
+        })
+        
+
+      } else {
+        alert(false)
+      }
+      break
+
+    case 'no': 
+      //alert('you click no')
+      break
+
+    default: 
+      //
+  }
+}
+
+
+//----------------------------------------------------------
+
+function loadProfilePage() {
+  contentSet('save')
+  con_tent.innerHTML = XV.template.profile 
+}
+
+function saveProfile() {
+  contentSet('close')
+  showMessage({
+    title: "Success, saved your new info.",
+    message: "Please continue using our platform. Have fun :-D",
+    
+  })
+}
+
+function loadProductPage() {
+  contentSet('save')
+  con_tent.innerHTML = XV.template.products
+}
+
+
+function loadSalesPage() {
+  contentSet('save')
+  con_tent.innerHTML = XV.template.sales
+}
+
+function loadBusinessPage() {
+  contentSet('save')
+  con_tent.innerHTML = XV.template.my_business
+}
+
+
+//---------------------------------------------------
+
+function uploadProfilePic(event) {
+  const [file] = get_profile_pic.files
+  if (file) {
+    profile_pic.src = URL.createObjectURL(file)
+  }
+}
+
+
+function loadBasketPage() {
+  contentSet('save')
+  con_tent.innerHTML = XV.template.basket 
+}
+
+
+function loadMoreItemPage() {
+  contentSet('save')
+  con_tent.innerHTML = XV.template.more_item
+}
+
+
+
+function loadJustNote() {
+  //contentSet('save') -- don't need to save the more_item page
+  con_tent.innerHTML = XV.template.just_note
+}
+
+
+function saveJustNote() {
+  if (just_note.note.value) {
+    XB.$({send: 
+      {
+        act:  'add_justnote',
+        note: just_note.note.value,
+        tag:  just_note.tag.value,
+        by:   just_note.by.value
+      }
+    }).then(re => {
+      alert(JSON.stringify(re))
+    })
+
+  } else {
+    alert('Note can not be blank!')
+  }
+}
+
+
+function addMessageCard(obj) {
+  /* obj = {sender: ,message: ,received:  ,color:  } */ 
+
+  let msgCard = document.createElement('div')
+  if (!obj.color) obj.color = 'green'
+  msgCard.className = `w3-card-4 w3-container w3-section w3-display-container w3-${obj.color}`
+  msgCard.style = "min-height:130px"
+  msgCard.innerHTML = `<i class="fa fa-user-circle-o w3-xxxlarge w3-margin w3-display-topleft"></i><br>
+    <p class="w3-xlarge w3-margin-left w3-display-topleft" style="margin-top:70px" sender=""></p>
+
+    <p class="w3-xlarge w3-text-black" style="margin-left:80px" message=""></p>
+    <span class="w3-display-bottomright w3-margin-right w3-text-brown" received=""></span>`
+
+  msgCard.querySelector('[sender]').textContent = obj.sender
+  msgCard.querySelector('[message]').textContent = obj.message
+  msgCard.querySelector('[received]').textContent = obj.received
+
+  con_tent.append(msgCard)
+}
+
+
+function addCard(templName, dataObj, colorClass) {
+  // create card from template and fill data, then append to <content>
+  // templName = 'message_card'
+  // dataObj = {sender:'', message:'', time:''}
+  // colorClass = 'w3-pale-blue'
+
+  let card = document.createElement('div')
+  card.className = XV.template[templName].cardClass
+  card.style = XV.template[templName].cardStyle  
+  card.innerHTML = XV.template[templName].html
+
+  if (colorClass) card.classList.add(colorClass)
+  else card.classList.add(XV.template[templName].defaultColorClass)
+
+  for (field in dataObj) {
+    card.querySelector(`[_${field}]`).textContent = dataObj[field]
+  }
+
+  con_tent.append(card)
+}
+
+
+function addCard2(templName, data) {
+  //enhanced from addCard()
+
+  //check data
+
+  let scrip = document.createElement('script')
+  scrip.textContent = XV.template[templName].script
+  con_tent.prepend(scrip)
+
+  let card = document.createElement('div')
+  card.className = XV.template[templName].class
+  card.style = XV.template[templName].style
+  let att = Object.keys(XV.template[templName].attribute)
+  card.setAttribute(att[0], XV.template[templName].attribute[att[0]])
+  card.innerHTML = XV.template[templName].html
+  con_tent.prepend(card)
+  
+  document.documentElement.scrollTop = 0
+}
+
+
+function mdb(vv) {
+  //handles data in memory like database but takes memory
+
+  if (typeof _mdb == 'undefined') {
+    _mdb = {}
+    return _mdb
+  } else if (!vv) {
+    return _mdb
+  } else if (vv && typeof vv == 'object') {
+    _mdb = vv
+  } else {
+    return false
+  }
+  
+}
 
 
 </script>

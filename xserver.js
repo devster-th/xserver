@@ -359,6 +359,7 @@ app.post("/xserver", (req,resp)=> {
                   refPacketId:      packet.id,
                   sessionActivated: true,
                   yourNewSalt:      salt, 
+                  serverId:         XSERVER.secure.serverId
                 }
                 
                 XS.makeKey(rePacket).then(gotKey => {

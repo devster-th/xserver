@@ -116,25 +116,63 @@ exports.$ = async function (X) {
       break
 
 
+
+
     case 'load_login_content':
+      let contentFound = await XD.$({
+        find: {act: 'load_login_content'},
+        from: 'xdb.content'
+      })
 
-    let contentFound = await XD.$({
-      find: {act: 'load_login_content'},
-      from: 'xdb.content'
-    })
+      if (contentFound.length) {
+        return {
+          act: 'load_login_content',
+          content: contentFound[0].content
+        }
+      } else {
+        return {
+          act: 'load_login_content',
+          error: "Not found."
+        }
+      }
+      break
 
-    if (contentFound.length) {
+
+    case 'log_out':
+      let re = await XD.$({
+        change: {sessionId: X.sessionId},
+        with:   {userId: ''},
+        to:     'xdb.session'
+      })
+
+      console.log(re)
+
       return {
-        act: 'load_login_content',
-        content: contentFound[0].content
+        act:      'log_out',
+        sessionId: X.sessionId,
+        success:  true
       }
-    } else {
-      return {
-        act: 'load_login_content',
-        error: "Not found."
-      }
-    }
-    break
+      break
+
+
+
+    case 'request_product_cards':
+      return await XD.$({
+        find:'', from:'xdb.product'
+      })
+      break
+
+
+    case 'add_justnote': 
+      return await XD.$({
+        add: {
+          note: X.note,
+          tag:  X.tag,
+          by:   X.by
+        },
+        to: 'mutita.justNote'
+      })
+      break
 
 
 

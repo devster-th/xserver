@@ -1,0 +1,21 @@
+<card partNum="">
+  <pic-frame>
+    <img src="" style="width:100%; cursor: pointer;" onclick="chooseItem(this)">
+    <pic-mark class="w3-xxlarge w3-opacity w3-text-gray"></pic-mark>
+
+    <quick-order style="display:none">
+      <order-qty style="position:absolute; bottom:20px; right:140px">
+        <button style="padding-top:0; padding-bottom:0; border-radius:16px" class="w3-pale-yellow" onclick="cancelItem(this)">Cancel</button> &nbsp;&nbsp; <button style="width:100px; padding-top:0px; padding-bottom:0px; border-radius:16px 0 0 16px" onclick="orderQty(this,'-')">&minus;</button><button style="width:100px; padding-top:0; padding-bottom:0; border-radius:0 16px 16px 0" onclick="orderQty(this,'+')">&plus;</button>
+      </order-qty>
+      <div class="w3-xxlarge w3-text-pink" style="position:absolute; right:8px; bottom:8px;">
+        <qty class="w3-white w-padding">1</qty> <check class="fa fa-check-circle"></check>
+      </div>
+    </quick-order>
+  </pic-frame>
+
+  <div class="w3-container">
+    <card-name class="w3-xxlarge" title="Click to see product's detail."></card-name> &nbsp; <vendor-logo class="fa fa-odnoklassniki-square w3-xlarge" title="Click to see vendor's detail."></vendor-logo> &nbsp; <special-tag class="w3-tag w3-small w3-red"></special-tag> <price-tag class="w3-tag w3-small w3-blue"></price-tag> &nbsp;&nbsp; <review><star class="fa fa-star w3-xlarge"></star><star class="fa fa-star w3-xlarge"></star><star class="fa fa-star w3-xlarge"></star><star-half class="fa fa-star-half-o w3-xlarge"></star-half></review><br>
+    
+    <card-brief class="w3-large"></card-brief> &nbsp; <more class="fa fa-ellipsis-h w3-tag w3-light-gray w3-text-gray w3-xlarge" style="cursor: pointer;" title="Click to see more detail of this product."></more>
+  </div><br><br>
+</card>
