@@ -51,6 +51,8 @@ global.XSERVER = {
   xbrowserDocPath:'doc/' //after xbrowserModulePath
 }
 
+global.POOL = {} //pool of data that exchanging between the server & browsers so that we won't directly accessing the xdb but accessing the POOL instead. Like POOL.message can contain all messages that are currently exchanging, POOL.product, POOL.alert, etc.
+
 //console.log(XSERVER.secure.serverId)
 //XD.$({find:'',from:'user'}).then(console.log)
 

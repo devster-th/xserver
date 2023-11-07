@@ -1,4 +1,4 @@
-// XV is a global var
+// XV is a global var for template
 
 globalThis.XV = {}
 

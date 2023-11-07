@@ -1,7 +1,7 @@
 /**
  * xmongo2.js - a library to work with mongodb easier
  * @by mutita.org@gmail.com
- * @version 0.1
+ * @version 2.0
  * 
  */
 
@@ -19,7 +19,7 @@ const mongo = new MongoClient(
 
 const info = {
     software:'xmongo.js',
-    version:'0.1',
+    version:'2.0',
     by:'mutita.org@gmail.com',
     license:'none'
 }
@@ -272,6 +272,7 @@ async function $(X={}) {
 
 
     //replace --------------------------------------------
+    /* the Replace replaces the entire doc while the Update only updates the fields we specified, that's the different. */
     case 'replace': //OK
       /*  { replace:{..query..}, with:{..}, on:'db.collec' }
       */
@@ -438,7 +439,7 @@ function easierFilter(queryObj) {
         queryObj[key] = {$gt: Number(val)}
     }
 
-    // >= ... {price:'>=_100'} =OK/m
+    // >= ... {price:'>=100'} =OK/m
     else if (typeof queryObj[key] == 'string' &&
       queryObj[key].match(/^>=\d+$/) ) {
         var resetVal = queryObj[key].replace('>=','')
@@ -452,7 +453,7 @@ function easierFilter(queryObj) {
         queryObj[key] = {$lt: Number(val)}
       }
 
-    // =< ... {price:'=<_100'}  =OK/m
+    // =< ... {price:'=<100'}  =OK/m
     else if (typeof queryObj[key] == 'string' &&
       queryObj[key].match(/^=<\d+$/) ) {
         var resetVal = queryObj[key].replace('=<','')

@@ -954,12 +954,69 @@ XB.password = function (length=12) {
   for (i=0; i<length; i++) {
     pass += `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$!~-+-*/\|&%#@^.,:;<>(){}[]`.charAt(
       Math.floor(
-        Math.random() * 90
+        Math.random() * 89
       )
     )
   }
   return pass
 }//ok
+
+
+
+XB.pin = function (length=8) {
+  //gen random pin from A-Z and 0-9, default length is 8
+
+  let pin = ''
+  for (i=0; i<length; i++) {
+    pin += `ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`.charAt(
+      Math.floor(
+        Math.random() * 36
+      )
+    )
+  }
+  return pin
+}//ok m2309280824
+
+
+
+XB.xDateCode = function (vari) {
+  //output is M 20-9-28 10:45
+  //use with XB.pin() we can have code like: #ABXYS45F TH 23-9-28
+  //to use in mobile screen which we need as short as possible to show code or something
+  /* input can have 3 options
+      1. put the date string like new Date().toString() - string
+      2. put the timestamp, Date.now() - number type
+      3. just blank it, it will take the time it runs */
+
+  var newDate
+
+  if (typeof vari == 'string') {
+    newDate = vari
+  } else if (typeof vari == 'number') {
+    newDate = new Date(vari).toString()
+  } else {
+    newDate = new Date()
+  }
+
+
+  const mon = {
+    jan:1, feb:2, mar:3, apr:4, may:5, jun:6, jul:7, aug:8, sep:9, oct:10, nov:11, dec:12
+  }
+
+  let ar = newDate.toString().split(' ')
+  let reformat = 
+    ar[0].toUpperCase() + ' ' +          //day of week
+    ar[3].slice(2) + '-' +            //year
+    mon[ar[1].toLowerCase()] + '-' +  //month 
+    ar[2] + ' ' +                     //date
+    ar[4].slice(0,5)                  //time
+
+  return reformat
+  //tested ok, m2309281216
+}
+
+
+
 
 
 

@@ -1,0 +1,219 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="author" content="mutita.org@gmail.com">
+  <title>xmongo2.js doc</title>
+  <style>
+    textarea {width: 100%; background-color:lavender; font-family: monospace; overflow:hidden; border:none; color:darkred}
+    code {background-color:lavender; font-family: monospace; color:darkred}
+    h1 {color:darkred}
+    h2 {margin-top:32px; margin-bottom:0}
+    h2 + p {margin-top:8px}
+    mark {background-color: lightyellow;}
+    caution {color:red; font-weight: bold;}
+
+    @media (min-width:800px) {
+      #toc {
+        float: left;
+        width: 25%;
+        position:sticky; top:0;
+      }
+      #story {
+        margin-left: 25%;
+        max-width: 800px;
+      }
+      #title {
+        margin-top:0; padding-top:0;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- scroll top -->
+<a href="#" style="font-size:40px; position:fixed; left:0; bottom:0; padding:2px; color:orange; cursor:pointer; text-decoration: none;">&#8673;</a>
+<!-- table of contents -->
+<div id="toc">
+  <!-- doc title -->
+  <h1 id="title">xmongo2.js doc</h1>
+  <p>Table of contents</p>
+  <ol>
+    <li><a href="#brief">Brief</a></li>
+    <li><a href="#config">Config</a></li>
+    <li><a href="#connect">connect</a></li>
+    <li><a href="#disconnect">disconnect</a></li>
+    <li><a href="#add">add</a></li>
+    <li><a href="#delete">delete</a></li>
+    <li><a href="#find">find</a></li>
+    <li><a href="#change">change</a></li>
+    <li><a href="#replace">replace</a> </li>
+    <li><a href="#createcollec">createCollection</a> </li>
+  </ol>
+</div>
+<!-- story -->
+<div id="story">
+  <h2 id="brief">Brief</h2>
+  <p>This is a tool that help working with <mark>mongodb</mark> easier & faster. There's feature that utilize the use of memory instead of directly accessing the mongodb every time. So it can house millions of users in the same time.</p>
+
+  <p>We may call this <mark>xmongo</mark>. General use of the xmongo is:</p>
+  <textarea rows="3">
+  XD.$({
+    ... put xmongo commands here ... 
+  })
+  </textarea>
+  <p>The xmongo command is simply the object format but just forming it to be understandable like a language, like:</p>
+  <textarea rows="4">
+  XD.$({
+    add:  {name:'john',age:23,sex:'male'},
+    to:   'xdb.people'}
+  })
+  </textarea>
+
+
+  <h2 id="config">Config</h2>
+  <p>Get the <mark>xmongo2.js</mark> to your directory and include it to your main code. You have to have the <mark>mongodb</mark> module already installed in your <mark>nodejs</mark> environment.</p>
+  <textarea>
+  const XD = require('xmongo2.js')
+  </textarea>
+  <p>The number <mark>2</mark> is its version. If we have next version it gonna be <mark>xmongo3.js</mark> so we know which version we're using.</p>
+  <p>The default port setting is in the <mark>xmongo2.js</mark> where you can change the uri:</p>
+  <textarea>
+  const uri = 'mongodb://localhost:27017'
+  </textarea>
+
+
+  <hr style="margin-top:36px; margin-bottom:0; padding:0; ">
+  <p style="color:gray; margin-top:0; font-family: sans-serif; text-align: center;">XMONGO COMMANDS</p>
+
+  <h2 id="connect">connect</h2>
+  <p>Two ways to connect to the db.</p>
+  <textarea>
+  XD.connect()
+  XD.$({connect:true})
+  </textarea>
+
+  <h2 id="disconnect">disconnect</h2>
+  <p>2 ways but recommendation for db intensive app we don't need to disconnect at every access instead we should maintain the connection as our app acessing the db all the time.</p>
+  <textarea>
+  XD.disconnect()
+  XD.$({disconnect:true})
+  </textarea>
+
+  <h2 id="add">add</h2>
+  <p>We don't use the term insert here as we like to make it more simple, so uses add instead.</p>
+  <textarea rows="4">
+  XD.$({
+    add:  {name:'john',age:23,sex:'male'},
+    to:   'dbName.collectionName'
+  })
+  </textarea>
+  <p>If you ommit the dbName it will assume the xdb database. Uses <code>add:[{...},{...},...]</code> for adding many docs.</p>
+
+
+  <h2 id="delete">delete</h2>
+  <p>Deletes all docs that matched your query.</p>
+  <textarea rows="4">
+  XD.$({
+    delete: {uuid:'..........'},
+    from:   'dbName.collectionName'
+  })
+  </textarea>
+
+
+  <h2 id="find">find</h2>
+  <p>The <code>find:, from:</code> are required.</p>
+  <textarea rows="13">
+  XD.$({
+    find: {name:'john'},
+    from: 'dbName.collectionName'
+  })
+
+  XD.$({
+    find: {price:'100+'},
+    from: 'db.collection',
+    getOnly: 'name price stock',
+    sort: {name:1},
+    limit: 20,
+    skip: 5,
+  })
+  </textarea>
+
+  <p>Query has options below</p>
+  <ul>
+    <li>To take all docs, uses <code>find:{}</code> or <code>find:''</code> and we'll get all docs from that collection.</li>
+    <li>More than -- uses <code>find:{price:'100+'}</code> this finds the price that more than 100</li>
+    <li>Less than -- uses <code>price:'100-'</code></li>
+    <li>More than or equal -- uses <code>price:'>=100'</code></li>
+    <li>Less than or equal -- <code>price:'=<100'</code></li>
+    <li>Not -- <code>name:'NOT_john'</code> finds all docs that the field <mark>name</mark> is not john. The result includes docs that doesn't have <mark>name</mark> field too.</li>
+    <li>Exist -- <code>name:'EXIST_'</code> finds docs that having the field <mark>name</mark></li>
+    <li>Inexist -- <code>name:'INEXIST_'</code> finds docs that the filed <mark>name</mark> inexisted</li>
+    <li>Starts with -- <code>name:'jo*'</code> finds docs that the field <mark>name</mark> starts with jo</li>
+    <li>Ends with -- <code>name:'*hn'</code> finds docs that the field <mark>name</mark> ends with hn</li>
+    <li>Regular expression -- <code>name:/joh/</code> finds docs having <mark>name</mark> includes joh</li>
+  </ul>
+
+
+
+  <p>Other options</p>
+  <ul>
+    <li>Get only fields we need -- uses <code>getOnly:'name'</code>. If needs more than 1 you may put <code>getOnly:'name age sex'</code> so gets only these 3 fields of the result.</li>
+    <li>Sort -- <code>{find:'', from:'...', sort:{name:1} }</code> find all docs and sort by the name in ascending. If descending puts -1 instead.</li>
+    <li>Limit -- <code>{find:'', from:'..', limit:3}</code> limits only 3 docs for the result</li>
+    <li>Skip -- <code>{find:'', from:'..', skip:5}</code> skips the first 5 docs from the result</li>
+    <li>Default db -- if you ommit the db name like: <code>from:'product'</code>, it will take the product collection from xdb database.</li>
+  </ul>
+
+
+
+
+  <h2 id="change">change</h2>
+  <p>Change is the update in general mongodb terms. The <code>change:, with:, to:</code> are required.</p>
+  <textarea rows="5">
+  XD.$({
+    change: {..query..},
+    with:   {..data to make change..},
+    to:     'db.collection'
+  })
+  </textarea>
+
+  <p>Options</p>
+  <ul>
+    <li>Increase -- <code>with:{price:'+100'}</code> increases the price by 100</li>
+    <li>Decrease -- <code>with:{price:'-100'}</code> decreases the price by 100</li>
+    <li>Multiply -- <code>with:{price:'*1.1'}</code> multiplies the price by 1.1</li>
+    <li>Rename -- <code>with:{aaa:'RENAMETO_bbb'}</code> renames the filed aaa to bbb</li>
+    <li>Remove -- <code>with:{aaa:'REMOVE_'}</code> removes the field aaa</li>
+    <li>If you know mongodb command you can use its update operators like <code>$set, $inc, $mul, $rename, $unset</code>, whatever by putting it in <code>with:{ ... }</code></li>
+  </ul>
+
+
+  <h2 id="replace">replace</h2>
+  <p>Replaces the entire doc that matched the query. The different with the change/update is the change/update only does for the fields we specified, not the entire doc like replace. In this command we do only 1 doc replacment at a time, not do replaceMany.</p>
+  <textarea rows="5">
+  XD.$({
+    replace:  {uuid:'...'},
+    with:     {...},
+    on:       'db.collection'
+  })
+  </textarea>
+
+
+
+
+  <h2 id="createcollec">createCollection</h2>
+  <p>This creates a collection. We still don't create db yet, leaving it for the <mark>mongosh</mark> to do it.</p>
+  <textarea rows="4">
+  XD.$({
+    createCollection: 'name',
+    db:               'db name'
+  })
+  </textarea>
+
+</div>
+
+<!-- footer -->
+<br><br><hr>
+<small>Last update: Nov 7, 2023 by M</small>
+</body>
+</html>

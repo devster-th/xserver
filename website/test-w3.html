@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/uicons-solid-straight/css/uicons-solid-straight.css'>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">  
+  <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-win8.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link href='https://fonts.googleapis.com/css?family=Open Sans' rel='stylesheet'>
+  <link href='https://fonts.googleapis.com/css?family=Open Sans Condensed:300' rel='stylesheet'>
+  <link href='https://fonts.googleapis.com/css?family=Roboto Condensed' rel='stylesheet'>
+  <link href='https://fonts.googleapis.com/css?family=Ubuntu Condensed' rel='stylesheet'>
+  <link href='https://fonts.googleapis.com/css?family=Homemade Apple' rel='stylesheet'>
+  <link href='https://fonts.googleapis.com/css?family=Gloria Hallelujah' rel='stylesheet'>
+  <link href='https://fonts.googleapis.com/css?family=Francois One' rel='stylesheet'>
+  <link href='https://fonts.googleapis.com/css?family=Caveat' rel='stylesheet'>
+  <link href='https://fonts.googleapis.com/css?family=BIZ UDGothic' rel='stylesheet'>
+  <link href='https://fonts.googleapis.com/css?family=Ubuntu' rel='stylesheet'>
+  <link href='https://fonts.googleapis.com/css?family=Kirang Haerang' rel='stylesheet'>
+
+  <style>
+    * {line-height:1.1}
+
+  /*  
+    .x-english-text {line-height:1.5}
+    .x-thai-text {line-height:1.3; margin-top:8px}
+  */
+
+    /* default element */
+    h1,h2,h3,h4,h5,h6 {font-family:'Francois One',sans-serif; line-height:1; margin:8px 0 16px 0}
+    p {font-size: 150%; font-family:'Open Sans',Ubuntu,sans-serif; line-height:1.2; margin:4px 0}
+  
+    /* class by x */
+    .x-card {height:164px; margin:0 2px 4px 2px; max-width: 720px; overflow: hidden; border-radius:12px 0}
+    .x-pic {width:100%; height:100%; object-fit:cover}
+    .x-text {padding: 16px 16px}
+    .x-icon {top:4px; left:4px}
+    .x-user {font-family: monospace;}
+    .x-time {bottom:2px; left:4px; color:black}
+    .x-sign {margin-right:8px; line-height:1.5;}
+    .x-tag {padding-left:2px; padding-right:2px; font-family:'BIZ UDGothic'; margin:0}
+
+    
+
+    /* font */
+      /* for small capital text like tags */
+    .x-opensans {font-family: 'Open Sans'}
+    .x-gothic {font-family:'BIZ UDGothic'} /* tag */
+    .x-smallcap {font-family:'Open Sans'; text-transform: uppercase;}
+    .x-smallcap2 {font-family:'BIZ UDGothic'; 
+      text-transform: uppercase;}
+      /* title */
+    .x-ubuntu {font-family:'Ubuntu'}
+    .x-francois {font-family:'Francois One'}
+    .x-kirang {font-family:'Kirang Haerang'}
+    .x-title2 {font-family:'Ubuntu'; font-weight:bold;}
+    .x-title {font-family:'Francois One'}  /* strong little art */
+    .x-title3 {font-family:'Kirang Haerang'} /* art */
+      /* condensed */
+    .x-opensans-cond {font-family: 'Open Sans Condensed'}
+    .x-roboto-cond {font-family:'Roboto Condensed'}
+    .x-ubuntu-cond {font-family:'Ubuntu Condensed'}
+    .x-condense {font-family:'Ubuntu Condensed'}
+    .x-condense2 {font-family:'Roboto Condensed'}
+    .x-condense3 {font-family:'Open Sans Condensed'}
+      /* hand writing fonts */
+    .x-homemade {font-family:'Homemade Apple'}
+    .x-gloria {font-family:'Gloria Hallelujah'}
+    .x-caveat {font-family:'Caveat'}
+    .x-hand {font-family:'Caveat'}
+    .x-hand2 {font-family:'Gloria Hallelujah'}
+    .x-hand3 {font-family:'Homemade Apple'}
+      /* font control */
+    .x-fon110 {font-size:110%}
+    .x-fon120 {font-size:120%}
+    .x-fon125 {font-size:125%}
+    .x-fon130 {font-size:130%}
+    .x-fon135 {font-size:135%}
+    .x-fon140 {font-size:140%}
+    .x-fon150 {font-size:150%}
+    .x-fon175 {font-size:175%}
+    .x-fon200 {font-size:200%}
+    .x-cap {text-transform: uppercase;}
+
+  </style>
+</head>
+<body onresize="reso.textContent = window.innerWidth + 'x' + window.innerHeight"
+  class="w3-content"
+  style="max-width:720px; margin-left:0">
+<span id="reso" style="position:fixed; bottom:0; right:0; z-index:100"></span>
+
+<!-- site logo -->
+<i  class="fa fa-superpowers w3-spin w3-xxlarge"
+    style="margin:0; border-radius:50%; position:fixed; top:4px; right:4px; z-index: 100; text-shadow:; color:#ff99ff; "></i>
+
+<!-- main menu trigger -->
+<div style="position:fixed; left:0; top:50%; width:5px; height:100px; background-color:black; z-index:100; cursor: pointer; border-radius:0 8px 8px 0; transform:translate(0,-50%);" title="Open menu"></div>
+
+<!-- quick tool menu -->
+<div style="position:fixed; left:0; top:60%; width:5px; height:70px; background-color:black; z-index:100; border-radius:0 8px 8px 0; cursor: pointer;" title="Open Quick Tool"></div>
+
+<!-- view ----------------------------------------------------->
+<view>
+  <div name="card" class="x-card w3-display-container w3-yellow">
+    <!--pic -->
+    <img src="" class="x-pic" hidden>
+    <!-- user -->
+    <div name="user_icon" class="w3-display-position x-icon" hidden>
+      <i class="fa fa-user-circle-o w3-xlarge"></i> <span class="x-user"></span>
+    </div>
+    <!-- sign -->
+    <div name="sign" class="w3-display-right w3-right x-sign" hidden>
+      <span class="w3-tiny w3-text-white w3-right"><i class="fa fa-heart w3-text-red w3-large"></i></span><br>
+      <span class="w3-tiny w3-text-white w3-right"><i class="fa fa-retweet w3-text-red w3-large"></i></span><br>
+      <span class="w3-tiny w3-text-white w3-right"><i class="fa fa-comments w3-text-red w3-large"></i></span>
+    </div>
+    <!-- tag -->
+    <div name="tag" class="w3-display-left x-tag">
+      <span class="w3-tag x-tag"></span><br>
+      <span class="w3-tag x-tag" style="text-decoration: line-through red;"></span><br>
+      <span class="w3-tag x-tag"></span><br>
+      <span class="w3-tag x-tag"></span>
+    </div>
+    <!-- time -->
+    <span name="time" class="w3-display-position w3-tiny x-time"></span>
+    <!-- action -->
+    <button name="button" class="w3-display-bottomright w3-button w3-ripple w3-blue x-gothic" style="border-radius: 12px 0;">ORDER</button>
+  </div>
+
+
+  <div class="x-card w3-display-container">
+    <!--pic -->
+    <img src="pic/F46BnACbQAAhypE.jpeg" class="x-pic">
+    <!-- user -->
+    <div class="w3-display-position x-icon">
+      <i class="fa fa-user-circle-o w3-xlarge"></i> <span class="x-user">John</span>
+    </div>
+    <!-- sign -->text-shadow: -1px 1px 2px white;
+    <div class="w3-display-right w3-right x-sign">
+      <span class="w3-tiny w3-text-white w3-right">1,000 <i class="fa fa-heart w3-text-red w3-large"></i></span><br>
+      <span class="w3-tiny w3-text-white w3-right">1,000,000 <i class="fa fa-retweet w3-text-red w3-large"></i></span><br>
+      <span class="w3-tiny w3-text-white w3-right">865 <i class="fa fa-comments w3-text-red w3-large"></i></span>
+    </div>
+    <!-- tag -->
+    <div class="w3-display-left x-tag">
+      <span class="w3-tag x-tag">256.50 THB</span><br>
+      <span class="w3-tag x-tag" style="text-decoration: line-through red;">FROM 350.00 THB</span><br>
+      <span class="w3-tag x-tag">UNTIL 25 JUL 23 !</span><br>
+      <span class="w3-tag x-tag">NEW</span>
+    </div>
+    <!-- time -->
+    <span class="w3-display-position w3-tiny x-time">FRI 23-9-29 9:12 #SES45G</span>
+    <!-- action -->
+    <button class="w3-display-bottomright w3-button w3-ripple w3-blue x-gothic" style="border-radius: 12px 0;">ORDER</button>
+  </div>
+
+  
+
+  <div class="x-card w3-display-container">
+    <img src="pic/F4245nJbkAAHjBg.jpeg" class="x-pic">
+    <div class="w3-display-position x-icon">
+      <i class="fa fa-user-circle-o w3-xlarge"></i> <span class="x-user">Jane</span>
+    </div>
+    <div class="w3-display-left" style="max-width:40%; line-height: 1; padding:0; margin-left:4px">
+      <p class="x-francois" style="line-height: 1; padding:0; margin:0; text-shadow: -1px 1px 2px white;">Something very very best is happening here!</p>
+    </div>
+    <span class="w3-display-position w3-tiny x-time">MON 23-9-29 9:12 #SD85FS</span>
+  </div>
+
+
+
+  <div class="x-card x-text w3-center w3-pink w3-display-container">
+    <div class="w3-display-position x-icon">
+      <i class="fa fa-info-circle w3-xlarge "></i> <span style="font-family:monospace">xyz app</span>
+    </div>
+    <h1>Text card</h1>
+    <p>Please go to check your health right now, it is important!</p>
+    <span class="w3-display-position w3-tiny x-time">TUE 23-9-29 9:12 #S5D24S</span>
+  </div>
+
+  <div class="x-card x-text w3-center w3-blue w3-display-container">
+    <div class="w3-display-position x-icon">
+      <i class="fa fa-user-circle-o w3-xlarge "></i> <span class="x-user">Dad</span>
+    </div>
+    <h1 class="x-hand3">this is my note</h1>
+    <p>ภาษาไทยนั้นเป็นภาษาเก่าแก่ มีมาเนิ่นนานช้านาน กตัญญู โน้น นครปฐม ราชบุรี</p>
+    <span class="w3-display-position w3-tiny x-time">WED 23-9-29 9:12 #FSD5F8</span>
+  </div> 
+  
+
+  <div class="x-card x-text w3-center w3-green w3-display-container">
+    <i class="fa fa-info-circle w3-xlarge w3-display-position x-icon"></i>
+    <h1>This is a text card</h1>
+    <p class="x-hand w3-xxlarge">Please go to check your health right now, it is important!</p>
+    <span class="w3-display-position w3-tiny x-time">TUE 23-9-29 9:12 #S5D24S</span>
+  </div>
+
+  <div class="x-card x-text w3-center w3-yellow w3-display-container">
+    <div class="w3-display-position x-icon">
+      <i class="fa fa-user-circle-o w3-xlarge "></i> <span class="x-user">Dad</span>
+    </div>
+    <h1 class="x-hand3">this is my note</h1>
+    <p>This is a message that you need to read and do something about it.</p>
+    <span class="w3-display-position w3-tiny x-time">WED 23-9-29 9:12 #FSD5F8</span>
+  </div> 
+
+
+</view>
+
+
+<script>
+  reso.textContent = window.innerWidth + 'x' + window.innerHeight 
+
+
+
+
+//add pic & text card
+/*
+var tem = 
+`<div  class="w3-card-2 w3-round-large w3-section w3-display-container" 
+        style="height:288px">
+
+    <!-- pic / upper part -->
+    /*
+    <div class="w3-display-container" style="height:75%">
+      <img src="{{picFile}}" 
+        style="width:100%; height:100%;"
+        class="w3-round-large x-card-pic">
+
+      <!-- tag -->
+      <div class="w3-display-bottomleft"
+        style="padding:">
+        <span class="w3-tag x-tag">{{priceTag}} {{currency}}</span>
+        <span class="w3-tag x-tag">{{tag1}}</span>
+        <span class="w3-tag x-tag">{{tag2}}</span>
+      </div>
+    
+      <!-- user -->
+      <div class="w3-opacity w3-round-xxlarge w3-light-grey w3-display-position x-user-position w3-text-black">
+        {{userAvartar}} 
+        <span class=""> {{userName}}</span>
+      </div>
+      
+      <!-- sign -->
+      <div class="w3-display-position w3-xlarge w3-light-grey w3-opacity w3-round-xxlarge w3-text-blue" 
+        style="top:8px; right:8px">{{star}}
+      </div>
+
+    </div>
+    
+    <!-- lower part -->
+    <div class="w3-bar">
+      <div class="w3-container w3-left">
+        <div class="w3-xlarge x-ubuntu-cond"
+            style="margin-top:8px; margin-left:-8px"><b>
+              <a href="" class="w3-text-dark-grey" style="text-decoration: none;">
+                {{productName}}
+              </a></b>
+        </div> 
+        <div class="w3-large w3-text-grey x-opensans x-adj-mg">{{explain}}</div>  
+      </div>
+      <button 
+        class="w3-right w3-button w3-round-large w3-border w3-border-blue w3-text-blue w3-hover-blue w3-ripple x-button-pad x-gothic w3-light-grey"
+        style="margin:4px; ">ORDER</button>
+    </div>
+    <div class="w3-display-position x-smallcap w3-small w3-text-grey" 
+      style="right:4px; bottom:4px">{{timeCode}}</div>
+  </div>`
+
+*/ /*
+var card = {}
+card.picFile = 'pic/F46hZStawAEfHpc.jpeg'
+card.priceTag = '452.56'
+card.currency = 'USD'
+card.tag1 = 'OUT OF STOCK'
+card.tag2 = ''
+card.userAvartar = '<i class="fa fa-user-circle-o w3-xlarge"></i>'
+card.userName = 'biden'
+card.star = '<i class="fa fa-star"></i><i class="fa fa-star"></i>'
+card.productName = 'This is a product name'
+card.explain = 'explain about this product'
+card.timeCode = '#ASDF45DS TUE 23-5-23 15:45'
+
+
+function applyVarInTem(vari,tem) {
+  let ar = tem.match(/(?<={{)\w+(?=}})/g)
+
+  ar.forEach(v => {
+    tem = tem.replace('{{' + v + '}}', vari[v])
+  })
+}
+
+let tem2 = applyVarInTem(card, tem)
+
+console.log(tem2)
+
+let el = document.createElement('div')
+el.id = 'abcdef100'
+el.name = 'pic_text_card'
+el.innerHTML = tem 
+document.querySelector('view').prepend(el)
+*/
+
+</script>
+</body>
+</html>

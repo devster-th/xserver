@@ -2,7 +2,7 @@
  * xfile2.js - enhanced version of xfile.js
  * @param {object} X 
  * @by mutita.org@gmail.com
- * @version 0.2
+ * @version 2.0
  * @license none
  * @lastUpdated 2023-07-25
  * 
@@ -51,16 +51,140 @@ async function $ (X={}) {
 
   } else if (command == 'rename') {
     //XF.$({rename:'old_file_name.txt', to:'new_name.txt'})   OK/m
+    //can rename directory too
+
     return rename(X.rename, X.to)
 
   } else if (command == 'exist') {
     //XF.$({ exist: 'file_name.txt' })    OK/m
     return exist(X.exist)
-  
+
+
+  } else if (command == 'readDir') {
+    //XF.$({ readDir: '/xserver' })
+    //reads what are files in this directory
+    //tested OK, m20230918
+
+    return fs.readdirSync(X.readDir)
+
+
+  } else if (command == 'makeDir') {
+    //XF.$({ makeDir: '<<name of new directory>>' })
+    //if the named dir already exists, returns false
+    //tested OK, m20230918
+
+    if (!fs.existsSync(X.makeDir)) {
+      try {
+        fs.mkdirSync(X.makeDir)
+      } catch (error) {
+        return error
+      }
+    } else {
+      return {
+        msg: "The file name is dupplicating. Aborted.",
+        success: false,
+        fail: true
+      }
+    }
+
+
+  } else if (command == 'deleteDir') {
+    //XF.$({ deleteDir: '<<directory name to be deleted>>' })
+    //this will delete sub dir of the specified dir too (recursive)
+    //tested OK, m20230918
+
+    fs.rm(
+      X.deleteDir,
+      {recursive:true, force:true},
+      error => {
+        if (error) throw error
+        return {
+          msg:"Directory deletion done.",
+          success:true, fail:false
+        }
+      }
+    )
+
+
+
+  } else if (command == 'copy') {
+    //XF.$({ copy: '<<file to be copied>>', to: '<<target file name>>' })
+    //XF.$({ copy: '/xyz.txt', to: '/abc.txt' })
+    //tested OK, m20230918
+
+    fs.copyFile(
+      X.copy,
+      X.to,
+      (error) => console.log(error)
+    )
+
+
+  } else if (command == 'copyDir') {
+    //XF.$({ copyDir:'<<source dir name>>', to:'<<target dir name>>' })
+    //XF.$({ copyDir:'/xyz', to:'/abc' })
+    //this is recursive so all files, folders under the source dir will be copied
+    //tested OK, m20230918
+
+    fs.cp(
+      X.copyDir,
+      X.to,
+      {recursive:true},
+      (error) => console.log(error)
+    )
+
+
+  } else if (command == 'changeModeFile') {
+    //XF.$({ changeModeFile: '<<file>>', to: '<<000 - 777>>' })
+    //if put ... to:0 ... means mode=000
+    //tested OK, works for both file and dir, m20230918
+
+    if (X.to || X.to == 0) {
+      if (typeof X.to == 'number') X.to = X.to.toString()
+      if (typeof X.to != 'string') return {
+        msg: "Wrong input.", success:false, fail:true
+      }
+    } else {
+      return {
+        msg:"Wrong input.", success:false, fail:true
+      }
+    }
+
+    fs.chmod(
+      X.changeModeFile,
+      X.to,
+      (error) => {
+        if (error) return error
+        else return true
+      } 
+    )
+
+
+  } else if (command == 'infoFile') {
+    //XF.$({ infoFile:'<<file>>' })
+    //XF.$({ infoFile:'/xserver/xserver.js' })
+    //show info of both file & dir
+    //tested OK, m20230918
+
+    return new Promise((resolve,reject) => {
+      fs.stat(
+        X.infoFile,
+        (error,info) => {
+          if (error) reject(error) 
+          resolve(info) 
+        }
+      )
+    }) 
+    
+    
+
+
   } else {
+    //if reached here, nothing executed, just return msg
+
     return {
       msg: "Invalid input.",
-      fail: true
+      fail: true,
+      success: false
     }
   }
 }

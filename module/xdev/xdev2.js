@@ -966,13 +966,13 @@ async function makeKey(objIdStr) {
 
 //------------------------------------------------
 function password(length=12) {
-  //gen random password from 92 characters
+  //gen random password from 89 characters
 
   let pass = ''
   for (i=0; i<length; i++) {
     pass += `abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_$!~-+-*/\|&%#@^.,:;<>(){}[]`.charAt(
       Math.floor(
-        Math.random() * 90
+        Math.random() * 89 //89 is the total char we're random from
       )
     )
   }
@@ -1082,7 +1082,7 @@ async function prepPacket(msg, sessionInfo) {
 
 
 /**
- * XB.passwordRealHash - makes the password hash more secure
+ * XS.passwordRealHash - makes the password hash more secure
  * @param {string} username 
  * @param {string/hex} passwordHash 
  * @returns hash/hex/sha256/64 digits
@@ -1104,3 +1104,7 @@ module.exports = {
 }
 
 
+/* NOTE
+The wrap & unwrap are not use now, uses the packet instead.
+
+*/

@@ -44,6 +44,7 @@
 <script src="/xbrowser/module/xdev/xdev_b2.js"></script>
 <script src="/xbrowser/library/md5/md5.min.js"></script>
 <script src="/xbrowser/variable.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body class="w3-content" style="max-width:600px">
@@ -52,91 +53,7 @@
 <!-- content / this is where all the content shown to the user -->
 <content id="con_tent" class="w3-container">
 
-  <div class="w3-card-4 w3-section">
-    <img src="./pic/mpox.png" style="width:100%">
-  </div>
 
-  <div card_id="1000" class="w3-card-4 w3-container w3-section w3-display-container w3-pale-yellow" style="min-height:130px">
-    <i class="fa fa-user-circle-o w3-xxxlarge w3-margin w3-display-topleft"></i><br>
-    <p class="w3-xlarge w3-margin-left w3-display-topleft" style="margin-top:70px">John</p>
-
-    <p class="w3-xlarge" style="margin-left:80px">Hey!, how're you? <br>Shall we have lunch?
-    <br>ssssssssssssss sssssssssss sssssssss</p>
-    <span class="w3-display-bottomright w3-margin-right w3-text-brown">10min ago</span>
-  </div>
-
-  <div class="w3-card-4 w3-container w3-green w3-display-container w3-section" style="height:130px">
-    <i class="fa fa-btc w3-display-topleft w3-xxxlarge w3-margin"></i>
-    <p class="w3-xlarge" style="margin-left:80px">Your new order #2563<br>valued = BTC 32,152.00</p>
-    <span class="w3-display-bottomright w3-margin-right w3-text-brown">9min ago, from Tesla, inc.</span>
-  </div>
-
-  <div class="w3-panel w3-pink w3-card-4 w3-section w3-display-container">
-    <p><i class="fa fa-info-circle w3-xxlarge"></i> &nbsp; There'll be lions on the street soon. Careful!</p>
-    <span class="w3-display-bottomright w3-margin-right w3-text-black">8min ago, A zoo, New York City</span>
-  </div>
-
-  <div class="w3-cell-row">
-    <div class="w3-card-4 w3-display-container w3-cell">
-      <img src="./pic/sandwich.jpeg" width="100%">
-      <span class="w3-display-bottomleft w3-black w3-xxlarge">฿ 100.-</span>
-    </div>
-    <div class="w3-card-4 w3-display-container w3-cell">
-      <img src="./pic/latte.jpg" width="100%">
-      <span class="w3-display-bottomleft w3-black w3-xxlarge">฿ 120.-</span>
-    </div>
-  </div>
-  
-  <div class="w3-panel w3-leftbar w3-light-grey w3-display-container">
-    <p class="w3-xxlarge w3-serif w3-text-brown"><i>"Yo! Maybe the world can stop spinning somedays."</i></p>
-    <p class="w3-text-gray">Someone who inexisted</p>
-    <span class="w3-display-bottomright w3-margin-right w3-text-brown">09:00am, Hitler</span>
-  </div>
-
-  <div class="w3-row w3-pale-green w3-card-4">
-    <div class="w3-col s4">
-      <img src="./pic/F43L3MEXoAA4PCH.jpeg" style="width:100%">
-    </div>
-    <div class="w3-container w3-col s8">
-      <p class="w3-xlarge ">This video is very good :-D<br>
-      You have to watch it now, now, now.</p>
-    </div>
-  </div>
-
-  
-<!--
-  <div name="approve_card" class="w3-card-4 w3-container w3-display-container w3-pale-blue w3-section">
-    <h1 class="w3-serif w3-text-red"><i>Will you approve this?</i></h1>
-    <br>
-    <form class="w3-xlarge">
-      <input type="radio" value="yes" name="action" class="w3-radio"> Yes, &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <input type="radio" value="no" name="action" class="w3-radio"> No
-    </form>
-      
-    <br>
-    <br>
-    <button class="w3-btn w3-margin-bottom w3-blue" onclick="xyz(this)">Confirm my action</button><br>
-    <span msg=""></span>
-
-    <script>
-      function xyz(el) {
-        let cardEl = el.closest('div[name="approve_card"]')
-        if (cardEl.querySelector('form').action.value == '') {
-          cardEl.querySelector('[msg]').textContent = "You haven't choose anything, please choose one."  
-        } else {
-          cardEl.querySelector('[msg]').textContent = "You have choosen: " + cardEl.querySelector('form').action.value
-        }
-         
-      }
-    </script>
-  </div>
--->
-
-
-
-  <div class="w3-card-4 w3-container w3-serif w3-section w3-sand">
-    <h1 class="w3-serif w3-text-khaki w-shadow">This is just a text for your reading</h1>
-    <p>People is one of the amazing thing on earth. The people is doing things, goods, bads, and they're doing every day, hours, minutes. They're trying to do things that they think is worth for them to do it.</p>
-  </div>
 
 </content>
 
@@ -191,12 +108,12 @@
 
 
 
-<!-- quick tools at lower part of the screen -->
+<!-- quick tools at lower part of the screen 
 <search class="fa fa-search w3-text-gray" style="position:fixed; left:40px; bottom:60px; font-size:46px; cursor:pointer; margin-top:8px" onclick="toggleDisplay(search_box)"></search> 
 
 <input id="search_box" class="w3-input w3-border w3-black w3-round-xxlarge" type="text" style="position:fixed; left:100px; bottom:60px; width:350px; display:none; border:1px solid black" placeholder="Fill words & enter to search." onchange="alert(search_box.value)">  
 
-
+-->
 
 
 
@@ -866,21 +783,31 @@ function addCard2(templName, data) {
 }
 
 
-function mdb(vv) {
-  //handles data in memory like database but takes memory
+function chart() {
+  //draw chart on card_id="9000"
+  let canvasEl = XB.el('#chart1000')
 
-  if (typeof _mdb == 'undefined') {
-    _mdb = {}
-    return _mdb
-  } else if (!vv) {
-    return _mdb
-  } else if (vv && typeof vv == 'object') {
-    _mdb = vv
-  } else {
-    return false
-  }
+  new Chart(canvasEl, {
+    type:'bar',
+    data: {
+      labels: ['Red','Blue','Yellow','Green','Purple','Orange'],
+      datasets: [{
+        //label:'',
+        data: [12,19,9,18,23,5],
+        borderWidth:1,
+        //backgroundColor:['red','blue','yellow','green','purple','orange']
+
+      }]
+    },
+    options: {
+      scales:{
+        y: {beginAtZero: true}
+      }
+    }
+  })
   
 }
+chart()
 
 
 </script>

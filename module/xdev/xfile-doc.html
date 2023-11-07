@@ -1,0 +1,202 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="author" content="mutita.org@gmail.com">
+  <title>xfile2.js doc</title>
+  <style>
+    textarea {width: 100%; background-color:lavender; font-family: monospace; overflow:hidden; border:none; color:darkred}
+    code {background-color:lavender; font-family: monospace; color:darkred}
+    h1 {color:darkred}
+    h2 {margin-top:32px; margin-bottom:0}
+    h2 + p {margin-top:8px}
+    mark {background-color: lightyellow;}
+    caution {color:red; font-weight: bold;}
+
+    @media (min-width:800px) {
+      #toc {
+        float: left;
+        width: 25%;
+        position:sticky; top:0;
+      }
+      #story {
+        margin-left: 25%;
+        max-width: 800px;
+      }
+      #title {
+        margin-top:0; padding-top:0;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- scroll top -->
+<a href="#" style="font-size:40px; position:fixed; left:0; bottom:0; padding:2px; color:orange; cursor:pointer; text-decoration: none;">&#8673;</a>
+<!-- table of contents -->
+<div id="toc">
+  <!-- doc title -->
+  <h1 id="title">xfile2.js doc</h1>
+  <p>Table of contents</p>
+  <ol>
+    <li><a href="#brief">Brief</a></li>
+    <li><a href="#config">Config</a></li>
+    <li><a href="#create">create</a> </li>
+    <li><a href="#write">write</a> </li>
+    <li><a href="#read">read</a> </li>
+    <li><a href="#append">append</a> </li>
+    <li><a href="#delete">delete</a> </li>
+    <li><a href="#rename">rename</a></li>
+    <li><a href="#exist">exist</a> </li>
+    <li><a href="#readdir">readDir</a></li>
+    <li><a href="#makedir">makeDir</a></li>
+    <li><a href="#deletedir">deleteDir</a></li>
+    <li><a href="#copy">copy</a></li>
+    <li><a href="#copydir">copyDir</a></li>
+    <li><a href="#chmod">changeModeFile</a></li>
+    <li><a href="#infofile">infoFile</a></li>
+
+
+  </ol>
+</div>
+<!-- story -->
+<div id="story">
+  <h2 id="brief">Brief</h2>
+  <p>Makes it easier to work with files in <mark>node.js</mark>. The program based on <mark>fs</mark> module of node.js. The command is like:</p>
+  <textarea rows="3">
+  XF.$({
+    ... put xfile commands here ... 
+  })
+  </textarea>
+  <p>The xfile command is simply the object format but just forming it to be understandable like a language, like:</p>
+  <textarea rows="">
+  XF.$({ create: 'fileName.json' })
+  </textarea>
+
+
+  <h2 id="config">Config</h2>
+  <p>Get the <mark>xfile2.js</mark> to your directory and include it to your program. You have to have the <mark>fs</mark> module installed in your nodejs environment.</p>
+  <textarea>
+  const XF = require('xfile2.js')
+  </textarea>
+  <p>The number <mark>2</mark> is its version. If we have next version it gonna be <mark>xfile3.js</mark> so we know which version we're using.</p>
+
+
+  <hr style="margin-top:36px; margin-bottom:0; padding:0; ">
+  <p style="color:gray; margin-top:0; font-family: sans-serif; text-align: center;">XFILE COMMANDS</p>
+
+
+  <h2 id="create">create</h2>
+  <p>Creates a blank file.</p>
+  <textarea>
+  XF.$({ create: 'fileName.json' })
+  </textarea>
+
+  <h2 id="write">write</h2>
+  <p>Writes text to a file:</p>
+  <textarea>
+  XF.$({  write:  'content...', 
+          to:     'fileName.txt' })
+  </textarea>
+
+  <h2 id="read">read</h2>
+  <p>Reads file content:</p>
+  <textarea rows="">
+  XF.$({ read: 'fileName.ext' })
+  </textarea>
+
+
+  <h2 id="append">append</h2>
+  <p>Appends text to the file:</p>
+  <textarea rows="">
+  XF.$({  append: 'content...',
+          to:     'fileName.ext' })
+  </textarea>
+
+
+  <h2 id="delete">delete</h2>
+  <p>Deletes file:</p>
+  <textarea rows="">
+  XF.$({  delete: 'fileName.ext' })
+  </textarea>
+
+  
+
+
+
+
+  <h2 id="rename">rename</h2>
+  <p>Renames the file or directory.</p>
+  <textarea rows="">
+  XF.$({  rename: 'oldName.ext',
+          to:     'newName.ext'   })
+  </textarea>
+
+  
+
+  <h2 id="exist">exist</h2>
+  <p>Checks existence of the file or directory:</p>
+  <textarea rows="">
+  XF.$({ exist: 'fileName.ext' })
+  </textarea>
+
+
+
+
+  <h2 id="readdir">readDir</h2>
+  <p>Lists all file in the directory.</p>
+  <textarea rows="">
+  XF.$({ readDir: 'directoryName' })
+  </textarea>
+
+  <h2 id="makedir">makeDir</h2>
+  <p>Makes a directory. If the directory with that name already existed, xfile will give false.</p>
+  <textarea>
+  XF.$({ makeDir: 'directoryName' })
+  </textarea>
+
+  <h2 id="deletedir">deleteDir</h2>
+  <p><caution>!</caution> Deletes directory included its subdirectory & files.</p>
+  <textarea>
+  XF.$({ deleteDir: 'nameOfDirectory' })
+  </textarea>
+
+
+  <h2 id="copy">copy</h2>
+  <p>Copies file to another location. If you not specify the target file name it will show error.</p>
+  <textarea>
+  XF.$({  copy: 'fileName.ext', 
+          to:   '/dir/fileName.ext' })
+  </textarea>
+
+
+  <h2 id="copydir">copyDir</h2>
+  <p>Copies directory & its subdirectories and files to other location. It copies also the directory and do it for all subdirectories too. If you don't put the target directory name, it shows the error.</p> 
+  <p><caution>!</caution> But if you put the target directory name which is already existed, it will replace that whole directory.</p>
+  <textarea>
+  XF.$({  copyDir:  '/abc',
+          to:       '/dir/dir-name'})
+  </textarea>
+
+
+  <h2 id="chmod">changeModeFile</h2>
+  <p>Changes the file's mode between <code>000-777</code>. The mode code can be in both string or number. If puts <code>0</code> it means <code>000</code>, so all the user, group and global will be denied.</p>
+  <textarea>
+  XF.$({  changeModeFile: 'fileName.ext',
+          to:             '400'           })
+  </textarea>
+
+
+  <h2 id="infofile">infoFile</h2>
+  <p>Show file/directory information.</p>
+  <textarea>
+  XF.$({ infoFile: 'fileName.ext' })
+  </textarea>
+
+
+</div>
+
+<!-- footer -->
+<br><br><hr>
+<small>Last update: Nov 7, 2023 by M</small>
+</body>
+</html>

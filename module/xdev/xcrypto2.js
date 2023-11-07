@@ -25,7 +25,7 @@ const crypto = require('crypto')
 
 exports.info = {
   module: 'xcrypto2.js',
-  version: '0.2',
+  version: '2.0',
   by: 'mutita',
   license: 'none',
   brief: "The enhanced version of xcrypto.js which adapting the object style of language XC.$({...}) . This XC or xcrypto2 is part of the XS/xdev package."

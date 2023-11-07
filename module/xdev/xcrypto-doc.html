@@ -1,0 +1,190 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="author" content="mutita.org@gmail.com">
+  <title>xcrypto2.js doc</title>
+  <style>
+    textarea {width: 100%; background-color:lavender; font-family: monospace; overflow:hidden; border:none; color:darkred}
+    code {background-color:lavender; font-family: monospace; color:darkred}
+    h1 {color:darkred}
+    h2 {margin-top:32px; margin-bottom:0}
+    h2 + p {margin-top:8px}
+    mark {background-color:lightyellow;}
+    caution {color:red; font-weight: bold;}
+
+    @media (min-width:800px) {
+      #toc {
+        float: left;
+        width: 25%;
+        position:sticky; top:0;
+      }
+      #story {
+        margin-left: 25%;
+        max-width: 800px;
+      }
+      #title {
+        margin-top:0; padding-top:0;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- scroll top -->
+<a href="#" style="font-size:40px; position:fixed; left:0; bottom:0; padding:2px; color:orange; cursor:pointer; text-decoration: none;">&#8673;</a>
+<!-- table of contents -->
+<div id="toc">
+  <!-- doc title -->
+  <h1 id="title">xcrypto2.js doc</h1>
+  <p>Table of contents</p>
+  <ol>
+    <li><a href="#brief">Brief</a></li>
+    <li><a href="#config">Config</a></li>
+    <li><a href="#hash">hash</a> </li>
+    <li><a href="#hmac">hmac</a> </li>
+    <li><a href="#random">random</a> </li>
+    <li><a href="#encrypt">encrypt</a> </li>
+    <li><a href="#decrypt">decrypt</a> </li>
+    <li><a href="#genkeys">genKeys</a></li>
+    <li><a href="#sign">sign</a> </li>
+    <li><a href="#verify">verify</a></li>
+    <li><a href="#randomint">randomInt</a></li>
+    
+
+
+  </ol>
+</div>
+<!-- story -->
+<div id="story">
+  <h2 id="brief">Brief</h2>
+  <p>Makes crypto works easier in the <mark>nodejs</mark>. Similar to other <mark>xdev</mark> package, the form of the language will be:</p>
+  <textarea rows="3">
+  XC.$({
+    ... put xcrypto commands here ... 
+  })
+  </textarea>
+  
+
+
+  <h2 id="config">Config</h2>
+  <p>Get the <mark>xcrypto2.js</mark> to your directory and include it to your program. You have to have the <mark>crypto</mark> module installed in your nodejs environment.</p>
+  <textarea>
+  const XC = require('xcrypto2.js')
+  </textarea>
+  <p>The number <mark>2</mark> is its version. If we have next version it gonna be <mark>xcrypto3.js</mark> so we know which version we're using.</p>
+
+
+  <hr style="margin-top:36px; margin-bottom:0; padding:0; ">
+  <p style="color:gray; margin-top:0; font-family: sans-serif; text-align: center;">XCRYPTO COMMANDS</p>
+
+
+
+  <h2 id="hash">hash</h2>
+  <p>Hashes string. The algor can be md5, sha512 and some standards. Format can be hex or base64. If we ommit algor & format, the default is sha256 and hex.</p>
+  <textarea rows="3">
+  XC.$({  hash:   'string...', 
+          algor:  'md5|sha1|sha256*|sha384|sha512', 
+          format: 'hex*|base64' })
+  </textarea>
+
+  <h2 id="hmac">hmac</h2>
+  <p>Gen the Hash-based Message Authentication Code. The * is the default if you ommit it. The key can be any digit of string or can be <code>''</code>.</p>
+  <textarea rows="5">
+  XC.$({  hmac:   'string...', 
+          key:    'string...'|'',
+          algor:  'md5|sha1|sha256*|sha384|sha512',
+          format: 'hex*|base64' 
+  })
+  </textarea>
+
+
+  <h2 id="random">random</h2>
+  <p>Gives random strings, the default is 16. You can put <code>random:''</code> and you'll get 16 bytes random strings which is 32 characters. But if you set format to base64 the string length will be shorter than that.</p>
+  <textarea rows="4">
+  XC.$({ 
+    random: 16*|''|any number,
+    format: 'hex*|base64' 
+  })
+  </textarea>
+
+
+  <h2 id="encrypt">encrypt</h2>
+  <p>Encrypts string with AES-256-GCM algorithm. The key should be 64 characters string or a sha256 code.</p>
+  <textarea rows="4">
+  XC.$({  
+    encrypt: 'string...',
+    key:     'hex sha256 string...' 
+  })
+  </textarea>
+
+
+  <h2 id="decrypt">decrypt</h2>
+  <p>Decrypts string that encrypted by the command encrypt above. The key must be same as the encryption. This is AES-256-GCM algorithm.</p>
+  <textarea rows="4">
+  XC.$({  
+    decrypt:  'string...',
+    key:      'hex sha256 string...' 
+  })
+  </textarea>
+
+  
+
+
+
+
+  <h2 id="genkeys">genKeys</h2>
+  <p>Generate RSA keypair. Puts <code>'rsa'</code> or <code>''</code> given the same output.</p>
+  <textarea rows="3">
+  XC.$({  
+    genKeys: 'rsa'*|'',
+  })
+  </textarea>
+
+  
+
+  <h2 id="sign">sign</h2>
+  <p>Signs message with RSA PublicKey. Output of the sign called a signature in which we'll use in the Verify process. The signature is base64 format. You can get the privateKey from the genKeys command above.</p>
+  <textarea rows="4">
+  XC.$({ 
+    sign:       'message......',
+    privateKey: 'rsa private key' 
+  })
+  </textarea>
+  <p>Sample of the signature:</p>
+  <textarea rows="18">
+  'aTkgeLriMZfJ/cUXhDMRwYgwZSXcWHpIAvbuXuDDxykTXilo6zbWMNvGeUQVCy6+nfVRCmkKI5J8hH0/owsgkCYxyC4VM4GF7kqPcqjcimEcTHx5O7/oZTkJXyU1lpwjeZzn3GOojml6s4KZJhzZSZcRcUmcfpgreXFi40zqkGIq4DzqGp3PphEZtv20VPmsE3vdssi09Pc8/R4Ge0STe/JMU4B8ph+9tZVZWhQa7szBLtav7+fqnB4Cd8U28W55qH6DkT1OYq3GcuJEPjr+krF0n+LpollcnxpJxAGOzUBJPg5a/EYjTBAV1EtS66EVM4lXfT2JP0wq26QmXIkuEE7iFedIxb55DjaKEPzVG9v+Xtcs/x6ynfScJ98jDi0tqScZcktBBl/4YqI3EVD1eRfS+XZhlJUcAMb7idnTZJwcsbq0t0vl++W43EEsf3YvqkalhMkoBpQe2JUoJpG2dmGtEazspg2vVjEHpefaWZsH5HbKrP/T/WRBucPoDMj3JDtk0XpyiYnhgAa5zNCccO6/vGaV0wN1pbrYuHhP4of85ItkQgcPwJMAGSIOOyw9CJ4ryZ8wWNFa2sfIwFD5s4VZUazOzYAv9IXsl1aXF8OKYjFthSLx63OLp2C/TTAiPzxQ9pHtyx2mLZx+Ng7VaiaFPOq508mcmLhYDul7gQM='
+  </textarea>
+
+
+  <h2 id="verify">verify</h2>
+  <p>Verifies the message that was signed by the above command. The signature is the output from the sign command above. The publicKey can be get from the genKeys command.</p>
+  <textarea rows="5">
+  XC.$({ 
+    verify:     'message...',
+    signature:  'signature...',
+    publicKey:  'rsa public key' 
+  })
+  </textarea>
+
+
+
+  <h2 id="randomint">randomInt</h2>
+  <p>Gen random integer. The default is 10 numbers or you can put <code>''</code> instead. The min & max can be set. Be careful, if you set the length to 10 but you put max is 6, the max will overrides the length. If you ommit min & max, it gives from 0 upto the max digit that you set.</p>
+  <textarea rows="5">
+  XC.$({ 
+    randomInt:  10*|'',
+    min:        1000000000,
+    max:        9999999999 
+  })
+  </textarea>
+
+  
+
+
+</div>
+
+<!-- footer -->
+<br><br><hr>
+<small>Last update: Nov 7, 2023 by M</small>
+</body>
+</html>
