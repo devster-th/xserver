@@ -15,7 +15,7 @@
     "jsonwebtoken": "^9.0.0",
     "keypair": "^1.0.4",
     "minimal-password-prompt": "^1.1.0",
-    "mongodb": "^4.9.1",
+    "mongodb": "6.3",
     "nanoid": "^4.0.0",
     "password-prompt": "^1.1.2",
     "prompt-sync": "^4.2.0",

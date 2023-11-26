@@ -738,7 +738,7 @@ XB.importKey = async function(key,format='aes') {
 
 //14----------------------------------------------
 XB.sign = async function (msg, key, algor='hmac') {
-  // take HMAC is the defaul sign algorithm
+  // take HMAC is the default sign algorithm
 
   //check the msg
   if (typeof msg == 'object') {

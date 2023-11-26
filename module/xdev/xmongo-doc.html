@@ -3,14 +3,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
   <meta name="author" content="mutita.org@gmail.com">
-  <title>xmongo2.js doc</title>
+  <title>xmongo3.js doc</title>
   <style>
     textarea {width: 100%; background-color:lavender; font-family: monospace; overflow:hidden; border:none; color:darkred}
     code {background-color:lavender; font-family: monospace; color:darkred}
     h1 {color:darkred}
     h2 {margin-top:32px; margin-bottom:0}
     h2 + p {margin-top:8px}
-    mark {background-color: lightyellow;}
+    mark {background-color:lavender}
     caution {color:red; font-weight: bold;}
 
     @media (min-width:800px) {
@@ -35,19 +35,34 @@
 <!-- table of contents -->
 <div id="toc">
   <!-- doc title -->
-  <h1 id="title">xmongo2.js doc</h1>
+  <h1 id="title">xmongo3.js doc</h1>
   <p>Table of contents</p>
   <ol>
     <li><a href="#brief">Brief</a></li>
     <li><a href="#config">Config</a></li>
+    <small style="color:gray">--- commands ---</small>
     <li><a href="#connect">connect</a></li>
     <li><a href="#disconnect">disconnect</a></li>
     <li><a href="#add">add</a></li>
     <li><a href="#delete">delete</a></li>
     <li><a href="#find">find</a></li>
+    <li><a href="#searchtext">searchText</a></li>
     <li><a href="#change">change</a></li>
     <li><a href="#replace">replace</a> </li>
     <li><a href="#createcollec">createCollection</a> </li>
+    <li><a href="#createdb">createDb</a> </li>
+    <li><a href="#listcollec">listCollectionOf</a> </li>
+    <li><a href="#listdb">listDb</a> </li>
+    <li><a href="#setindex">setIndexAs</a> </li>
+    <li><a href="#getindex">getIndexOf</a> </li>
+    <li><a href="#removeindex">removeIndex</a> </li>
+    <li><a href="#removecollec">removeCollection</a> </li>
+    <li><a href="#removedb">removeDb</a> </li>
+    <li><a href="#copycol">copyCollection</a> </li>
+    <li><a href="#command">command</a> </li>
+    <li><a href="#objectid">Work with ObjectId</a></li>
+    <li><a href="#loop">Work with loop</a></li>
+
   </ol>
 </div>
 <!-- story -->
@@ -57,28 +72,28 @@
 
   <p>We may call this <mark>xmongo</mark>. General use of the xmongo is:</p>
   <textarea rows="3">
-  XD.$({
-    ... put xmongo commands here ... 
-  })
+XD.$({
+  ... put xmongo commands here ... 
+})
   </textarea>
   <p>The xmongo command is simply the object format but just forming it to be understandable like a language, like:</p>
-  <textarea rows="4">
-  XD.$({
-    add:  {name:'john',age:23,sex:'male'},
-    to:   'xdb.people'}
-  })
+  <textarea rows="5">
+XD.$({
+  add:  {name:'john', age:23, sex:'male'},
+  to:   'xdb.people'
+})
   </textarea>
-
+  <p>These all things are <code>promise</code> base so don't forget to put <code>await</code> to get the output of each command.</p>
 
   <h2 id="config">Config</h2>
-  <p>Get the <mark>xmongo2.js</mark> to your directory and include it to your main code. You have to have the <mark>mongodb</mark> module already installed in your <mark>nodejs</mark> environment.</p>
+  <p>Get the <mark>xmongo3.js</mark> to your directory and include it to your main code. You have to have the <mark>mongodb</mark> module already installed in your <mark>nodejs</mark> environment.</p>
   <textarea>
-  const XD = require('xmongo2.js')
+const XD = require('xmongo3.js')
   </textarea>
-  <p>The number <mark>2</mark> is its version. If we have next version it gonna be <mark>xmongo3.js</mark> so we know which version we're using.</p>
-  <p>The default port setting is in the <mark>xmongo2.js</mark> where you can change the uri:</p>
+  <p>The number <mark>3</mark> is its version. If we have next version it gonna be <mark>xmongo4.js</mark> so we know which version we're using.</p>
+  <p>The default connection string is in the <mark>xmongo3.js</mark> where you can change the uri or you may just set it at connection time.</p>
   <textarea>
-  const uri = 'mongodb://localhost:27017'
+const uri = 'mongodb://localhost:27017'
   </textarea>
 
 
@@ -86,63 +101,71 @@
   <p style="color:gray; margin-top:0; font-family: sans-serif; text-align: center;">XMONGO COMMANDS</p>
 
   <h2 id="connect">connect</h2>
-  <p>Two ways to connect to the db.</p>
+  <p>Two ways to connect to the db. If you don't put the connection string, it takes the default. In the <code>XD.$({connect:''})</code>, if you don't put the connection string just put the <code>''</code> so it takes the default. When putting the connection string you may put just <code>'mongodb://localhost'</code> then it goes to the default port by default.</p>
   <textarea>
-  XD.connect()
-  XD.$({connect:true})
+XD.connect('mongodb://localhost:27017')
+XD.$({connect: =connectionString= })
   </textarea>
 
   <h2 id="disconnect">disconnect</h2>
   <p>2 ways but recommendation for db intensive app we don't need to disconnect at every access instead we should maintain the connection as our app acessing the db all the time.</p>
   <textarea>
-  XD.disconnect()
-  XD.$({disconnect:true})
+XD.disconnect()
+XD.$({disconnect:''})
   </textarea>
 
   <h2 id="add">add</h2>
   <p>We don't use the term insert here as we like to make it more simple, so uses add instead.</p>
   <textarea rows="4">
-  XD.$({
-    add:  {name:'john',age:23,sex:'male'},
-    to:   'dbName.collectionName'
-  })
+XD.$({
+  add:  {name:'john',age:23,sex:'male'},
+  to:   'dbName.collectionName'
+})
   </textarea>
   <p>If you ommit the dbName it will assume the xdb database. Uses <code>add:[{...},{...},...]</code> for adding many docs.</p>
-
+  <p>The add command will automatically add the uuid field into every doc it inserting into the mongodb. If the doc already has field uuid, it skips.</p>
 
   <h2 id="delete">delete</h2>
   <p>Deletes all docs that matched your query.</p>
   <textarea rows="4">
-  XD.$({
-    delete: {uuid:'..........'},
-    from:   'dbName.collectionName'
-  })
+XD.$({
+  delete: {uuid:'..........'},
+  from:   'dbName.collectionName'
+})
   </textarea>
+  <p>In delete command we don't have the <mark>easierFilter</mark> feature so there's no <code>EXIST_</code> or <code>INEXIST_</code> therefore you have to do this if you delete some docs that haven't some fields:</p>
+  <textarea rows="4">
+XD.$({
+  delete: {uuid: {$exist: false}},
+  from:   'db.collection'
+})
+  </textarea>
+  <p>This deletes the docs that the field uuid doesn't exist.</p>
 
 
   <h2 id="find">find</h2>
-  <p>The <code>find:, from:</code> are required.</p>
+  <p>The <code>find:, from:</code> are required. The output always in array.</p>
   <textarea rows="13">
-  XD.$({
-    find: {name:'john'},
-    from: 'dbName.collectionName'
-  })
+XD.$({
+  find: {name:'john'},
+  from: 'dbName.collectionName'
+})
 
-  XD.$({
-    find: {price:'100+'},
-    from: 'db.collection',
-    getOnly: 'name price stock',
-    sort: {name:1},
-    limit: 20,
-    skip: 5,
-  })
+XD.$({
+  find:     {price:'100+'},
+  from:     'db.collection',
+  getOnly:  'name price stock',
+  sort:     {name:1},
+  limit:    20,
+  skip:     5,
+})
   </textarea>
 
-  <p>Query has options below</p>
+  <p>Query has options below. You'll find that there're features that we made to make the query easier, this is called <mark>easierFilter</mark>. This makes the query in mongodb a lot easier.</p>
   <ul>
     <li>To take all docs, uses <code>find:{}</code> or <code>find:''</code> and we'll get all docs from that collection.</li>
-    <li>More than -- uses <code>find:{price:'100+'}</code> this finds the price that more than 100</li>
-    <li>Less than -- uses <code>price:'100-'</code></li>
+    <li>More than -- uses <code>find:{price:'100+'}</code> this finds the price that more than 100. This also work now <code>price:'>100'</code>. We can compare more than on character too <code>name:'>s'</code>.</li>
+    <li>Less than -- uses <code>price:'100-'</code>, this also work <code>price:'<100'</code>. Less than in character mode also done by <code>name:'&lt;s'</code></li>
     <li>More than or equal -- uses <code>price:'>=100'</code></li>
     <li>Less than or equal -- <code>price:'=<100'</code></li>
     <li>Not -- <code>name:'NOT_john'</code> finds all docs that the field <mark>name</mark> is not john. The result includes docs that doesn't have <mark>name</mark> field too.</li>
@@ -151,6 +174,40 @@
     <li>Starts with -- <code>name:'jo*'</code> finds docs that the field <mark>name</mark> starts with jo</li>
     <li>Ends with -- <code>name:'*hn'</code> finds docs that the field <mark>name</mark> ends with hn</li>
     <li>Regular expression -- <code>name:/joh/</code> finds docs having <mark>name</mark> includes joh</li>
+    <li>OR -- The logical OR is done by <code>find:{aaa:...., OR_bbb:....}</code>. The <code>OR_</code> field takes its left field to do OR logic. If you have many <code>OR_</code> in the query, it takes all <code>OR_</code> fields into the same comparison.</li>
+    <textarea rows="12">
+XD.$({
+  find: {aaa:1000, OR_bbb:2000},
+  from: 'db.col'
+})
+// {aaa: } || {bbb: }
+
+XD.$({
+  find: {aaa: ,bbb: ,OR_ccc: ,ddd: , OR_eee: }, ...
+})
+// {aaa: } && {ddd: } && ( {bbb: } || {ccc: } || {eee: } )
+    </textarea>
+
+    <li>ObjectId -- You can find by the ObjectId too.</li>
+    <textarea rows="4">
+XD.$({
+  find: XD.ObjectId("...."), from: 
+})
+    </textarea>
+    <li>Range -- finds in range of numbers by <code>find:{price:'100-500'}</code> gets you the docs having price from 100 to 500.</li>
+    <li>Max value -- finds max value of a field by <code>find:{price:'MAX_'}</code></li>
+    <li>Min value -- finds min by <code>find:{price:'MIN_'}</code></li>
+    <li>Time -- finds docs based on time like <code>find:{available:'BEFORE_2023-11-30'}</code>. The time format uses ISO and we can put until the millisec level. More on time finding are below:</li>
+      <ul>
+        <li><code>find:{time:'AFTER_2023-11-30T09:00Z'}</code></li>
+        <li><code>find:{time:'SINCE_ ...'}</code></li>
+        <li><code>find:{time:'FROM_2023-11-01_TO_2023-11-30'}</code></li>
+        <li><code>find:{time:'OLDEST_'}</code></li>
+        <li><code>find:{time:'LATEST_'}</code></li>
+      </ul>
+    <li>Finds doc qty in a collection -- <code>find:'DOC_QTY', from: </code></li>
+    <li>Finds first doc in collection -- <code>find:'FIRST_DOC', from: </code></li>
+    <li>Finds last doc of the collection -- <code>find:'LAST_DOC', from: </code></li>
   </ul>
 
 
@@ -162,19 +219,37 @@
     <li>Limit -- <code>{find:'', from:'..', limit:3}</code> limits only 3 docs for the result</li>
     <li>Skip -- <code>{find:'', from:'..', skip:5}</code> skips the first 5 docs from the result</li>
     <li>Default db -- if you ommit the db name like: <code>from:'product'</code>, it will take the product collection from xdb database.</li>
+    <li>Distinct -- finds a field for a distinct values: <code>{find:'', distinctField:'category', from:'products'}</code>. The output is an array with distinct values of that field.</li>
   </ul>
+
+
+  <h2 id="searchtext">searchText</h2>
+  <p>We can do text search but the collection has to have the text index before searching for its content.</p>
+  <textarea rows="4">
+XD.$({
+  searchText: =textToSearch=,
+  from:       =db.collec=
+})    
+  </textarea>
+
 
 
 
 
   <h2 id="change">change</h2>
-  <p>Change is the update in general mongodb terms. The <code>change:, with:, to:</code> are required.</p>
-  <textarea rows="5">
-  XD.$({
-    change: {..query..},
-    with:   {..data to make change..},
-    to:     'db.collection'
-  })
+  <p>Change is the update in general mongodb terms. The <code>change: ..., with: ..., to: ...</code> are required. The part <code>change: </code> doesn't use the easierFilter so you have to use the mongodb query way for now.</p>
+  <textarea rows="11">
+XD.$({
+  change: {..query..},
+  with:   {..data to make change..},
+  to:     'db.collection'
+})
+
+XD.$({
+  change: {_id: new XD.ObjectId('...')},
+  with: ,
+  to: 
+})
   </textarea>
 
   <p>Options</p>
@@ -185,17 +260,18 @@
     <li>Rename -- <code>with:{aaa:'RENAMETO_bbb'}</code> renames the filed aaa to bbb</li>
     <li>Remove -- <code>with:{aaa:'REMOVE_'}</code> removes the field aaa</li>
     <li>If you know mongodb command you can use its update operators like <code>$set, $inc, $mul, $rename, $unset</code>, whatever by putting it in <code>with:{ ... }</code></li>
+    <li>ObjectId -- can be done by <code>change:{_id: XD.ObjectId('...')}</code></li>
   </ul>
 
 
   <h2 id="replace">replace</h2>
   <p>Replaces the entire doc that matched the query. The different with the change/update is the change/update only does for the fields we specified, not the entire doc like replace. In this command we do only 1 doc replacment at a time, not do replaceMany.</p>
   <textarea rows="5">
-  XD.$({
-    replace:  {uuid:'...'},
-    with:     {...},
-    on:       'db.collection'
-  })
+XD.$({
+  replace:  {uuid:'...'},
+  with:     {...},
+  on:       'db.collection'
+})
   </textarea>
 
 
@@ -204,16 +280,141 @@
   <h2 id="createcollec">createCollection</h2>
   <p>This creates a collection. We still don't create db yet, leaving it for the <mark>mongosh</mark> to do it.</p>
   <textarea rows="4">
-  XD.$({
-    createCollection: 'name',
-    db:               'db name'
-  })
+XD.$({
+  createCollection: =name=,
+  in:               =dbName=
+})
   </textarea>
+
+
+  <h2 id="createdb">createDb</h2>
+  <p>This command auto generates the <code>xdbConfig</code> collection inside the new db.</p>
+  <textarea rows="">
+XD.$({ createDb: =name= })    
+  </textarea>
+
+
+  <h2 id="listcollec">listCollectionOf</h2>
+  <p>Lists collections info of a db. The output is an array of the collection info in it.</p>
+  <textarea rows="3">
+XD.$({
+  listCollectionOf: =dbName=
+})    
+  </textarea>
+
+
+  <h2 id="listdb">listDb</h2>
+  <p>Lists all database info in the mongo. The output is an object with having a <code>databases</code> array inside.</p>
+  <textarea>
+XD.$({ listDb:'' })    
+  </textarea>
+
+
+
+  <h2 id="setindex">setIndexAs</h2>
+  <p>Creates index for a collection. We can also create text index by <code>setIndexAs:{note:'text'}</code></p>
+  <textarea rows="4">
+XD.$({ 
+  setIndexAs: {name: 1, xyz: -1},
+  on:          =db.collection= 
+})    
+  </textarea>
+
+
+  <h2 id="getindex">getIndexOf</h2>
+  <p>Gets index info of a collection.</p>
+  <textarea>
+XD.$({ getIndexOf: =db.collection= })    
+  </textarea>
+
+
+
+  <h2 id="removeindex">removeIndex</h2>
+  <p>Removes index from a collection, put the index name you want to remove.</p>
+  <textarea rows="4">
+XD.$({ 
+  removeIndex:  'note_text', 
+  from:         'mutita.justNote' 
+})    
+  </textarea>
+
+
+
+  <h2 id="removecollec">removeCollection</h2>
+  <p>Removes a collection & its whole data from a db.</p>
+  <textarea rows="4">
+XD.$({
+  removeCollection: =name=, 
+  from:             =dbName=
+})    
+  </textarea>
+
+
+  <h2 id="removedb">removeDb</h2>
+  <p>Removes a db & its all data.</p>
+  <textarea rows="3">
+XD.$({
+  removeDb: =name= 
+})    
+  </textarea>
+
+
+  <h2 id="copycol">copyCollection</h2>
+  <p>Copies a collection to another new collection with everything will be same such as _id, uuid and all data inside. Done in same db only.</p>
+  <textarea rows="5">
+XD.$({
+  copyCollection: =name=, 
+  to:             =newName=, 
+  in:             =db= 
+})    
+  </textarea>
+
+
+
+
+
+
+
+
+  <h2 id="command">command</h2>
+  <p>Runs mongodb commands. The command usually in the object form. So you're free to put any viable mongo commands into it.</p>
+  <textarea rows="3">
+XD.$({
+  command: {=mongoCommand=} 
+})    
+  </textarea>
+
+
+
+
+  <h2 id="objectid">Work with ObjectId</h2>
+  <p>Ways to work with mongodb ObjectId as follows:</p>
+  <textarea rows="7">
+let v = XD.ObjectId()
+v.getTimestamp()  //get timestamp in ISO format 
+v.getTimestamp().getTime()  //get millisec   
+v.toString()    //convert the ObjectId to string  
+  </textarea>
+
+
+  <h2 id="loop">Work with loop</h2>
+  <p>We can do loop when adding or changing to the db like:</p>
+  <textarea rows="7">
+arr.forEach(x => {
+  XD.$({ add: x, to:=db.coll= })
+})
+    
+arr.forEach(x => {
+  XD.$({ change:{}, with: x, to:=db.coll= })
+})
+  </textarea>
+
+
 
 </div>
 
 <!-- footer -->
 <br><br><hr>
-<small>Last update: Nov 7, 2023 by M</small>
+<small>Last update: Nov 25, 2023 by M</small>
 </body>
 </html>

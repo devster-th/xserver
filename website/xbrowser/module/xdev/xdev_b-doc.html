@@ -1,0 +1,211 @@
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="author" content="mutita.org@gmail.com">
+  <title>xdev_b2.js doc</title>
+  <style>
+    textarea {width: 100%; background-color:lavender; font-family: monospace; overflow:hidden; border:none; color:darkred}
+    code {background-color:lavender; font-family: monospace; color:darkred}
+    h1 {color:darkred}
+    h2 {margin-top:32px; margin-bottom:0}
+    h2 + p {margin-top:8px}
+    mark {background-color: lightyellow;}
+    caution {color:red; font-weight: bold;}
+
+    @media (min-width:800px) {
+      #toc {
+        float: left;
+        width: 25%;
+        position:sticky; top:0;
+      }
+      #story {
+        margin-left: 25%;
+        max-width: 800px;
+      }
+      #title {
+        margin-top:0; padding-top:0;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- scroll top -->
+<a href="#" style="font-size:40px; position:fixed; left:0; bottom:0; padding:2px; color:orange; cursor:pointer; text-decoration: none;">&#8673;</a>
+<!-- table of contents -->
+<div id="toc">
+  <!-- doc title -->
+  <h1 id="title">xdev_b2.js doc</h1>
+  <p>Table of contents</p>
+  <ol>
+    <li><a href="#brief">Brief</a></li>
+    <li><a href="#config">Config</a></li>
+    <li><a href="#connect">connect</a></li>
+    <li><a href="#disconnect">disconnect</a></li>
+    <li><a href="#add">add</a></li>
+    <li><a href="#delete">delete</a></li>
+    <li><a href="#find">find</a></li>
+    <li><a href="#change">change</a></li>
+    <li><a href="#replace">replace</a> </li>
+    <li><a href="#createcollec">createCollection</a> </li>
+  </ol>
+</div>
+<!-- story -->
+<div id="story">
+  <h2 id="brief">Brief</h2>
+  <p>This is the <mark>xdev</mark> for browser. Generally working with <mark>xserver</mark> so it's called <mark>xbrowser</mark>. So it runs on browser side and talking to xserver on the server side.</p>
+
+
+
+  <h2 id="config">Config</h2>
+  <p>Get the <mark>xdev_b2.js</mark> into your directory for browser. The general command language is:</p>
+  <textarea>
+  XB.$({ ...command... })
+  XB.functionName()
+  </textarea>
+  <p>The XB object has some thing can be set/configured, look at file <mark>xdev_b2.js</mark>.</p>
+
+
+  <hr style="margin-top:36px; margin-bottom:0; padding:0; ">
+  <p style="color:gray; margin-top:0; font-family: sans-serif; text-align: center;">XDEV COMMANDS</p>
+
+
+
+  <h2 id="send">send</h2>
+  <p>Sends data to xserver. If the <code>to:</code> is absent, it is default to <code>'/xserver'</code>. We call what sending to the xserver is 'packet'.</p>
+  <textarea rows="5">
+  XB.$({
+    send: {..data..},
+    to:   'fetch path' //default is '/xserver'
+  })
+  </textarea>
+
+  <h2 id="random">random</h2>
+  <p>Returns Uint32Array, the random is in <code>re[0]</code>, e.g., 3660119685.</p>
+  <textarea>
+  XB.random()
+  </textarea>
+
+  <h2 id="uuid">uuid</h2>
+  <p>Gen standard UUID.</p>
+  <textarea rows="">
+  XB.uuid()
+  </textarea>
+
+
+  <h2 id="hash">hash</h2>
+  <p>Hashes the message. If the algor is absent, it uses default SHA-256.</p>
+  <textarea rows="4">
+  XB.hash('message...', algor) 
+  XB.hash('message...', 1|'SHA-1'|2|'SHA-256'*|3|'SHA-384'|5|'SHA-512')
+  </textarea>
+
+
+  <h2 id="cert">cert</h2>
+  <p>Certifies the packet.</p>
+  <textarea rows="">
+  XB.cert(packet)
+  </textarea>
+
+
+
+
+
+  <h2 id="genkey">genKey</h2>
+  <p>Gens symmetric key. The default algor is AES-GCM. The key is already exported, at the <code>yourKeyVar.export</code> so you don't need to export it again.</p>
+  <textarea rows="">
+  XB.genKey() //default is 'aes'
+  XB.genKey('rsa'|'hmac'|'aes'*|'ecdsa')
+  </textarea>
+
+
+
+  <h2 id="encrypt">encrypt | enc</h2>
+  <p>Encrypt message using AES-GCM. The key should be sha256 hex. The <code>XB.enc(...)</code> works the same thing, the shorter version.</p>
+  <textarea rows="">
+  XB.encrypt(msg, key)
+  XB.enc(msg, key)
+  </textarea>
+
+
+
+
+  <h2 id="decrypt">decrypt | dec</h2>
+  <p>Decrypts message.</p>
+  <textarea rows="">
+  XB.decrypt(msg, key)
+  XB.dec(msg, key)
+  </textarea>
+
+
+  <h2 id="exportkey">exportKey</h2>
+  <p>Exports js key object to base64 key string.</p>
+  <textarea rows="3">
+  XB.exportKey(yourKeyVar, format)
+  //format can be: 'priKey'|'pubKey'|'raw', the default is 'aes'
+  </textarea>
+
+
+  <h2 id="importkey">importKey</h2>
+  <p>Imports key string into js key object.</p>
+  <textarea rows="3">
+  XB.importKey(keyString, format)
+  //format can be: 'priKey|'pubKey'|'raw'|'aes'*|'hmac'
+  </textarea>
+
+
+  <h2 id="sign">sign</h2>
+  <p>Signs message.</p>
+  <textarea>
+  XB.sign(msg, key, algor='hmac')
+  //algor can be: 'ecdsa'|'hmac'*
+  </textarea>
+
+
+  <h2 id="verify">verify</h2>
+  <p>Verifies message.</p>
+  <textarea rows="3">
+  XB.verify(msg, signature, key, algor='hmac')
+  //algor can be: 'ecdsa'|'hmac'*
+  </textarea>
+
+
+  <h2 id="uuidx">uuidx</h2>
+  <p>Gets UUIDX, output likes 16993376-12235.</p>
+  <textarea>
+  XB.uuidx()
+  </textarea>
+
+
+  <h2 id="randomwords">randomWords</h2>
+  <textarea>
+  XB.randomWords(length=16)
+  </textarea>
+
+
+  <h2 id="password">password</h2>
+  <textarea>
+  XB.password(length=12)
+  </textarea>
+
+
+  <h2 id="pin">pin</h2>
+  <p>Output format A-Z,0-9.</p>
+  <textarea>
+  XB.pin(length=8)
+  </textarea>
+
+
+
+
+
+
+
+
+</div>
+
+<!-- footer -->
+<br><br><hr>
+<small>Last update: Nov 7, 2023 by M</small>
+</body>
+</html>
