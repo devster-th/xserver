@@ -52,6 +52,13 @@ const jsdb = {
   x: {} //this where the data kept
 }
 
+const mdb = {
+  info: {
+    brief: "This is a simple memory db.",
+    version: '0.1'
+  }
+}
+
 
 // functions
 
@@ -1094,13 +1101,182 @@ async function passwordRealHash (username, passwordHash) {
 }
 
 
+// converts csv into js object
+function csv2obj(csv) {
+  let ar = csv.split('\n')
+  let obj = []
+  let header = ar[0].split(',')
+  let totalRow = ar.length - 1 //excludes header
+
+  for (row=1; row <= totalRow; row++) {
+    let thisRow = {}
+    let data = ar[row].split(',')
+    let i = 0 //loop data in each row
+
+    header.forEach(h => {
+      if (data[i]) {
+        //has value
+        if (data[i].match(/^\d+$/)) {
+          //is number
+          thisRow[h] = Number(data[i])
+        } else {
+          //not number
+          thisRow[h] = data[i]
+        }
+      } else {
+        //has no value
+        thisRow[h] = ''
+      }
+      
+      i++
+    })
+
+    obj.push(thisRow)
+  }
+
+  //console.log(obj)
+  return obj
+}
+
+
+/* this f handle memory data, the concept is store everything in an array and sync this array with the xdb. 
+
+use
+    XS.mdb.w({....})    ===> write mode
+    XS.mdb.r({uuid: =uuid= })   ===>read mode
+*/
+
+//this is array for keeping all data, as a silo
+mdb.a = []
+
+//read mode
+mdb.r = function (v='') {
+  if (v) {
+    if (typeof v == 'object' && !Array.isArray(v)) {
+      //input is obj: {uuid: =uuid= }
+      let objKey = Object.keys(v)[0]
+      return mdb.a.find(x => x[objKey] == v[objKey])
+
+    } else {
+      //not obj
+      return mdb.a.find(x => x == v)
+    }
+
+  } else {
+    //if no input just throw everything out
+    return mdb.a
+  }
+}
+
+//write mode
+mdb.w = function (v='') {
+  if (v) {
+    if (typeof v == 'object' && Array.isArray(v) && v != '') {
+      //input is array
+      let qty = 0
+      let skip = 0
+      v.forEach(w => {
+        if (checked(w)) {
+          let found = mdb.a.find(x => x.uuid == w.uuid)
+          if (found) {
+            //doc existed
+            if (w.time > found.time) {
+              let i = mdb.a.findIndex(y => y.uuid == w.uuid)
+              mdb.a[i] = w
+              qty++
+            } else {
+              //this doc has to skip
+              skip++ 
+            }
+          } else {
+            mdb.a.push(w)
+            qty++
+          }
+        } else {
+          //if not obj just skip for now
+          skip++ 
+        }
+      })
+
+      if (skip > 0) {
+        return {
+          partialSuccess: true, 
+          msg:'added ' + qty + (qty > 1 ? ' docs' : ' doc')
+        }
+      } else if (qty == v.length) {
+        return {
+          success: true,
+          msg: 'added ' + qty + (qty > 1 ? ' docs' : ' doc')
+        }
+      } else {
+        return {
+          fail: true,
+          msg:'nothing added'
+        }
+      }
+
+    } else if (typeof v == 'object' && !Array.isArray(v)) {
+      //input is obj, the obj must have uuid prop
+      if (checked(v)) {
+        let found = mdb.a.find(x => x.uuid == v.uuid)
+        if (found) {
+          //there's existing doc
+          if (v.time > found.time) {
+            //if time is later means it is updated so push in
+            let i = mdb.a.findIndex(y => y.uuid == v.uuid)
+            mdb.a[i] = v
+            return {success:true, msg:'added 1 doc'}
+          } else {
+            return {fail:true, msg:'data already existed'}
+          }
+        } else {
+          //no existing doc
+          mdb.a.push(v)
+          return {success:true, msg:'added 1 doc'}  
+        }
+      } else {
+        return {fail:true, msg:'wrong input'}
+      }
+        
+
+    } else {
+      //input is other, reject
+      return {fail:true, msg:'wrong input'}
+    }
+
+  } else {
+    //input cannot be blank
+    return {fail:true, msg:'wrong input'}
+  }
+
+  function checked(obj) {
+    if (typeof obj == 'object' && !Array.isArray(obj) && Object.keys(obj) != '') {
+      //this is real obj
+      if (obj.uuid && obj.time) {
+        //perfect
+        return obj
+      } else {
+        if (!obj.uuid) obj.uuid = uuid()
+        if (!obj.time) obj.time = Date.now()
+        return obj
+      }
+    } else {
+      return false
+    }
+  }
+}
+//ok m202311262305
+//all works for but right now it just replace the existing doc. Next it has to update only the changed fields.
+
+
 
 // exports -------------------------------------------------
 module.exports = {
   masterKeyFile, $, uuidx, uuid, isHex, 
   isJson, x2html, docNum, runThrough, convert,
   jsdb, makeKey, password, randomWords, Packet, 
-  cert, prepPacket, passwordRealHash
+  cert, prepPacket, passwordRealHash, csv2obj,
+  mdb
 }
 
 
