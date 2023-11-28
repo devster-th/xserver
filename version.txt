@@ -1,1 +1,2 @@
 version 0.1 --  Tue 28 Nov 12:17:46 +07 2023
+start working on v0.2 -- Tue 28 Nov 12:30:01 +07 2023
