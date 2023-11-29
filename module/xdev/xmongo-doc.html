@@ -84,6 +84,7 @@ XD.$({
 })
   </textarea>
   <p>These all things are <code>promise</code> base so don't forget to put <code>await</code> to get the output of each command.</p>
+  <p>Sometime we use something like <code>{userId: =uuid=}</code> to define the type of the data/value.</p>
 
   <h2 id="config">Config</h2>
   <p>Get the <mark>xmongo3.js</mark> to your directory and include it to your main code. You have to have the <mark>mongodb</mark> module already installed in your <mark>nodejs</mark> environment.</p>
@@ -102,7 +103,7 @@ const uri = 'mongodb://localhost:27017'
 
   <h2 id="connect">connect</h2>
   <p>Two ways to connect to the db. If you don't put the connection string, it takes the default. In the <code>XD.$({connect:''})</code>, if you don't put the connection string just put the <code>''</code> so it takes the default. When putting the connection string you may put just <code>'mongodb://localhost'</code> then it goes to the default port by default.</p>
-  <textarea>
+  <textarea rows="4">
 XD.connect('mongodb://localhost:27017')
 XD.$({connect: =connectionString= })
   </textarea>
@@ -118,8 +119,8 @@ XD.$({disconnect:''})
   <p>We don't use the term insert here as we like to make it more simple, so uses add instead.</p>
   <textarea rows="4">
 XD.$({
-  add:  {name:'john',age:23,sex:'male'},
-  to:   'dbName.collectionName'
+  add:  {name:'john', age:23, sex:'male'},
+  to:   =db.collec=
 })
   </textarea>
   <p>If you ommit the dbName it will assume the xdb database. Uses <code>add:[{...},{...},...]</code> for adding many docs.</p>
@@ -238,7 +239,7 @@ XD.$({
 
   <h2 id="change">change</h2>
   <p>Change is the update in general mongodb terms. The <code>change: ..., with: ..., to: ...</code> are required. The part <code>change: </code> doesn't use the easierFilter so you have to use the mongodb query way for now.</p>
-  <textarea rows="11">
+  <textarea rows="13">
 XD.$({
   change: {..query..},
   with:   {..data to make change..},
@@ -278,7 +279,7 @@ XD.$({
 
 
   <h2 id="createcollec">createCollection</h2>
-  <p>This creates a collection. We still don't create db yet, leaving it for the <mark>mongosh</mark> to do it.</p>
+  <p>This creates a collection. </p>
   <textarea rows="4">
 XD.$({
   createCollection: =name=,
@@ -415,6 +416,6 @@ arr.forEach(x => {
 
 <!-- footer -->
 <br><br><hr>
-<small>Last update: Nov 25, 2023 by M</small>
+<small>Last update: Nov 29, 2023 by M</small>
 </body>
 </html>

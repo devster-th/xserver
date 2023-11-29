@@ -1,0 +1,1 @@
+v0.2 aims to handle complete xserver as a platform -- Tue 28 Nov 12:33:27 +07 2023
