@@ -1,7 +1,7 @@
 /**
- * xmongo3.js - a library to work with mongodb easier
+ * xmongo.js - a library to work with mongodb easier
  * @by mutita.org@gmail.com
- * @version 3.0
+ * @version 3.1 (dev mode)
  * 
  * main objective of this version is to let the xmongo handling cache so it can handle more concurrent users like millions or more. Some other fintunes can be improved as well.
  * 
@@ -52,7 +52,7 @@ const config = {
 /**
  * XD.connect() - connects to mongodb.
  */
-async function connect(uri='') {
+async function xdConnect(uri='') {
   //allows user to change the uri at connection time
   if (uri) {
     mongo = new MongoClient(uri)
@@ -70,7 +70,7 @@ async function connect(uri='') {
 /**
  * XD.disconnect() - disconnects the mongodb.
  */
-async function disconnect() {
+async function xdDisconnect() {
   try {
     mongo.close()
   } catch (error) {
@@ -83,7 +83,7 @@ async function disconnect() {
 /**
  * XD.$({..}) - new version of the xmongo.js
  */
-async function $(X={}) {
+async function xd(X={}) {
 
   //checking
   if (!X.db) X.db = 'xdb'
@@ -242,7 +242,7 @@ async function $(X={}) {
         }
       }
       
-      if (X.find instanceof XD.ObjectId) {
+      if (X.find instanceof ObjectId) {
         //this is a find by ObjectId
       } else if (typeof X.find == 'object') {
 
@@ -653,6 +653,20 @@ async function $(X={}) {
       //copies col to new one within the same db, all the _id & uuid are carried
 
 
+    case 'ObjectId':
+      // {ObjectId: ''} //gen new ObjectId
+      // {ObjectId: '=objectId='} //make ObjectId from existing id string
+      if (X.ObjectId) {
+        return new ObjectId(X.ObjectId)
+      } else {
+        // input is blank
+        return new ObjectId()
+      }
+      break
+
+
+
+
     default:
       return {fail:true, msg:'Wrong command.'}
   }
@@ -878,9 +892,8 @@ function easierFilter(queryObj) {
   return queryObj
 }
 
-
-module.exports = {info, config, $, ObjectId, connect, disconnect}
-
+//module.exports = {info, config, $, ObjectId, connect, disconnect}
+module.exports = {xd, ObjectId, xdConnect, xdDisconnect}
 
 /* NOTE
 
@@ -889,6 +902,17 @@ module.exports = {info, config, $, ObjectId, connect, disconnect}
 2. now the find supports < & > so that we can do {find:{price:'>100'},...} or price:'<100' == done, m/20231108
 
 
+v3.1
+2023-12-01
+- changed the way to use the module by this format:
+    const {xd} = require('........')
+    instead of the old: const XD = require(...)
+
+    so when we use it in the program will be shorter, cleaner like:
+      let result = await xd({find:'', from:'user'})
+
+    functions exports from module are: 
+      {xd, ObjectId, xdConnect, xdDisconnect}
 
 
 
