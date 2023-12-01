@@ -1,9 +1,8 @@
-//xcrypto.js 
-/* 
-simplify cryptography tool
-v1.0 20230423
-mutita.org@gmail.com
+/* xcrypto.js -- enhanced version from xcrypto.js to make it the object style like xc({encrypt:'words...', key:...})
+ 
+v3.1-dev
 
+v--below will edit later
 
 USE
   const xcrypto = require('./xcrypto.js')
@@ -21,6 +20,108 @@ USE
 */
 
 const crypto = require('crypto')
+
+
+///////////////////////////////////////////////////////
+// use this block instead
+
+/*
+exports.info = {
+  module: 'xcrypto2.js',
+  version: '2.0',
+  by: 'mutita',
+  license: 'none',
+  brief: "The enhanced version of xcrypto.js which adapting the object style of language XC.$({...}) . This XC or xcrypto2 is part of the XS/xdev package."
+}
+
+exports.config = {
+  msg: "Nothing now."
+}
+
+exports.guide = {
+  import: {
+    use: "const XC = require('./xcrypto2')",
+    mainFunction: "$ is the main so use it as XC.$({...}) style."
+  },
+  random: {
+    use: "XC.$({random:16})",
+    param: "you can use random:'' the default is 16 bytes. Or you can use 32, 64 which is the byte length of the random string.",
+    output: "hex 32 digit for the 16 bytes parameter."
+  },
+  hash: {
+    use: "XC.$({hash:'words', algor:'sha256', format:'hex'})",
+    param:"algor is defaulted at sha256, default format is hex but you may put base64 as desired.",
+    output: "default is sha256 hex format."
+  }
+}
+*/
+
+
+
+exports.xc = async function (X) {
+
+  const command = Object.keys(X)[0]
+
+  if (command == 'hash') {
+    // XC.$({ hash:'--words--', algor:'sha256', format:'hex' })                           ...OK/m
+    return hash(X.hash, X.algor, X.format)    
+  }
+
+  else if (command == 'hmac') {
+    // XC.$({ hmac:'--words--', key: })   ...OK/m
+    return hmac(X.hmac, X.key, X.algor, X.format)
+  }
+
+  else if (command == 'random') {
+    // XC.$({ random:16, format:'hex'})   ...OK/m
+    // if random:'' ...will default to 16
+    if (X.random == '') X.random = 16
+    return random(X.random, X.format) 
+  }
+
+  else if (command == 'encrypt') {
+    // XC.$({ encrypt:'--words--', key: })  ...OK/m
+    return encrypt(X.encrypt, X.key)
+  }
+
+  else if (command == 'decrypt') {
+    // XC.$({ decrypt:'--words--', key: })    ...OK/m
+    return decrypt(X.decrypt, X.key)
+  }
+
+  else if (command == 'genKeys') {
+    // XC.$({ genKeys:'rsa' })                ...OK/m
+    // also genKeys:'' ...default will be rsa
+
+    return genKeys()
+  }
+
+  else if (command == 'sign') {
+    // XC.$({ sign:'--words--', privateKey: })  ...OK/m
+    // output is the signature (base64)
+    return sign(X.sign, X.privateKey)
+  }
+
+  else if (command == 'verify') {       //...OK/m
+    // XC.$({ verify:'--words--', signature: ,publicKey: })
+    return verify(X.verify, X.signature, X.publicKey)
+  }
+
+  else if (command == 'randomInt') {
+    // XC.$({ randomInt:'', min:1000000000, max:9999999999})
+    // default min & max is 10-digit above but can set
+    return randomInt(X.min, X.max)
+  }
+
+  else {
+    return {msg:"Invalid input.", fail: true}
+  }
+
+}
+
+///////////////////////////////////////////////////////
+
+
 
 //1-------------------------------------------------------
 async function hash(words,algor='sha256',outputFormat='hex') {
@@ -62,6 +163,7 @@ function random(bytes=16, outputFormat='hex') {
 //4-----------------------------------------------------------
 async function encrypt( msg, key) {
   
+  if (typeof msg == 'number') msg = msg.toString()
   let msg_ = Buffer.from(msg)
   let iv = crypto.randomBytes(12)
   let key_ = Buffer.from(key,'hex')
@@ -191,7 +293,11 @@ exports.encrypt = encrypt
 exports.decrypt = decrypt
 */
 
+
+/*
 module.exports = {hash, hmac, random, encrypt, decrypt, genKeys, keyEncrypt, keyDecrypt, sign, verify, convert, randomInt}
+*/
+
 
 /*
 jwt will not make in xcrypto as it is simple enough to be used for the xdev
