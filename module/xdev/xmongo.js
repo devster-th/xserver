@@ -1,521 +1,899 @@
-// xmongo.js
-// v1.0
-// Make it simpler to interact with mongoDb, make it promisified
-// mutita.org@gmail.com
+/**
+ * xmongo3.js - a library to work with mongodb easier
+ * @by mutita.org@gmail.com
+ * @version 3.0
+ * 
+ * main objective of this version is to let the xmongo handling cache so it can handle more concurrent users like millions or more. Some other fintunes can be improved as well.
+ * 
+ * list of key changes:
+ * 1. OR_ == done
+ * 2. cache
+ * 3. <, > for number == done
+ * 4. <, > for character
+ * 5. auto add uuid == done
+ * 6. ObjectId is now support in find command == done
+ * 7. change command supports easierFilter
+ * 
+ */
 
-/*
-USE
-    const xmongo = require('./xmongo.js')
+const uri = 'mongodb://localhost:27017/' //default
+const {MongoClient, ServerApiVersion, ObjectId} = require('mongodb')
 
-    xmongo.newDb('name of new db')
-    xmongo.newCol('name of new collection', db)
-    xmongo.inserts([{...}, ...], col, db) ....can put just 1 doc
-    xmongo.updates({value to update},{query}, col, db) ....can update 1
-    xmongo.find({query}, col, db)
-*/
+let mongo = new MongoClient(
+  uri, 
+  /*
+  { serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true }
+  }
+  */
+ //take the above block out and the distinctField now work, m20231124
+)
 
+const XS = require('./xdev2.js')
 
+const info = {
+    software:'xmongo.js',
+    version:'2.0',
+    by:'mutita.org@gmail.com',
+    license:'none'
+}
 
-const mongo = require('mongodb').MongoClient
-const url = 'mongodb://localhost:27017/'
-
-
-//test///////////////////////////////////
-
-
-//newDb('xdatabase')
-//newCol('people','xdatabase')
-/*
-inserts([
-  {name:'dad', age:55, sex:'maile', career:'advisor'},
-  {name:'mom',age:54, sex:'female', career:'assistant to village head'},
-  {name:'john',age:23,sex:'male',career:'student, bachelor year 4'},
-  {name:'jane',age:19,sex:'female',career:'student, bachelor year 1'}
-  ],
-  'people','xdatabase'
-)*/
-
-//find({career:/student/},'people','xdatabase').then(op => console.log(op))
-
-//insert({name:'jack ma'},'people','xdatabase')
-//updates({country:'china'},{name:/jack/},'people','xdatabase')
-
-//inserts({name:'vincent van goh',country:'some where'},'people','xdatabase')
-
-
-
-
-////////////////////////////////////////
-
-function newDb(dbName) {
-  return new Promise( (resolve,reject) => {
-    
-    mongo.connect(
-      url + dbName, // mongodb://localhost:27017/dbName
-      (err,dbx) => {
-        if (err) reject(err)
-        dbx.close()
-        resolve('created db: ' + dbName) 
-      })
-  })
-}//m,ok
+const config = {
+  host:'localhost',
+  port:'27017',
+  userName:'SUPERADMIN',
+  password:"c'CyVV/kzRDC"
+}
 
 
 
-function newCol(colName, dbName) {
-  return new Promise( (resolve,reject) => {
-    
-    mongo.connect(url, (err,dbx) => {
-      if (err) reject(err)
-      const useDb = dbx.db(dbName)
+/**
+ * XD.connect() - connects to mongodb.
+ */
+async function connect(uri='') {
+  //allows user to change the uri at connection time
+  if (uri) {
+    mongo = new MongoClient(uri)
+  }
+
+  try {
+    mongo.connect()
+  } catch (error) {
+    return {fail: true, msg: error}
+  } finally {
+    return {success: true, msg: "Connected."}
+  }
+}
+
+/**
+ * XD.disconnect() - disconnects the mongodb.
+ */
+async function disconnect() {
+  try {
+    mongo.close()
+  } catch (error) {
+    return {fail: true, msg:"Fail to disconnect."}
+  } finally {
+    return {success: true, msg:"Disconnected."}
+  }
+}
+
+/**
+ * XD.$({..}) - new version of the xmongo.js
+ */
+async function $(X={}) {
+
+  //checking
+  if (!X.db) X.db = 'xdb'
+  X.collec = ''
+  if (!X.find) X.find = {}
+  if (!X.limit) X.limit = 0
+  if (!X.skip) X.skip = 0
+  if (!X.sort) X.sort = {}
+  if (!X.project) X.project = {}
+
+
+  //run
+  switch (Object.keys(X)[0]) {
+
+    //connect -------------------------------------------
+    case 'connect':   //OK
+      // XD.$({connect: '' | =uri= })
+
+      if (X.connect) {
+        // user puts a uri, so sets it
+        mongo = new MongoClient(X.connect)
+      } else {
+        //return {fail: true, msg: "Wrong input."}
+        //uses default uri
+      }
+
+      try {
+        mongo.connect() 
+      } catch (error) {
+        return {fail: true, msg: error}
+      } finally {
+        return {success: true, msg: "Connected."}
+      }
+      break
+
+
+
+    //disconnect --------------------------------------
+    case 'disconnect':  //OK
+      // XD.$({disconnect: '' }) ...don't check value
+
+      try {
+        mongo.close()
+      } catch (error) {
+        return {fail: true, msg: error}
+      } finally {
+        return {success: true, msg: "Disconnected."}
+      }
+      break
+
+
+
+    //add -------------------------------------------
+    case 'add':  //OK
+      // { add: {...}, to:'db.collec' }
+      if (!X.add || !X.to) {
+        return {
+          fail: true,
+          msg: "Can not add empty data."
+        }
+      }
+
+      //if X.add is obj, makes it array
+      if (!Array.isArray(X.add)) {
+
+        //check if it already has uuid
+        if ('uuid' in X.add) {
+          //console.log('already has uuid')
+        } else {
+          //let uuid = XS.uuid()
+          //console.log(uuid)
+          X.add.uuid = XS.uuid()
+        }
+        X.add = [X.add]
+      } else {
+        //this is insertMany and we have to add uuid in every doc
+        //add uuid field if inexistence
+        X.add.forEach(x => {
+          if ('uuid' in x) {
+            //already has
+          } else {
+            x.uuid = XS.uuid()
+          }
+        })
+      }
+
+      //if no . takes default xdb as db but if has . will take like db.collec
+      if (X.to.includes('.')) {
+        let part = X.to.split('.')
+        X.db = part[0]
+        X.collec = part[1]
+      } else {
+        X.collec = X.to
+      }
+
+
+      return mongo
+        .db(X.db)
+        .collection(X.collec)
+        .insertMany(X.add)
+
+      break 
+
+
+
+    //delete -------------------------------------------
+    case 'delete':  //OK
+      // { delete: {..query..}, from:'db.collec' }
+      if (!X.delete || !X.from) {
+        return {
+          fail: true,
+          msg: "No data to delete."
+        }
+      }
+
+      if (X.from.includes('.')) {
+        let part = X.from.split('.')
+        X.db = part[0]
+        X.collec = part[1]
+      } else {
+        X.collec = X.from
+      }
+
+      return mongo
+        .db(X.db)
+        .collection(X.collec)
+        .deleteMany(X.delete)
+
+      break 
+
+
+    //find ----------------------------------------------
+    case 'find':  //OK
+      /* {  find: {..query..},
+            from: 'xdb.product' ,
+            getOnly: 'name price stock',
+            distinctField: 'country' //not support
+          }
+      */
+
+      //initial
+      global.isFindMax = false
+      global.findMaxKey = ''
+      global.isFindMin = false 
+      global.findMinKey = ''
+
+
+      //check db & collec
+      if (X.from) {
+        if (X.from.includes('.')) {
+          part = X.from.split('.')
+          X.db = part[0]
+          X.collec = part[1]
+        } else {
+          X.collec = X.from 
+        }
+      }
       
-      useDb.createCollection(colName, (err,result) => {
-        if (err) reject(err)
-        dbx.close()
-        resolve(result)
-      })
-    })
-  })
-}//m,ok
+      if (X.find instanceof XD.ObjectId) {
+        //this is a find by ObjectId
+      } else if (typeof X.find == 'object') {
 
+        //filter, this handle the data of the field
+        X.find = easierFilter(X.find)
 
+      } else {
+        //XD.$({find:'DOC_QTY', from: })
+     
+        if (X.find == 'DOC_QTY') {
+          return mongo
+            .db(X.db).collection(X.collec)
+            .countDocuments()
+        
+        } else if (X.find == 'FIRST_DOC') {
+          return mongo
+            .db(X.db).collection(X.collec)
+            .find({}).sort({_id:1}).limit(1)
+            .toArray()
+        
+        } else if (X.find == 'LAST_DOC') {
+          return mongo 
+            .db(X.db).collection(X.collec)
+            .find().sort({_id:-1}).limit(1)
+            .toArray()
+        }
+      }
 
-
-
-
-
-
-
-
-/* use inserts instead
-function insert(doc,colName,dbName) {
-  return new Promise( (resolve,reject) => {
-    
-    mongo.connect(url, (err,dbx) => {
-      if (err) reject(err)
-      const useDb = dbx.db(dbName)
       
-      useDb.collection(colName).insertOne(doc, (err,result) => {
-        if (err) reject(err)
-        dbx.close()
-        resolve(result)
-      })
-    })
-  })
-}//m,ok
-*/
 
 
-function inserts(docs,colName,dbName) {
-  return new Promise( (resolve,reject) => {
+      //getOnly:'name price stock'      =OK/m
+      //this is easier projection
+      if (X.getOnly) {
+        let part = X.getOnly.split(' ')
+        
+        part.forEach(p => {
+          X.project[p] = 1
+        })
+
+        if ('_id' in X.project) {} else {
+          //if not specify _id , puts it off
+          X.project._id = 0
+        }
+      }
+
+
+
+
+      //run mongodb
+
+      if (X.distinctField) {
+        //distinct ......not work due to api not support
+
+        return mongo.db(X.db).collection(X.collec)
+          .distinct(
+            X.distinctField,
+            X.find
+          )
+
+        //for find:{price:'MAX_'}, ....
+      } else if (isFindMax && findMaxKey) {
+
+        return mongo
+          .db(X.db).collection(X.collec)
+          .find().sort({[findMaxKey]: -1})
+          .limit(1).toArray()
+      
+
+      } else if (isFindMin && findMinKey) {
+
+        return mongo
+          .db(X.db).collection(X.collec)
+          .find().sort({[findMinKey]: 1})
+          .limit(1).toArray()
+
+      } else {
+        //normal block
+
+        return mongo
+          .db(X.db).collection(X.collec)
+          .find(X.find).project(X.project)
+          .sort(X.sort).limit(X.limit)
+          .skip(X.skip).toArray()
+      }
+      
+      break 
+
+
+
+    //replace --------------------------------------------
+    /* the Replace replaces the entire doc while the Update only updates the fields we specified, that's the different. */
+    case 'replace': //OK
+      /*  { replace:{..query..}, with:{..}, on:'db.collec' }
+      */
+      if (!X.replace || !X.with || !X.on) {
+        return {
+          fail: true,
+          msg: "Invalid input."
+        }
+      }
+
+      if (X.on.includes('.')) {
+        let part = X.on.split('.')
+        X.db = part[0]
+        X.collec = part[1]
+      }
+
+      return mongo
+        .db(X.db)
+        .collection(X.collec)
+        .replaceOne(X.replace, X.with)
+      break
+
+
+    //change ---------------------------------------------
+    case 'change':  //OK
+      // {  update: {..query..}, with: {$set:{..}}, 
+      //    db:'--', collec:'--'  }
+      /* NOTE
+          For easy mode right now we only for only simple update but if there's more complex such as updating multiple operations together, may be problem. 
+          --SOLVED, now working in complex statement for: $set, $unset, $inc, $mul, $rename
+      */
+
+      //valid check
+      if (!X.change || !X.with || !X.to) {
+        return {
+          fail: true,
+          msg: "Invalid input."
+        }
+      }
+
+      //easier db & collec
+      if (X.to) {
+        if (X.to.includes('.')) {
+          part = X.to.split('.')
+          X.db = part[0]
+          X.collec = part[1]
+        } else {
+          X.collec = X.to
+        }
+      }
+
+      //easierUpdate -------------------------------------OK/m 
+      // with:{ price: '+100' } | with:{ price: '-100' }
+      if (Object.keys(X.with)[0].match(/^\$.+$/) ) {
+        //this is pure mongo update operator like $set
+
+
+      } else {
+        //this is easy mode
+        let easyMode = {  //use to hold all the conversions
+          set: {}, inc: {}, mul: {}, rename: {}, unset: {}
+        } 
+
+        for (key in X.with) {
+
+          // with:{price: '+100'} ...or '-100'    -----OK/m
+          // {$inc:{aaa: 100}}
+          if (typeof X.with[key] == 'string' && 
+            X.with[key].match(/^[+-]\d+$/) ) {
+
+              let resetVal = Number( X.with[key] )
+              easyMode.inc[key] = resetVal
+          } 
+
+          // with:{price: '*1.1'}                   ----OK/m
+          // {$mul:{aaa: 100}}
+          else if (typeof X.with[key] == 'string' &&
+            X.with[key].match(/^\*[0-9.]+$/) ) {
+
+              let resetVal = Number(X.with[key].replace('*','') )
+              easyMode.mul[key] = resetVal
+          }   
+
+          // with:{aaa:'RENAMETO_bbb'}                ---OK/m
+          // {$rename: {aaa: 'bbb' }}
+          else if (typeof X.with[key] == 'string' && 
+            X.with[key].includes('RENAMETO_')) {
+
+              let resetVal = X.with[key].replace('RENAMETO_','')
+              easyMode.rename[key] = resetVal
+          }
+
+          // with:{aaa:'REMOVE_'}
+          // {$unset:{aaa:'', bbb:'', ...}}
+          else if (typeof X.with[key] == 'string' &&
+            X.with[key].includes('REMOVE_')) {
+
+              easyMode.unset[key] = ''
+            }
+
+          else {
+            //this is general $set
+            easyMode.set[key] = X.with[key]
+          }
+        }
+
+        //merge all to an update statement
+        X.with = {
+          $set: easyMode.set, 
+          $inc: easyMode.inc,
+          $mul: easyMode.mul,
+          $rename: easyMode.rename,
+          $unset: easyMode.unset 
+        }
+
+      }//easy mode
+
+      //run
+      return mongo
+        .db(X.db)
+        .collection(X.collec)
+        .updateMany(X.change, X.with)
+      break
+
+
+
+    // createCollection -----------------------------
+    case 'createCollection':
+      // { createCollection: =name=, in: =db= }
+      return mongo.db(X.in).command(
+        {create: X.createCollection}
+      )
+      break
+
+
+    // createDb---------------------------------------
+    case 'createDb':
+      // { createDb: =name= }
+      
+      //check input is required
+      if (!X.createDb) return {fail:true, msg:'Wrong input.'}
+
+      //check the db name must not be existed
+      let existingDb = await $({listDb:''})
+      if (existingDb.databases.find(
+        x => x.name == X.createDb
+      )) {
+        return {fail:true, msg:'This db already existed.'}
+      } 
+
+      //passed above checks
+      return mongo.db(X.createDb).command(
+        {create: 'xdbConfig'} 
+      )
+      break
+      // this command will always create a collec xdbConfig
+
+
+    // listDb -------------------------------------------
+    case 'listDb':
+      // XD.$({listDbName:''})
+      return mongo.db('admin').command(
+        {listDatabases: 1, //nameOnly: true
+        }
+      )
+      break 
+
+
+    // listCollectionOf --------------------------------------
+    case 'listCollectionOf':
+      // XD.$({listCollection: =dbName= })
+      return mongo.db(X.listCollectionOf)
+        .listCollections().toArray()
+      break
+
+
+
+    // setIndexAs -----------------------------------------
+    case 'setIndexAs':
+      // XD.$({setIndexAs:{userName:1}, on:'=db.coll='})
+      if (X.on.includes('.')) {
+        let part = X.on.split('.')
+        X.db = part[0]
+        X.collec = part[1]
+      } else {
+        X.collec = X.on 
+      }
+
+      return mongo.db(X.db).collection(X.collec)
+        .createIndex(X.setIndexAs)
+      break
+
+
+    // getIndexOf -------------------------------------------
+    case 'getIndexOf':
+      // XD.$({getIndexOf: =db.coll= })
+      if (X.getIndexOf.includes('.')) {
+        let part = X.getIndexOf.split('.')
+        X.db = part[0]
+        X.collec = part[1]
+      } else {
+        X.collec = X.getIndexOf
+      }
+
+      return mongo.db(X.db).collection(X.collec)
+        .indexes()
+      break
+
+
+    // searchText -----------------------------------------
+    case 'searchText':
+      // XD.$({searchText:'=textToSearch=', from:'=db.coll='})
+      if (X.from.includes('.')) {
+        let part = X.from.split('.')
+        X.db = part[0]
+        X.collec = part[1]
+      } else {
+        X.collec = X.from
+      }
+
+      return mongo.db(X.db).collection(X.collec)
+        .find({$text: {$search: X.searchText }}).toArray()
+      break
+
+
+    // removeIndex -------------------------------------------
+    case 'removeIndex':
+      // XD.$({removeIndex:=indexName=, from:=db.col=})
+      if (X.from.includes('.')) {
+        let part = X.from.split('.')
+        X.db = part[0]
+        X.collec = part[1]
+      } else {
+        X.collec = X.from
+      }
+
+      return mongo.db(X.db).collection(X.collec)
+        .dropIndex(X.removeIndex)
+      break
+
+
+    // removeCollection -----------------------------------
+    case 'removeCollection':
+      // XD.$({removeCollection:=colName=, from:=dbName=})
+
+      return mongo.db(X.from).collection(X.removeCollection)
+        .drop()
+      break 
+      //ok m202311250901
+
     
-    //check input docs
-    if (!Array.isArray(docs)) {
-      docs = [docs] //if input is only 1 doc, put the array on
+
+    // deleteDb --------------------------------------------
+    case 'removeDb':
+      // {removeDb:=dbName=}
+      return mongo.db(X.removeDb).command(
+        {dropDatabase: 1}
+      )
+      break
+      //ok m202311250946
+
+
+    // renameCollection --------------------------------------
+    case 'renameCollection':
+      /*  { renameCollection: =oldColName=, to: =newName=
+            in: =dbName= }
+      */
+      return mongo.db('admin').command(
+        { renameCollection: X.in + '.' + X.renameCollection , 
+          to: X.in + '.' + X.to 
+        }
+      )
+      break 
+      //ok m202311261051
+      //allows only renaming in the same collection, not cross
+
+
+    // command ----------------------------------------------
+    case 'command':
+      // {command: =mongoDbCommand= }
+      return mongo.db('admin').command(
+        X.command 
+      )
+      break 
+      //ok m202311250946
+
+
+    
+    // copyCollection ---------------------------------------
+    case 'copyCollection':
+      // {copyCollection: =name=, to: =name=, in: =db= }
+      
+      //check if the target name existed?
+      let existCol = await $({listCollectionOf: X.in})
+      let existed = existCol.find(col => col.name == X.to)
+      existCol = null
+
+      if (existed) {
+        return {fail:true, msg:"The target name already existed."}
+      } else {
+        //pass test
+        return $({createCollection: X.to, in: X.in}).then(
+          async re => {
+            let copy = await $({find:'', 
+              from: X.in +'.'+ X.copyCollection })
+
+            return await $({
+              add: copy, 
+              to: X.in +'.'+ X.to 
+            })
+          }
+        )
+      }
+      break
+      //ok m202311261219
+      //copies col to new one within the same db, all the _id & uuid are carried
+
+
+    default:
+      return {fail:true, msg:'Wrong command.'}
+  }
+} //$
+
+
+/**
+ * easierFilter() - simplifies the query of mongodb. It takes the query object and then convert to mongodb language.
+ * @param {object} queryObj - the query object in easier format
+ * @return {object} queryObj -  query obj in mongodb format
+ */
+function easierFilter(queryObj) {
+
+  //check
+  if (!queryObj) {
+    return {
+      fail: true,
+      msg: "Input can not be empty."
     }
-
-    mongo.connect(url, (err,dbx) => {
-      if (err) reject(err)
-      const useDb = dbx.db(dbName)
-      
-      useDb.collection(colName).insertMany(docs, (err,result) => {
-        if (err) reject(err) 
-        dbx.close()
-        resolve(result)
-      })
-    })
-  })
-}//m,ok
-
-
-
-function find(query,colName,dbName,option={/*_id:0*/},qty=0,order={}) {
-  //query = {name:/j/}
-  //option is projection, e.g., {_id:0, name:1} shows only name
-
-  if (typeof option != 'object') option={_id:0}
-  if (typeof qty != 'number') qty = 0
-  if (typeof order != 'object') order = {}
-
-  return new Promise( (resolve,reject) => {
-
-    mongo.connect(url, (err,dbx) => {
-      if (err) reject(err)
-      const useDb = dbx.db(dbName)
-
-      useDb.collection(colName).find(query).project(option).limit(qty).sort(order).toArray( 
-
-        (err,result) => {
-          if (err) reject(err) 
-          dbx.close()
-          resolve(result) 
-        }
-      )
-    })
-  })
-
-  /**
-   * added option in the f var so now we can put projection, 20230503
-   * Test with ObjectId = ok m20230611
-   */
-}//m,ok
-
-
-
-
-function updates(value,query,colName,dbName) {
-  return new Promise( (resolve,reject) => {
-
-    mongo.connect(url, (err,dbx) => {
-      if (err) reject(err)
-      const useDb = dbx.db(dbName)
-
-      useDb.collection(colName).updateMany(
-        query,
-        { $set: value }, 
-        (err,result) => {
-          if (err) reject(err)
-          dbx.close()
-          resolve(result)
-        }
-      )
-    })
-  })
-}//m,ok
-
-
-//enhance version
-function updates2(value,query,colName,dbName) {
-
-  /**
-   * created m/20230609
-   * added option v
-   * 
-   *    xdb.updates2({'aaa':'bbb'},{},col,db,'$rename')
-   *    
-   */
-
-  //check if the first key has no $set or other command
-  if (Object.keys(value)[0].match(!/^\$\w+$/)) {
-    value = {$set: value}
-    //if no $ command, puts $set as default
   }
 
 
-  //call mongo
-  return new Promise( (resolve,reject) => {
+  for (key in queryObj) {
 
-    mongo.connect(url, (err,dbx) => {
-      if (err) reject(err)
-      const useDb = dbx.db(dbName)
+    // > ... {price:'100+'} =OK/m
+    if (typeof queryObj[key] == 'string' && 
+      queryObj[key].match(/^\d+\+$/) /*|| 
+      queryObj[key].match(/^>\d+$/)*/ ) {
+        var val = queryObj[key].replace('+','')
+        /*val = queryObj[key].replace('>','')*/
+        queryObj[key] = {$gt: Number(val)}
+    }
 
-      useDb.collection(colName).updateMany(
-        query,
-        value,  //just pass raw value into it
-
-        (err,result) => {
-          if (err) reject(err)
-          dbx.close()
-          resolve(result)
+    //supports > sign
+    if (typeof queryObj[key] == 'string' &&
+      queryObj[key].match(/^>.+$/)) {
+        var val = queryObj[key].replace('>','')
+        if (val.match(/^\d+$/)) {
+          //if it's digit makes it number
+          queryObj[key] = {$gt: Number(val)}
+        } else {
+          //if it's words just leave it there
+          queryObj[key] = {$gt: val}
         }
-      )
+    }
 
-    })
-  })
-}
+    // >= ... {price:'>=100'} =OK/m
+    else if (typeof queryObj[key] == 'string' &&
+      queryObj[key].match(/^>=\d+$/) ) {
+        var resetVal = queryObj[key].replace('>=','')
+        queryObj[key] = {$gte: Number(resetVal)}
+      }
 
+    // < .... {price:'100-'} =OK/m
+    else if (typeof queryObj[key] == 'string' && 
+      queryObj[key].match(/^\d+\-$/)) {
+        const val = queryObj[key].replace('-','')
+        queryObj[key] = {$lt: Number(val)}
+      }
 
-
-
-/* NOTE USE , use updates2() instead
-function increase(value,query,colName,dbName) {
-  // xs.increase({stock:100, price:-10}, {name:'coffee'}, 'product','xdb')
-
-  /**
-   * increase f will do only 1 doc at a time to prevent mistake
-   */
-
-/*
-  return new Promise( (resolve,reject) => {
-
-    mongo.connect(url, (err,dbx) => {
-      if (err) reject(err)
-      const useDb = dbx.db(dbName)
-
-      useDb.collection(colName).updateOne(
-        query,
-        { $inc: value }, 
-        (err,result) => {
-          if (err) reject(err)
-          dbx.close()
-          resolve(result)
+    //supports < sign
+    else if (typeof queryObj[key] == 'string' &&
+      queryObj[key].match(/^<.+$/)) {
+        let val = queryObj[key].replace('<','')
+        if (val.match(/^\d+$/)) {
+          queryObj[key] = {$lt: Number(val)}
+        } else {
+          queryObj[key] = {$lt: val}
         }
-      )
-    })
-  })
-}*/ //ok m/20230606
+    }
 
+    // =< ... {price:'=<100'}  =OK/m
+    else if (typeof queryObj[key] == 'string' &&
+      queryObj[key].match(/^=<\d+$/) ) {
+        var resetVal = queryObj[key].replace('=<','')
+        queryObj[key] = {$lte: Number(resetVal)}
+      }
 
+    // NOT_ ... {name:'NOT_john'} =OK/m
+    else if (typeof queryObj[key] == 'string' &&
+      queryObj[key].match(/^NOT_/) ) {
+        var resetVal = queryObj[key].replace('NOT_','')
+        if (resetVal.match(/^\d+$/)) {resetVal = Number(resetVal)}
+        queryObj[key] = {$ne: resetVal}
+      }
 
-function deletes(query,colName,dbName) {
-  return new Promise( (resolve,reject) => {
+    // EXIST_ ... {name:'EXIST_'} =OK/m
+    else if (queryObj[key] == 'EXIST_') {
+      queryObj[key] = {$exists: true}
+    }
 
-    mongo.connect(url, (err,dbx) => {
-      if (err) reject(err)
-      const useDb = dbx.db(dbName)
+    // INEXIST_ ... {name:'INEXIST_'} =OK/m
+    else if (queryObj[key] == 'INEXIST_') {
+      queryObj[key] = {$exists: false}
+    }
 
-      useDb.collection(colName).deleteMany(
-        query,
-        (err,result) => {
-          if (err) reject(err)
-          dbx.close()
-          resolve(result)
+    // abc* ... {name:'abc*'} ... starts with abc     OK/m
+    else if (typeof queryObj[key] == 'string' &&
+      queryObj[key].match(/^.+\*$/) ) {
+
+        let resetVal = queryObj[key].replace('*','')
+        eval(`queryObj[key] = /^${resetVal}/`)
+      }
+
+    // *abc ... {name:'*abc'} ... ends with abc     OK/m
+    else if (typeof queryObj[key] == 'string' &&
+      queryObj[key].match(/\*.+$/) ) {
+
+        let resetVal = queryObj[key].replace('*','')
+        eval(`queryObj[key] = /${resetVal}$/`)
+      }
+
+    // {price:'100-500'} >> price:{$gte:100}, price:{$lte:500}
+    else if (typeof queryObj[key] == 'string' &&
+      queryObj[key].match(/^\d+-\d+$/)) {
+        let part = queryObj[key].split('-')
+        queryObj[key] = {
+          $gte: Number(part[0]), 
+          $lte: Number(part[1])
         }
-      )
-    })
-  })
-}//ok 20230605 m
+      }
+
+    // find:{time:'BEFORE_2023-11-01T09:00'}, ...
+    //the field about time in db must be millisec, always
+    else if (typeof queryObj[key] == 'string' &&
+      queryObj[key].match(/^BEFORE_.+$/)) {
+        let checkTime = new Date(
+          queryObj[key].replace('BEFORE_','')
+        ).getTime() 
+
+        queryObj[key] = {$lt: checkTime}
+      }
+
+    //AFTER_2023-11-01...
+    else if (typeof queryObj[key] == 'string' &&
+      queryObj[key].match(/^AFTER_.+$/)) {
+        let checkTime = new Date(
+          queryObj[key].replace('AFTER_','')
+        ).getTime()
+
+        queryObj[key] = {$gt: checkTime}
+      }
+
+    //SINCE_2023-11-01...
+    else if (typeof queryObj[key] == 'string' &&
+      queryObj[key].match(/^SINCE_.+$/)) {
+        let checkTime = new Date(
+          queryObj[key].replace('SINCE_','')
+        ).getTime()
+
+        queryObj[key] = {$gte: checkTime}
+      }
+
+    //FROM_2023-12-01_TO_2023-12-31
+    else if (typeof queryObj[key] == 'string' &&
+      queryObj[key].match(/^FROM_.+_TO_.+$/)) {
+        let time = queryObj[key].match(/^FROM_(.+)_TO_(.+)$/)
+        let fromTime = new Date(time[1]).getTime()
+        let toTime = new Date(time[2]).getTime()
+        queryObj[key] = {$gte: fromTime, $lte: toTime}
+      }
 
 
+    //find:{price:'MAX_'}
+    else if (typeof queryObj[key] == 'string' && queryObj[key].match(/MAX_|LATEST_/)) {
+      isFindMax = true
+      findMaxKey = key
+    }
 
-function dropCol(colName,dbName) {
-  return new Promise( (resolve,reject) => {
+    //find:{price:'MIN_'}
+    else if (typeof queryObj[key] == 'string' && queryObj[key].match(/MIN_|OLDEST_/)) {
+      isFindMin = true 
+      findMinKey = key
+    }
 
-    mongo.connect(url, (err,dbx) => {
-      if (err) reject(err)
-      const useDb = dbx.db(dbName)
-
-      useDb.collection(colName).drop(
-        (err,result) => {
-          if (err) reject(err)
-          dbx.close()
-          resolve(result)
-        }
-      )
-    })
-  })
-
-  //changed name from drop to dropCol m/20230609
-}//ok 20230605 m
+    //for the find:{name:/joh/i} ....this is works automatically as the input is regexp so we not do anything here.
+    
 
 
-
-function docCount(query,colName,dbName) {
-  //count number of doc resulting from the query
-
-  return new Promise( (resolve,reject) => {
-
-    mongo.connect(url, (err,dbx) => {
-      if (err) reject(err)
-      const useDb = dbx.db(dbName)
-
-      useDb.collection(colName).countDocuments(query, 
-
-        (err,result) => {
-          if (err) reject(err) 
-          dbx.close()
-          resolve(result) 
-        }
-
-      )
-    })
-  })
-
-  /**
-   * ok, m/20230610
-   */
-}
+  } //end of for..loop
 
 
+  //return queryObj
+  //output now in the queryObj
 
-function distinct(distinctValue,query,colName,dbName) {
-  //if we query for countries which picking only 1 distinct name from a collection (or from a query), this is for it.
+  //next work on the field name 
 
-  //e.g., xmongo.distinct('country',{signedUp:true},'exam','xdb')
+  let ky = Object.keys(queryObj)
+  let mongoQuer = {}
 
-  return new Promise( (resolve,reject) => {
+  for (c=0; c < ky.length; c++) {
+    if (ky[c].match(/^OR_.+/) && c > 0) {
 
-    mongo.connect(url, (err,dbx) => {
-      if (err) reject(err)
-      const useDb = dbx.db(dbName)
-
-      useDb.collection(colName).distinct(
-        distinctValue,
-        query, 
-
-        (err,result) => {
-          if (err) reject(err) 
-          dbx.close()
-          resolve(result) 
-        }
-
-      )
-
-    })
-  })
-
-  /**
-   * ok, m/20230610
-   */
-}
-
-
-//list collections
-function listCollection(query={},dbName='xdb') {
-  /**
-   * xmongo.listCollection() -- returns col names in array
-   * 
-   * #use
-   *        let c = await xmongo.listCollection()
-   * 
-   * #test OK, m-202306221721
-   * #log
-   *    -added query to the var so we can check if the specified collection name existed in the db or not, by: 
-   *    xmongo.listCollection({name:'customer'})
-   */
-
-  return new Promise( (resolve,reject) => {
-
-    mongo.connect(url, (err,dbx) => {
-      if (err) reject(err)
-      const useDb = dbx.db(dbName)
-
-      useDb.listCollections(query,{nameOnly:true}).toArray(
-        (err,result) => {
-          if (err) reject(err) 
-          dbx.close()
-          resolve(result) 
-        }
-
-      )
-    })
-  })
-
-}
-
-
-
-
-function isCollection(checkName,dbName='xdb') {
-  /**
-   * xmongo.isCollection(checkName) -- returns true/false to check if it exists as collection or not.
-   * 
-   * #use
-   *        if (isCollection('xyz') {...}
-   * 
-   * #test OK, m-202306221934
-   * #log
-   */
-
-  return new Promise( (resolve,reject) => {
-
-    mongo.connect(url, (err,connection) => {
-      if (err) reject(err)
-      const useDb = connection.db(dbName)
-
-      useDb.listCollections({name:checkName},{nameOnly:true}).toArray(
-        (err,result) => {
-          if (err) reject(err) 
-          connection.close()
-
-          if (result != '') resolve(true)
-          else resolve(false) 
-        }
-
-      )
-    })
-  })
-
-}
-
-
-
-
-
-
-
-//list db
-function listDb(dbName='xdb') {
-  /**
-   * listDb() -- returns list of db existed in the connected mongo
-   * 
-   * #use -- Get the names of the db from output.databases which is the array.
-   * 
-   * #tested OK, m-202306221818
-   */
-
-  return new Promise( (resolve,reject) => {
-
-    mongo.connect(url).then( connection => {
-      const dbAdmin = connection.db(dbName).admin()
-  
-      dbAdmin.listDatabases((err,list) => {
-        if (err) reject(err)
-        //console.log(list)
-        connection.close()
-        resolve(list)  
-      })
-    })
-
-  })
-}
-
-
-
-
-function isDb(checkName,dbName='xdb') {
-  /**
-   * isDb(name) -- returns true if the db exists, false if not.
-   * 
-   * #use -- if (isDb('xdb')) {...}
-   * 
-   * #tested OK, m-202306221956
-   */
-
-  return new Promise( (resolve,reject) => {
-
-    mongo.connect(url).then( connection => {
-      const dbAdmin = connection.db(dbName).admin()
-  
-      dbAdmin.listDatabases((err,list) => {
-        if (err) reject(err)
-        //console.log(list)
-        connection.close()
-
-        const existed = list.databases.find(d => d.name == checkName)
+      if ('$or' in mongoQuer) {
+        let thisKey = ky[c].replace('OR_','')
+        mongoQuer.$or.push(
+          { [thisKey] : queryObj[ky[c]] }
+        )
+      } else {
+        //$or inexist, so create new
+        let thisKey = ky[c].replace('OR_','')
+        let prevKey = ky[c-1]
         
-        if (existed) resolve(true)
-        else resolve(false)  
-      })
-    })
+        mongoQuer.$or = [
+          { [prevKey]: queryObj[prevKey] },
+          { [thisKey]: queryObj[ky[c]] }
+        ]
 
-  })
+        delete mongoQuer[prevKey]
+      }
+      
+    } else {
+      //not OR_
+      if (true) {
+        let thisKey = ky[c]
+        mongoQuer[ky[c]] = queryObj[thisKey] 
+
+      }
+    }
+  }
+
+  queryObj = mongoQuer
+  return queryObj
 }
 
 
+module.exports = {info, config, $, ObjectId, connect, disconnect}
 
 
-// export -----------------------------------
-module.exports = {
-  newDb, 
-  newCol, 
-  inserts, 
-  find, 
-  updates, 
-  deletes, 
-  dropCol, 
-  updates2,
-  docCount,
-  distinct,
-  listCollection,
-  listDb,
-  isCollection,
-  isDb 
-}
+/* NOTE
+
+1. auto add uuid into every doc when adding but if it already has, don't touch. == now done. m/20231108
+
+2. now the find supports < & > so that we can do {find:{price:'>100'},...} or price:'<100' == done, m/20231108
 
 
-/*
-m,ok .......reasonably works 20230501
+
+
+
+
+
 
 
 */

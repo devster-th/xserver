@@ -28,7 +28,7 @@ eachDoc = {
     rights: [
       { who: '=userId|orgId/uuid',
         rights: 'read/write/edit/delete'
-      },
+      }, 
       { who: '=userId',
         rights: ''
       }
