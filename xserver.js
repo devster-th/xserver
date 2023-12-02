@@ -1,5 +1,5 @@
 /**
- * xserver is a framework to dev software.
+ * xserver is a platform for everything.
  * Version: 0.1
  * Web:''
  * Date: 2023-06-13
@@ -20,10 +20,11 @@
 //load modules
 const express = require("express")
 const app   = express()
-const XS    = require('./module/xdev/xdev2.js')
-const XD    = require('./module/xdev/xmongo2.js')
-const XF    = require('./module/xdev/xfile2.js')
-const XC    = require('./module/xdev/xcrypto2.js')
+const xs    = require('./module/xdev/xdev.js')
+const x$    = xs.$
+const {xd}  = require('./module/xdev/xmongo.js')
+const {xf}  = require('./module/xdev/xfile.js')
+const {xc}  = require('./module/xdev/xcrypto.js')
 const core  = require('./module/core/core.js')
 const sales = require('./module/sales/sales.js')
 //global.model = require('./module/xdev/xDataModel.js')
@@ -40,7 +41,7 @@ global.XSERVER = {
   operator: 'mutita',
   secure:{
     defaultSalt: "#|~}v4&u&1R",
-    serverId: XS.uuid(),
+    serverId: xs.uuid(),
     masterKey: 'c40b93b2dfb61810e5ad22d132de54b7e718d10f66a8f523379826de95dbadf1'
   },
   xRootPath:'/home/mutita/dev/xserver/', //root of xserver
@@ -54,7 +55,7 @@ global.XSERVER = {
 global.POOL = {} //pool of data that exchanging between the server & browsers so that we won't directly accessing the xdb but accessing the POOL instead. Like POOL.message can contain all messages that are currently exchanging, POOL.product, POOL.alert, etc.
 
 //console.log(XSERVER.secure.serverId)
-//XD.$({find:'',from:'user'}).then(console.log)
+//xd({find:'',from:'user'}).then(console.log)
 
 
 
@@ -135,7 +136,7 @@ app.post("/xserver", (req,resp)=> {
   let packet = req.body //just put name to avoid confuse
 
   //log
-  XD.$(
+  xd(
     { add: {packet: packet}, to: 'xdb.log'  }
   )
 
@@ -146,7 +147,7 @@ app.post("/xserver", (req,resp)=> {
     //session already active
 
     //check xdb
-    XD.$(
+    xd(
       { find: { sessionId: packet.from },
         from: 'xdb.session'
       }
@@ -157,14 +158,14 @@ app.post("/xserver", (req,resp)=> {
       if (found.active) {
         //in the xdb.session also active so the session is good to work with
 
-        XS.cert(packet, found.salt).then(certified => {
+        xs.cert(packet, found.salt).then(certified => {
           if (certified) {
 
             //packet is certified, now unwrap the packet.msg
-            XS.makeKey(packet, found.salt).then(gotKey => {
+            xs.makeKey(packet, found.salt).then(gotKey => {
 
               //unwrap packet.msg
-              return XC.$(
+              return xc(
                 { decrypt:  packet.msg,
                   key:      gotKey
                 }
@@ -195,13 +196,13 @@ app.post("/xserver", (req,resp)=> {
                     console.log(result)
 
                     //prep packet to send to XB
-                    return XS.prepPacket(result, found)
+                    return xs.prepPacket(result, found)
                     
                   }).then(rePacket => {
                       console.log(rePacket)
 
                       //log
-                      XD.$(
+                      xd(
                         { add:  rePacket,
                           to:   'xdb.log' }
                       )
@@ -235,13 +236,13 @@ app.post("/xserver", (req,resp)=> {
                     module: 'core',
                     msg:    'none'
                   }
-                  return XS.prepPacket(re, found)
+                  return xs.prepPacket(re, found)
                 
                 }).then(rePacket => {
                   console.log(rePacket)
 
                   //log
-                  XD.$(
+                  xd(
                     { add:  rePacket,
                       to:   'xdb.log' }
                   )
@@ -288,7 +289,7 @@ app.post("/xserver", (req,resp)=> {
     XS.cert(rePacket).then(() => {
 
       //log
-      XD.$(
+      xd(
         { add: {packet: rePacket}, to:'xdb.log' }
       )
 
@@ -306,16 +307,16 @@ app.post("/xserver", (req,resp)=> {
     //session not active, needs to register session
 
     //check cert
-    XS.cert(packet).then(certified => {
+    xs.cert(packet).then(certified => {
       //console.log('cert result', certified) //true|false
 
       if (certified) {
         //cert passed now unwrap the packet.msg
 
-        XS.makeKey(packet).then(gotKey => {
+        xs.makeKey(packet).then(gotKey => {
           //console.log(gotKey)
 
-          return XC.$(
+          return xc(
             { decrypt:  packet.msg, 
               key:      gotKey }
           )
@@ -328,17 +329,17 @@ app.post("/xserver", (req,resp)=> {
           if (packet.msg.act == 'new_session') {
 
             //check xdb.session
-            XD.$(
+            xd(
               { find: {sessionId: packet.from},
                 from: 'xdb.session'  }
 
             ).then(found => {
               if (found == '') {
                 //sessionId not already existed, good to go
-                let salt = XS.password()
+                let salt = xs.password()
                 
                 //register new session
-                XD.$(
+                xd(
                   { add: 
                       {
                         sessionId:  packet.from,
@@ -350,7 +351,7 @@ app.post("/xserver", (req,resp)=> {
                 )
 
                 //response
-                let rePacket    = new XS.Packet
+                let rePacket    = new xs.Packet
                 rePacket.from   = XSERVER.secure.serverId
                 rePacket.to     = packet.from
                 rePacket.active = true
@@ -364,11 +365,11 @@ app.post("/xserver", (req,resp)=> {
                   serverId:         XSERVER.secure.serverId
                 }
                 
-                XS.makeKey(rePacket).then(gotKey => {
+                xs.makeKey(rePacket).then(gotKey => {
                   //console.log(gotKey)
 
                   //wrap msg
-                  return XC.$(
+                  return xc(
                     { encrypt: JSON.stringify(rePacket.msg),
                       key: gotKey }
                   )
@@ -377,12 +378,12 @@ app.post("/xserver", (req,resp)=> {
                   rePacket.msg = wrap
 
                   //certify
-                  return XS.cert(rePacket)
+                  return xs.cert(rePacket)
 
                 }).then(() => {
 
                   //log
-                  XD.$(
+                  xd(
                     { add: {packet: rePacket}, to:'xdb.log' }
                   )
 

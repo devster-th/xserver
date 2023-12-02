@@ -22,6 +22,13 @@ USE
 */
 
 
+// fixed variables
+const masterKeyFile = 'master.sec'
+const defaultSalt = "#|~}v4&u&1R"
+serverIp = '127.0.0.1'
+
+
+
 
 // import modules ---------------------------------
 const {xc} = require('./xcrypto.js')
@@ -31,10 +38,8 @@ const {xd, ObjectId} = require('./xmongo.js')
 const jwt = require('jsonwebtoken')
 const {v4: uuidv4} = require('uuid')
 
-const masterKeyFile = 'master.sec'
-const defaultSalt = "#|~}v4&u&1R"
-serverIp = '127.0.0.1'
 
+// objects
 const jsdb = {
   info: {
     module: 'jsdb',
@@ -60,7 +65,7 @@ const mdb = {
 }
 
 
-// functions
+// functions -----------------------------------------------------
 
 async function $(X) {
 
@@ -1276,7 +1281,7 @@ module.exports = {
   isJson, x2html, docNum, runThrough, convert,
   jsdb, makeKey, password, randomWords, Packet, 
   cert, prepPacket, passwordRealHash, csv2obj,
-  mdb
+  mdb, xc, xf, xd
 }
 
 
