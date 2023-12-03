@@ -40,22 +40,7 @@ const {v4: uuidv4} = require('uuid')
 
 
 // objects
-const jsdb = {
-  info: {
-    module: 'jsdb',
-    brief: 'A very simple json database for node.js',
-    version: '0.1',
-    license: 'none',
-    by: 'M',
-    date: '2023-07-30'
-  },
-  defaultFileName: 'jsdb.json',
-  secureFileName: 'jsdb.sec',
-  secureMode: true,
-  keyFile: masterKeyFile,
-  active: false, //after check the file program will adjust this
-  x: {} //this where the data kept
-}
+
 
 const mdb = {
   info: {
@@ -480,484 +465,6 @@ function convert(chars,from,to) {
 
 
 
-///////////////////////////////////////////////////////
-// JSDB - A very simple json database for node.js  
-
-/**
- * jsdb.r - reads data from jsdb
- * @param {string} collec - if blank will read whole db
- * @param {object} query - like {name:'jo'}
- * @returns array if multi doc, obj if only 1 doc found
- * @use jsdb.r() for whole db, 
- *  jsdb('aaa') for whole collec,
- *  jsdb('aaa',{name:'bbb'}) finds specific filter
- * @note query allows only 1 field 
- * @test OK, m20230801
- * @clean OK, m20230801.1122
- */
-jsdb.r = function (collec,query) {
-  // XS.jsdb.r('person',{name:'john'})
-  return new Promise((resolve,reject) => {
-
-    let fileToUse = jsdb.secureMode? jsdb.secureFileName : jsdb.defaultFileName
-
-    xf({exist: fileToUse}).then(re => jsdb.active = re)
-    let output = ''
-  
-    if (jsdb.active) {
-      //read file then work on it
-
-      jsdbFile('read').then(re => {
-        /*let readd = await xf({read:'jsdb.json'})
-        jsdb.x = JSON.parse(readd)*/
-        
-        if (!collec && !query) {
-          //if receive blank read, means read all data in db
-          output = jsdb.x 
-          jsdb.x = {}
-          resolve(output) 
-    
-        } else if (collec && !query) {
-          //receive only collec, read whole specified collec
-          if (collec in jsdb.x) {
-            output = jsdb.x[collec] 
-            jsdb.x = {}
-            resolve(output) 
-            
-          } else {
-            jsdb.x = {}
-            reject(null) 
-          }
-    
-        } else if (collec && query) {
-          //receive both collec & query
-          if (collec in jsdb.x) {
-    
-            if (!Object.keys(query).length) {
-              //blank query {} means find all
-              output = jsdb.x[collec] 
-              jsdb.x = {}
-              resolve(output) 
-      
-            } else {
-              //has someting in the query
-    
-              let key = Object.keys(query)
-              let kk = key[0]
-    
-              if (key.length) {
-                //jsdb will support only 1 field query
-                let queryPattern = new RegExp(query[kk],'i')
-                
-                /*return jsdb.x[collec].filter(doc => doc[key].toString().match(queryPattern) )*/
-    
-                output = []
-                jsdb.x[collec].forEach(dd => {
-                  if (dd[kk]) {
-                    if (dd[kk].toString().match(queryPattern) ) output.push(dd)
-                  }
-                })
-    
-                jsdb.x = {}
-                if (output.length > 1) {
-                  resolve(output) 
-                } else {
-                  resolve(output[0]) //has only 1 doc returns just obj
-                }
-    
-              } else {
-                // query == {} means no query, just take all of this collec
-                output = jsdb.x[collec]
-                jsdb.x = {} 
-                resolve(output)
-              }
-            }
-          
-          } else {
-            jsdb.x = {}
-            reject(null)
-          }
-        }
-
-      })//jsdbFile
-
-    } else {
-      //inactive
-      reject(null)
-    }
-
-  })//promise
-}//END of jsdb.r
-
-
-//another name
-jsdb.read = jsdb.r
-
-
-
-
-
-//-------------------------------------------------------
-/**
- * jsdb.w - add new data to jsdb, or update existing data
- * @param {string} collec 
- * @param {object} docq 
- * @param {object} update 
- * @returns true if the write success, false if invalid/fail
- * @test tested OK, m20230731
- * @clean OK, m20230801.1216
- */
-jsdb.w = function (collec, docq, update) {
-  //write mode
-
-  return new Promise( (resolve,reject) => {
-
-    let fileToUse = jsdb.secureMode? jsdb.secureFileName : jsdb.defaultFileName
-  
-    xf({exist: fileToUse}).then(re => jsdb.active = re)
-
-    if (jsdb.active) { //now can work further
-
-      jsdbFile('read').then(re => {
-        //after read, data will be at jsdb.x
-
-        //WRITE-ADD
-        if (collec && docq && !update) {
-          //this is write mode for new adding data
-    
-            // write-add block
-          if (collec in jsdb.x) {
-            //if docq is empty {} just exit
-            if (!Object.keys(docq).length) {
-              jsdb.x = {}
-              reject(false) 
-            }
-            
-            //collec already existed, just push
-            if (Array.isArray(docq)) {
-              //if array means it's multi-doc
-              docq.forEach(d => {
-                jsdb.x[collec].push(d)
-              })
-            } else {
-              //only 1 doc
-              jsdb.x[collec].push(docq)
-            }
-            jsdbFile('write')
-    
-    
-          } else {
-            //not exist, add it as new collec
-            if (Array.isArray(docq)) {
-              jsdb.x[collec] = docq //the doc is already array
-            } else {
-              jsdb.x[collec] = [docq]
-            }
-            jsdbFile('write')
-          }
-    
-    
-        //WRITE-UPDATE
-        } else if (collec && docq && update) {
-          //this is write for updatng the old doc
-          //this case the docq will be the query input 
-          if (collec in jsdb.x) {
-            //collection exists, good to go
-    
-            let qKey = Object.keys(docq)
-            if (qKey.length) {
-              //valid query
-              let qk1 = qKey[0]
-              let querPatt = new RegExp(docq[qk1],'i')
-              //find & update
-              jsdb.x[collec].forEach(dd => {
-                if (dd[qk1]) {
-                  if (dd[qk1].match(querPatt) ) {
-                    //found then just update it
-                    for (kk in update) {
-                      dd[kk] = update[kk]
-                    }
-                  }
-                }
-              })
-              jsdbFile('write')
-    
-            } else {
-              //just a blank query {}, makes it as 'all'
-              jsdb.x[collec].forEach(dd => {
-                for (kk in update) {
-                  dd[kk] = update[kk]
-                }
-              })
-              jsdbFile('write')
-            }
-    
-          } else {
-            //collec not exist
-            jsdb.x = {}
-            reject(false)
-          }
-    
-        } else {
-          //not add, not update, so this is invalid
-          jsdb.x = {}
-          reject(false)
-        }
-    
-      })//jsdbFile
-    
-    
-    } else {
-      //inactive, this is fresh, the first fresh doc always being the write-new doc not write-update
-  
-      if (collec && docq) {
-        //this is first fresh add
-        if (Array.isArray(docq)) {
-          jsdb.x[collec] = docq
-        } else {
-          jsdb.x[collec] = [docq]
-        }
-        jsdbFile('write')
-
-      } else {
-        //invalid input
-        reject(false)
-      }
-    }
-  
-  })//promise
-}//END of jsdb.w
-
-
-//make another name
-jsdb.write = jsdb.w //another name
-
-
-
-//---------------------------------------------------------
-/**
- * jsdb.d - deletes collection or doc
- * @param {string} collec - like 'person'
- * @param {object} query - like {name:'jo'} 
- * @returns deletion in the jsdb, or false if invalid input
- * @status WORKS, m20230731
- * @test need little more clean on msg, m20230801
- */
-jsdb.d = async function(collec, query) {
-  //delete collec or doc
-
-  let fileToUse = jsdb.secureMode? jsdb.secureFileName : jsdb.defaultFileName
-
-  jsdb.active = await xf({exist: fileToUse})
-
-  if (jsdb.active) {
-    //file exists, good to go
-
-    jsdbFile('read').then(re => {
-
-      if (collec && !query) {
-        //this is delete the whole collection
-        if (jsdb.x[collec]) {
-          delete jsdb.x[collec]
-          jsdbFile('write')
-        } else {
-          jsdb.x = {}
-          return false //collec inexists
-        }
-  
-      } else if (collec && query) {
-        //delete some docs
-  
-        if (jsdb.x[collec] && Object.keys(query).length) {
-          //has collec & good query, good to go
-          let qkey = Object.keys(query)[0]
-          let notFinished = true 
-          
-          while (notFinished) {
-            //find index to delete until not found
-            let idex = jsdb.x[collec].findIndex(dd => dd[qkey] == query[qkey])
-  
-            if (idex != -1) {
-              jsdb.x[collec].splice(idex,1)
-            } else {
-              //not found and finished
-              notFinished = false
-              jsdbFile('write')
-            }
-          }
-          
-        } else {
-          jsdb.x = {}
-          return false
-        }
-  
-      } else {
-        //invalid
-        return false
-      }
-
-    })//jsdbFile
-
-
-  } else {
-    //if inactive, cannot delete anything
-    return false
-  }
-}//END jsdb.d
-
-jsdb.delete = jsdb.d
-
-
-/**
- * jsdb.import - get a json file to be jsdb.json file
- * @param {string} jsonFile - name of json file to import
- * @returns jsdb.json file
- * @status OK, m20230731
- * @test
- * @note changed the whole code, not test yet, m20230801.1251
- */
-/*
-jsdb.import = async function(file) {
-  if (!file) return false
-
-  let ff = await xf({read: file})
-  let fileToUse = jsdb.secureMode? jsdb.secureFileName : jsdb.defaultFileName
-
-  let re = xf({
-    write: ff, 
-    to: fileToUse
-  })
-  
-  return re.success
-}
-*/
-
-
-
-/**
- * jsdb.backup - backup jsdb.json file to another file
- * @param {string} backupFileName - if blank, default is jsdb_.json
- * @returns a backup file like jsdb_.json
- * @status OK, m20230731 
- */
-/*
-jsdb.backup = async function(backupFileName) {
-  if (!backupFileName) backupFileName = 'jsdb_.json'
-  jsdb.x = await xf({read:'jsdb.json'})
-  xf({write:jsdb.x, to:backupFileName }).then(re => {
-    jsdb.x = {}
-    return re.success
-  })
-}
-*/
-
-
-//-------------------------------------------------------
-/**
- * jsdbFile - internal func helping handle files for jsdb
- * @param {string} mode - 'read' or 'write' 
- * @returns data from jsdb for read mode, for write mode adding data to jsdb, or updating existing data
- * @test OK, m20230801
- * @status works
- */
-jsdbFile = async function (mode) {
-  //handles file for jsdb, internal func not exported
-  //mode is 'read|write'
-
-  if (mode == 'read') {
-    //read mode
-    if (jsdb.secureMode) {
-      let cont = await xf({read:jsdb.secureFileName})
-      let kk = await xf({read:jsdb.keyFile})
-      cont = await xc({decrypt:cont, key:kk})
-      jsdb.x = JSON.parse(cont) 
-
-    } else {
-      let cont = await xf({read:jsdb.defaultFileName})
-      jsdb.x = JSON.parse(cont)
-    }
-
-  } else if (mode == 'write') {
-    //write mode
-    if (Object.keys(jsdb.x).length) {
-      //has data to write
-
-      let jsonn = JSON.stringify(jsdb.x)
-
-      if (jsdb.secureMode) {
-        let kk = await xf({read: jsdb.keyFile})
-        let sec = await xc({encrypt:jsonn, key:kk})
-
-        let re = await xf({
-          write:  sec, 
-          to:     jsdb.secureFileName
-        })
-        
-        jsdb.x = {}
-        return re.success
-
-      } else {
-        let re = await xf({
-          write: JSON.stringify(jsdb.x) , 
-          to:    jsdb.defaultFileName
-        })
-      
-        jsdb.x = {}
-        return re.success
-      }
-
-    } else {
-      //don't have data
-      return false
-    }
-
-  } else {
-    //wrong
-    return false
-  }
-}
-
-
-/**
- * jsdb.changeMode - let we toggle between normal & secure modes
- * @returns jsdb.json if changed to normal mode, if changed to secure mode the file will be jsdb.sec
- * @status works
- * @test OK, m20230802
- */
-jsdb.changeMode = async function () {
-  //change mode from secure to normal, or vise versa
-  /*
-  - if inactive, cannot change mode
-  - if current mode is secure, changes to normal and vise-versa
-  - the files jsdb.sec & jsdb.json just leave them together. But careful to backup the file before you switch the mode because after switch the new file will be writen without notice.
-  */
- 
-  let fileToUse = jsdb.secureMode? jsdb.secureFileName : jsdb.defaultFileName
-
-  jsdb.active = await xf({exist: fileToUse})
-
-  if (jsdb.active) {
-    jsdbFile('read').then(re => {
-      if (jsdb.secureMode) {
-        //change secure > normal
-        jsdb.secureMode = false 
-        let re = jsdbFile('write')
-        return re //true if success | false if fail
-
-      } else {
-        //change normal > secure
-        jsdb.secureMode = true 
-        let re = jsdbFile('write')
-        return re
-      }
-    })
-
-  } else {
-    //inactive, invalid
-    return false
-  }
-}
-
 
 
 /*//--------------------------------------------------
@@ -1144,27 +651,48 @@ function csv2obj(csv) {
 }
 
 
-/* this f handle memory data, the concept is store everything in an array and sync this array with the xdb. 
+
+
+
+///////////////////////////////////////////////////////////////////
+/* this F handle memory data, the concept is store everything in an array and sync this array with the xdb. 
 
 use
-    XS.mdb.w({....})    ===> write mode
-    XS.mdb.r({uuid: =uuid= })   ===>read mode
+    //write
+    xs.mdb.w({uuid: ,....})
+    -if doc has no uuid, auto add it
+    -if uuid already existed, do update not add new
+    -if no uuid existed, do add new doc
+
+    //read
+    xs.mdb.r(uuid)   
+    xs.mdb.r({name:'john'})  
+    - allows only 1 key search
 */
 
 //this is array for keeping all data, as a silo
 mdb.a = []
 
 //read mode
-mdb.r = function (v='') {
-  if (v) {
-    if (typeof v == 'object' && !Array.isArray(v)) {
-      //input is obj: {uuid: =uuid= }
-      let objKey = Object.keys(v)[0]
-      return mdb.a.find(x => x[objKey] == v[objKey])
+mdb.r = function (quer='') {
+  if (quer) {
+    if (typeof quer == 'string') {
+      //if string, regards as a uuid
+      return mdb.a.find(x => x.uuid == quer)
 
+    } else if (typeof quer == 'object' && !Array.isArray(quer)) {
+      //if obj, it is a query like {name:'john'} but only first key allowed
+      let key = Object.keys(quer)[0]
+      if (quer[key] instanceof RegExp) {
+        //search by RegExp
+        return mdb.a.filter(x => x[key]?.match(quer[key]) )
+      } else {
+        //general search
+        return mdb.a.filter(x => x[key] == quer[key])
+      }
     } else {
-      //not obj
-      return mdb.a.find(x => x == v)
+      //more than these is false
+      return false
     }
 
   } else {
@@ -1174,100 +702,61 @@ mdb.r = function (v='') {
 }
 
 //write mode
-mdb.w = function (v='') {
-  if (v) {
-    if (typeof v == 'object' && Array.isArray(v) && v != '') {
-      //input is array
-      let qty = 0
-      let skip = 0
-      v.forEach(w => {
-        if (checked(w)) {
-          let found = mdb.a.find(x => x.uuid == w.uuid)
-          if (found) {
-            //doc existed
-            if (w.time > found.time) {
-              let i = mdb.a.findIndex(y => y.uuid == w.uuid)
-              mdb.a[i] = w
-              qty++
-            } else {
-              //this doc has to skip
-              skip++ 
-            }
-          } else {
-            mdb.a.push(w)
-            qty++
+//mdb.w({ data })
+//in each doc has to have uuid, if uuid already existed will regards as change-mode, not add-mode
+mdb.w = function (dat='') {
+  if (dat && typeof dat == 'object') {
+    if (Array.isArray(dat)) {
+      //this is array, set of docs
+      for (doc of dat) {
+        let existed = '' //indicates if this data's uuid existed or not
+
+        if (doc.uuid) {
+          existed = mdb.a.findIndex(x => x.uuid == doc.uuid)
+          if (existed < 0) existed = false
+        } else {
+          //data has no uuid so add new
+          doc.uuid = uuid()
+          existed = false
+        }
+  
+        if (existed) {
+          //this is change task not add
+          for (key in doc) {
+            if (key != 'uuid') mdb.a[existed] = doc[key]
           }
         } else {
-          //if not obj just skip for now
-          skip++ 
-        }
-      })
-
-      if (skip > 0) {
-        return {
-          partialSuccess: true, 
-          msg:'added ' + qty + (qty > 1 ? ' docs' : ' doc')
-        }
-      } else if (qty == v.length) {
-        return {
-          success: true,
-          msg: 'added ' + qty + (qty > 1 ? ' docs' : ' doc')
-        }
-      } else {
-        return {
-          fail: true,
-          msg:'nothing added'
+          //this is add task
+          mdb.a.push(doc)
         }
       }
-
-    } else if (typeof v == 'object' && !Array.isArray(v)) {
-      //input is obj, the obj must have uuid prop
-      if (checked(v)) {
-        let found = mdb.a.find(x => x.uuid == v.uuid)
-        if (found) {
-          //there's existing doc
-          if (v.time > found.time) {
-            //if time is later means it is updated so push in
-            let i = mdb.a.findIndex(y => y.uuid == v.uuid)
-            mdb.a[i] = v
-            return {success:true, msg:'added 1 doc'}
-          } else {
-            return {fail:true, msg:'data already existed'}
-          }
-        } else {
-          //no existing doc
-          mdb.a.push(v)
-          return {success:true, msg:'added 1 doc'}  
-        }
-      } else {
-        return {fail:true, msg:'wrong input'}
-      }
-        
 
     } else {
-      //input is other, reject
-      return {fail:true, msg:'wrong input'}
-    }
+      //this is obj
+      let existed = '' //indicates if this data's uuid existed or not
 
+      if (dat.uuid) {
+        existed = mdb.a.findIndex(x => x.uuid == dat.uuid)
+        if (existed < 0) existed = false
+      } else {
+        //data has no uuid so add new
+        dat.uuid = uuid()
+        existed = false
+      }
+
+      if (existed) {
+        //this is change task not add
+        for (key in dat) {
+          if (key != 'uuid') mdb.a[existed] = dat[key]
+        }
+      } else {
+        //this is add task
+        mdb.a.push(dat)
+      }
+    }
   } else {
-    //input cannot be blank
-    return {fail:true, msg:'wrong input'}
-  }
-
-  function checked(obj) {
-    if (typeof obj == 'object' && !Array.isArray(obj) && Object.keys(obj) != '') {
-      //this is real obj
-      if (obj.uuid && obj.time) {
-        //perfect
-        return obj
-      } else {
-        if (!obj.uuid) obj.uuid = uuid()
-        if (!obj.time) obj.time = Date.now()
-        return obj
-      }
-    } else {
-      return false
-    }
+    //no data = false
+    return false
   }
 }
 //ok m202311262305
@@ -1279,7 +768,7 @@ mdb.w = function (v='') {
 module.exports = {
   masterKeyFile, $, uuidx, uuid, isHex, 
   isJson, x2html, docNum, runThrough, convert,
-  jsdb, makeKey, password, randomWords, Packet, 
+  makeKey, password, randomWords, Packet, 
   cert, prepPacket, passwordRealHash, csv2obj,
   mdb, xc, xf, xd
 }

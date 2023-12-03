@@ -23,13 +23,16 @@ _xdb = {
 eachDoc = {
   uuid: 0,
   // all data
-  _sys: {
-    owner: '=userId/uuid=',
+  _control: {
+    owner:        '=userId/uuid=',
+    createdTime:  '=ms=',
+    createdBy:    '=userId/uuid=',
+    collection:   '=collectionName=',
     rights: [
-      { who: '=userId|orgId/uuid',
+      { who:    '=userId|orgId/uuid',
         rights: 'read/write/edit/delete'
       }, 
-      { who: '=userId',
+      { who:    '=userId',
         rights: ''
       }
     ],
@@ -38,6 +41,20 @@ eachDoc = {
       number: '=int=',
       madeBy: '=userId=',
       time:   '=ms='
+    },
+    feeling: {
+      like: {
+        count: '',
+        by: ['=userId=, ...'],
+
+      },
+      love: {
+        count: '',
+        by: []
+      }
+    },
+    status: {
+      active: true
     }
   }
 }
@@ -52,4 +69,12 @@ let packet = {
   id: '127.0.0.1_1699006422018_bb527a72-ba72-4a50-ab76-53007737d637',
   active: true,
   cert: 'e5298e36018af5e1e1584d12af092168e28ca3ff15f436f57c3fea5843c17cf5'
+}
+
+
+//the msg is where we put commands into it
+
+let msg = {
+  act: '',
+
 }

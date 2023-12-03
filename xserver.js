@@ -25,8 +25,8 @@ const x$    = xs.$
 const {xd}  = require('./module/xdev/xmongo.js')
 const {xf}  = require('./module/xdev/xfile.js')
 const {xc}  = require('./module/xdev/xcrypto.js')
-const core  = require('./module/core/core.js')
-const sales = require('./module/sales/sales.js')
+const {core}  = require('./module/core/core.js')
+//const sales = require('./module/sales/sales.js')
 //global.model = require('./module/xdev/xDataModel.js')
 
 
@@ -38,13 +38,13 @@ global.XSERVER = {
   startTime: Date.now(),
   domain:   "localhost",
   port:     2000,
-  operator: 'mutita',
+  operator: 'nexWorld',
   secure:{
     defaultSalt: "#|~}v4&u&1R",
     serverId: xs.uuid(),
     masterKey: 'c40b93b2dfb61810e5ad22d132de54b7e718d10f66a8f523379826de95dbadf1'
   },
-  xRootPath:'/home/mutita/dev/xserver/', //root of xserver
+  xRootPath:'/home/sunsern/xserver/', //root of xserver
   xsModulePath:'module/',
   websitePath:'website/',
   xbrowserPath:'xbrowser/', //put after websitePath 
@@ -191,7 +191,7 @@ app.post("/xserver", (req,resp)=> {
                   let module = eval(packet.msg.module)
                   console.log(module)         
 
-                  module.$(packet.msg).then(result => {
+                  module(packet.msg).then(result => {
                     //this is resp from the module
                     console.log(result)
 
@@ -229,7 +229,7 @@ app.post("/xserver", (req,resp)=> {
 
                 packet.msg.sessionId = packet.from
 
-                core.$(packet.msg).then(re => {
+                core(packet.msg).then(re => {
                   console.log('return from core: ', re)
 
                   if (!re) re = {
@@ -451,7 +451,7 @@ app.listen(XSERVER.port, () => {
 `@${XSERVER.appName} starts at http://localhost:${XSERVER.port} , ${new Date().toISOString()}`
   )
 
-  console.log('A little thing that trying to solve bigger things.')
+  console.log('A little thing that trying to solve something big.')
   console.log("@xserver is ready...\n")
   
   //testScript()

@@ -24,7 +24,7 @@
           })
 */
 
-
+const {xd} = require('/home/sunsern/xserver/module/xdev/xmongo.js')
 
 
 exports.core = async function (X) {
