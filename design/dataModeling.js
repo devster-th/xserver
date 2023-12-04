@@ -78,3 +78,9 @@ let msg = {
   act: '',
 
 }
+
+
+
+mdb.r(uuid)
+mdb.r({name: ''})
+mdb.w(uuid,data) 

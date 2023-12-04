@@ -701,6 +701,8 @@ mdb.r = function (quer='') {
   }
 }
 
+mdb.read = mdb.r 
+
 //write mode
 //mdb.w({ data })
 //in each doc has to have uuid, if uuid already existed will regards as change-mode, not add-mode
@@ -708,7 +710,10 @@ mdb.w = function (dat='') {
   if (dat && typeof dat == 'object') {
     if (Array.isArray(dat)) {
       //this is array, set of docs
+      let changeQty = 0
+      let addQty = 0
       for (doc of dat) {
+        
         let existed = '' //indicates if this data's uuid existed or not
 
         if (doc.uuid) {
@@ -723,13 +728,21 @@ mdb.w = function (dat='') {
         if (existed) {
           //this is change task not add
           for (key in doc) {
-            if (key != 'uuid') mdb.a[existed] = doc[key]
+            if (key != 'uuid') mdb.a[existed][key] = doc[key]
           }
+          mdb.a[existed].time = Date.now()
+          changeQty++
         } else {
           //this is add task
+          doc.time = Date.now() //always make the time-key
           mdb.a.push(doc)
+          addQty++
         }
       }
+      let msg = {}
+      if (addQty) msg.addedDoc = addQty
+      if (changeQty) msg.changedDoc = changeQty
+      return msg
 
     } else {
       //this is obj
@@ -747,11 +760,15 @@ mdb.w = function (dat='') {
       if (existed) {
         //this is change task not add
         for (key in dat) {
-          if (key != 'uuid') mdb.a[existed] = dat[key]
+          if (key != 'uuid') mdb.a[existed][key] = dat[key]
         }
+        mdb.a[existed].time = Date.now()
+        return {changedDoc: 1}
       } else {
         //this is add task
+        dat.time = Date.now()
         mdb.a.push(dat)
+        return {addedDoc: 1}
       }
     }
   } else {
@@ -761,6 +778,40 @@ mdb.w = function (dat='') {
 }
 //ok m202311262305
 //all works for but right now it just replace the existing doc. Next it has to update only the changed fields.
+
+mdb.write = mdb.w
+
+
+mdb.writeAll = function (dat='') {
+  if (dat && typeof dat == 'object' && !Array.isArray(dat)) {
+    let writeQty = 0
+    mdb.a.forEach(doc => {
+      let done = false //to check if it really write the data
+      for (key in dat) {
+        if (key != 'uuid') {
+          doc[key] = dat[key]
+          done = true
+        } 
+      }
+      if (done) {
+        doc.time = Date.now()
+        writeQty++
+      }
+    })
+    return {changedDoc: writeQty}
+  } else {
+    return false
+  }
+}
+
+mdb.wa = mdb.writeAll 
+
+
+
+
+
+
+
 
 
 
