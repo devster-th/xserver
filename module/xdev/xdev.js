@@ -673,6 +673,28 @@ use
 //this is array for keeping all data, as a silo
 mdb.a = []
 
+//adds this to every doc in mdb, xdb as we try to control the data
+class docControl {
+  owner = '=uuid='
+  collection = '=string='
+  needSync = false 
+  updatedBy = '=uuid='
+  createdTime = '=ms='
+  createdBy = '=userId='
+  rights = [
+    {who:'owner', rights:'read/write/delete'},
+    {who:'public',rights:''},
+    {who:'team',  rights:''},
+    {who:'org',   rights:''}
+  ]
+  version = {
+    name: '',
+    number: 1,
+    markedBy: '=userId='
+  }
+  active = true
+}
+
 //read mode
 mdb.r = function (quer='') {
   if (quer) {
@@ -688,7 +710,15 @@ mdb.r = function (quer='') {
         return mdb.a.filter(x => x[key]?.match(quer[key]) )
       } else {
         //general search
-        return mdb.a.filter(x => x[key] == quer[key])
+        if (key.includes('.')) {
+          //like {'_control.needSync':true}
+          let part = key.split('.')
+          return mdb.a.filter(x => x[part[0]][part[1]] == quer[key])
+          //supports only 2 level should be fine
+        } else {
+          //1 level key
+          return mdb.a.filter(x => x[key] == quer[key])
+        }
       }
     } else {
       //more than these is false
@@ -732,9 +762,11 @@ mdb.w = function (dat='') {
           }
           mdb.a[existed].time = Date.now()
           changeQty++
+          mdb.a[existed]._control.needSync = true
         } else {
           //this is add task
           doc.time = Date.now() //always make the time-key
+          doc._control = new docControl
           mdb.a.push(doc)
           addQty++
         }
@@ -763,10 +795,12 @@ mdb.w = function (dat='') {
           if (key != 'uuid') mdb.a[existed][key] = dat[key]
         }
         mdb.a[existed].time = Date.now()
+        mdb.a[existed]._control.needSync = true 
         return {changedDoc: 1}
       } else {
         //this is add task
         dat.time = Date.now()
+        dat._control = new docControl
         mdb.a.push(dat)
         return {addedDoc: 1}
       }
@@ -795,6 +829,7 @@ mdb.writeAll = function (dat='') {
       }
       if (done) {
         doc.time = Date.now()
+        doc._control.needSync = true 
         writeQty++
       }
     })
