@@ -658,196 +658,658 @@ function csv2obj(csv) {
 /* this F handle memory data, the concept is store everything in an array and sync this array with the xdb. 
 
 use
-    //write
-    xs.mdb.w({uuid: ,....})
-    -if doc has no uuid, auto add it
-    -if uuid already existed, do update not add new
-    -if no uuid existed, do add new doc
+    mdb.r() >>returns whole data of mdb
+    mdb.r(=uuid=) >> returns obj
+    mdb.r({aaa:123456}) //only 1 key, returns []
 
-    //read
-    xs.mdb.r(uuid)   
-    xs.mdb.r({name:'john'})  
-    - allows only 1 key search
+    mdb.u([...]|{...}) -- udpates doc/set to mdb & db
+    mdb.c([...]|{...}) -- checks if doc/set have update
+    mdb.d(=uuid=|{aaa:123456}) -- deletes doc/set
+    mdb.wa({...}) -- writes to all doc
 */
 
 //this is array for keeping all data, as a silo
-mdb.a = []
+mdb.a = []  //keep data here
+mdb.syncError = []  //keep response from mongo here
 
 //adds this to every doc in mdb, xdb as we try to control the data
-class docControl {
-  owner = '=uuid='
-  collection = '=string='
-  needSync = false 
-  updatedBy = '=uuid='
-  createdTime = '=ms='
-  createdBy = '=userId='
-  rights = [
-    {who:'owner', rights:'read/write/delete'},
-    {who:'public',rights:''},
-    {who:'team',  rights:''},
-    {who:'org',   rights:''}
-  ]
+class DocControl {
+  owner = ''
+  collection = ''
+  updatedBy = ''
+  createdTime = ''
+  createdBy = ''
+  rights = [] //{who: ,rights:'read/write/delete'}
   version = {
     name: '',
-    number: 1,
-    markedBy: '=userId='
+    number: '',
+    markedBy: ''
   }
   active = true
 }
 
-//read mode
-mdb.r = function (quer='') {
-  if (quer) {
-    if (typeof quer == 'string') {
-      //if string, regards as a uuid
-      return mdb.a.find(x => x.uuid == quer)
 
-    } else if (typeof quer == 'object' && !Array.isArray(quer)) {
-      //if obj, it is a query like {name:'john'} but only first key allowed
-      let key = Object.keys(quer)[0]
-      if (quer[key] instanceof RegExp) {
-        //search by RegExp
-        return mdb.a.filter(x => x[key]?.match(quer[key]) )
+mdb.touch = function(doc) {
+  //stamps time on a doc/set in mdb
+  // ! the doc/set should be in mdb not else
+  // returns =ts= if done, but given =false= if wrong
+
+  if (typeof doc == 'object') {
+
+    //array input
+    if (Array.isArray(doc)) {
+      let t = Date.now()
+      let done = 0
+      doc.forEach(x => {
+        if (x.uuid && x.time && x._control) {
+          x._control.touchTime = t
+          done++
+        } //if bad doc, just skip
+      })
+      if (done) return t
+      else return false //all is bad doc
+
+    //obj input  
+    } else if (Object.keys(doc).length) {
+      let t = Date.now()
+      if (doc.uuid && doc.time && doc._control) {
+        doc._control.touchTime = t
+        return t
       } else {
-        //general search
-        if (key.includes('.')) {
-          //like {'_control.needSync':true}
-          let part = key.split('.')
-          return mdb.a.filter(x => x[part[0]][part[1]] == quer[key])
-          //supports only 2 level should be fine
-        } else {
-          //1 level key
-          return mdb.a.filter(x => x[key] == quer[key])
-        }
+        return false //bad doc
       }
+    
+    //wrong input
     } else {
-      //more than these is false
       return false
     }
 
+  //first fail
   } else {
-    //if no input just throw everything out
-    return mdb.a
+    return false //wrong input
   }
 }
 
-mdb.read = mdb.r 
+//read mode
+//when we do mdb.r if not found in mdb, it will find in the mongo and takes it to mdb automatically ==> drop this idea as it will let the mdb slow not memory-centric
+//and if that data inactive for awhile, takes it off
+mdb.r = mdb.read = function (quer='') {
+  // reads the mdb, read only, no sync
+  // gives =obj= if query by =uuid=, [=set=] if queried by key
 
-//write mode
-//mdb.w({ data })
-//in each doc has to have uuid, if uuid already existed will regards as change-mode, not add-mode
-mdb.w = function (dat='') {
-  if (dat && typeof dat == 'object') {
-    if (Array.isArray(dat)) {
-      //this is array, set of docs
-      let changeQty = 0
-      let addQty = 0
-      for (doc of dat) {
-        
-        let existed = '' //indicates if this data's uuid existed or not
+  if (quer) {
 
-        if (doc.uuid) {
-          existed = mdb.a.findIndex(x => x.uuid == doc.uuid)
-          if (existed < 0) existed = false
+    //string query
+    if (typeof quer == 'string') {
+      //if string, regards as a uuid
+      let found = mdb.a.find(x => x.uuid == quer)
+      if (found) {
+        mdb.touch(found)
+        return found
+      } else {
+        return null //no ext so just give blank
+      }
+
+    //obj query
+    } else if (typeof quer == 'object' && !Array.isArray(quer)) {
+      //if obj, it is a query like {name:'john'} but only first key allowed
+      let key = Object.keys(quer)[0]
+
+      //by RegExp
+      if (quer[key] instanceof RegExp) {
+        let found = mdb.a.filter(x => x[key]?.toString().match(quer[key]) )
+
+        if (found != '') {
+          mdb.touch(found)
+          return found
         } else {
-          //data has no uuid so add new
-          doc.uuid = uuid()
-          existed = false
+          return null
         }
-  
-        if (existed) {
-          //this is change task not add
-          for (key in doc) {
-            if (key != 'uuid') mdb.a[existed][key] = doc[key]
+
+      //general search
+      } else {
+        //2-level
+        if (key.includes('.')) {
+          //like {'_control.needSync':true}
+          let part = key.split('.')
+          let found = mdb.a.filter(x => x[part[0]][part[1]] == quer[key])
+
+          if (found != '') {
+            mdb.touch(found)
+            return found
+          } else {
+            return null
           }
-          mdb.a[existed].time = Date.now()
-          changeQty++
-          mdb.a[existed]._control.needSync = true
+          //supports only 2 level should be fine
+
+        //1 level key
         } else {
-          //this is add task
-          doc.time = Date.now() //always make the time-key
-          doc._control = new docControl
-          mdb.a.push(doc)
-          addQty++
+          let found = mdb.a.filter(x => x[key] == quer[key])
+
+          if (found != '') {
+            mdb.touch(found)
+            return found
+          } else {
+            return null
+          }
         }
       }
+
+    //no more other query type
+    } else {
+      return false
+    }
+
+  //if no input, just throw everything out
+  } else {
+    if (mdb.a != '') return mdb.a
+    else return null
+  }
+}
+
+
+
+//mdb.update -- updates docs in mdb if not existed in mdb, pulls it from db. Any update will sync to db.
+// mdb.u({...}|[...]) | mdb.update(...)
+mdb.u = mdb.update = async function (dat='') {
+  // updates the mdb & sync to db
+  // mdb.u({=doc=} | [=set=]) | mdb.update()
+  // if the target doc is not in mdb, reloads it
+  // any chnage in mdb must sync to db immediately
+
+  if (dat && typeof dat == 'object') {
+
+    //array input
+    if (Array.isArray(dat)) {
+
+      var updateQty   = 0
+      var skipQty     = 0
+
+      for (upDoc of dat) {
+        if (upDoc.uuid && upDoc.time && upDoc._control) {
+          let exist = mdb.r(upDoc.uuid)
+    
+          if (exist) {
+            mdb.touch(exist)
+    
+            if (upDoc.time > exist.time) {
+              //input is newer so update the current
+              let done = 0
+    
+              for (key in upDoc) {
+                if (key != 'uuid' || key != '_control') {
+                  exist[key] = upDoc[key]
+                  done++
+                } 
+              }
+              mdb.touch(exist)
+    
+              if (done) {
+                updateQty++
+                let sync = await xd({ //sync
+                  change: {uuid: upDoc.uuid},
+                  with:   exist,
+                  to:     upDoc._control.collection
+                })
+                
+                if (sync.modifiedCount) {
+                  //no error from db
+                } else {
+                  mdb.syncError.push({
+                    uuid: upDoc.uuid,
+                    time: upDoc.time,
+                  })
+                }
+    
+              } else {
+                skipQty++
+              }
+    
+            } else {
+              //input is not newer so just skip
+              skipQty++
+            }
+          
+          //doc inexist in mdb so need to reload from db
+          } else {
+            let fromDb = await mdb.load({
+              find: {uuid: upDoc.uuid},
+              from: upDoc._control.collection
+            })
+    
+            if (fromDb.length) { //this point fromDb already in mdb
+              fromDb = fromDb[0]
+
+              if (upDoc.time > fromDb.time) {
+                let done = 0
+                for (key in upDoc) {
+                  if (key != 'uuid' || key != '_control') {
+                    fromDb[key] = upDoc[key]
+                    done++
+                  }
+                }
+                mdb.touch(fromDb)
+    
+                if (done) {
+                  updateQty++
+                  let sync = await xd({ //sync
+                    change: {uuid: upDoc.uuid},
+                    with:   fromDb,
+                    to:     upDoc._control.collection 
+                  })
+    
+                  if (sync.modifiedCount) {
+                    //done in db
+                  } else {
+                    mdb.syncError.push({
+                      uuid: upDoc.uuid,
+                      time: upDoc.time
+                    })
+                  }
+
+                //not done on updating, skip
+                } else {
+                  skipQty++
+                }
+
+              //upDoc not newer db, just keep in mdb, not update
+              } else {
+                skipQty++
+              }
+    
+            //not found in db
+            } else {
+              skipQty++
+            }
+          }
+    
+         
+        //upDoc is bad, has no uuid, time, _control
+        } else {
+          skipQty++
+        }  
+      }
+      
+      //return msg
       let msg = {}
-      if (addQty) msg.addedDoc = addQty
-      if (changeQty) msg.changedDoc = changeQty
+      if (updateQty) msg.updatedQty = updateQty
+      if (skipQty) msg.skippedQty   = skipQty  
       return msg
 
+      //! for looping the async func it doesn't work so we need to have the loop and the codes inside the loop in the same block. If we loop can call func inside the loop, not work.
+
+
+
+    //the input is object-------------------------------------  
     } else {
-      //this is obj
-      let existed = '' //indicates if this data's uuid existed or not
+      if (dat.uuid && dat.time && dat._control) {
+        let exist = mdb.r(dat.uuid)
+  
+        if (exist) {
+          mdb.touch(exist)
+  
+          if (dat.time > exist.time) {
+            //input is newer so update the current
+            let done = 0
+            for (key in dat) {
+              if (key != 'uuid' || key != '_control') {
+                exist[key] = dat[key]
+                done++
+              } 
+            }
+            mdb.touch(exist)
+  
+            if (done) { //sync
+              
+              let sync = await xd({ //sync
+                change: {uuid: dat.uuid},
+                with:   exist,
+                to:     dat._control.collection
+              })
+              
+              if (sync.modifiedCount) {
+                //no error from db
+              } else {
+                mdb.syncError.push({
+                  uuid: dat.uuid,
+                  time: dat.time,
+                })
+              }
+              return {updatedQty: 1}
+  
+            //not done on existed doc, skip
+            } else { 
+              return {skippedQty: 1}
+            }
+  
+          //input is not newer so just skip
+          } else {
+            return {skippedQty: 1}
+          }
 
-      if (dat.uuid) {
-        existed = mdb.a.findIndex(x => x.uuid == dat.uuid)
-        if (existed < 0) existed = false
-      } else {
-        //data has no uuid so add new
-        dat.uuid = uuid()
-        existed = false
-      }
-
-      if (existed) {
-        //this is change task not add
-        for (key in dat) {
-          if (key != 'uuid') mdb.a[existed][key] = dat[key]
+        //no doc in mdb so reload it from db
+        } else {
+          let fromDb = await mdb.load({
+            find: {uuid: dat.uuid},
+            from: dat._control.collection
+          })
+  
+          if (fromDb.length) {
+            fromDb = fromDb[0]
+            mdb.touch(fromDb)
+  
+            if (dat.time > fromDb.time) {
+              let done = 0
+              for (key in dat) {
+                if (key != 'uuid' || key != '_control') {
+                  fromDb[key] = dat[key]
+                  done++
+                }
+              }
+  
+              if (done) {
+                mdb.touch(fromDb)
+                let sync = await xd({ //sync
+                  change: {uuid: dat.uuid},
+                  with:   fromDb,
+                  to:     dat._control.collection 
+                })
+  
+                if (sync.modifiedCount) {
+                  //done in db
+                } else {
+                  mdb.syncError.push({
+                    uuid: dat.uuid,
+                    time: dat.time
+                  })
+                }
+                return {updatedQty: 1}
+              }
+  
+            //upDoc not newer db, skip
+            } else {
+              return {skippedQty: 1}
+            }
+  
+          //not found in db, skip
+          } else {
+            return {skippedQty: 1}
+          }
         }
-        mdb.a[existed].time = Date.now()
-        mdb.a[existed]._control.needSync = true 
-        return {changedDoc: 1}
+  
+      //upDoc has no uuid, time, _control = invalid
       } else {
-        //this is add task
-        dat.time = Date.now()
-        dat._control = new docControl
-        mdb.a.push(dat)
-        return {addedDoc: 1}
+        return false
       }
     }
+
+  //first fail, wrong input
   } else {
-    //no data = false
     return false
   }
 }
-//ok m202311262305
-//all works for but right now it just replace the existing doc. Next it has to update only the changed fields.
-
-mdb.write = mdb.w
+//ok m202312092210 -- works well, not maded the updater() instead of double codes
 
 
-mdb.writeAll = function (dat='') {
+
+
+//this forces change on all docs
+mdb.wa = mdb.writeAll = function (dat='') {
   if (dat && typeof dat == 'object' && !Array.isArray(dat)) {
     let writeQty = 0
+
     mdb.a.forEach(doc => {
       let done = false //to check if it really write the data
       for (key in dat) {
-        if (key != 'uuid') {
+        if (key != 'uuid' && key != '_control') {
           doc[key] = dat[key]
           done = true
         } 
       }
+
       if (done) {
         doc.time = Date.now()
-        doc._control.needSync = true 
         writeQty++
       }
     })
-    return {changedDoc: writeQty}
+
+    return {updatedDoc: writeQty}
+
   } else {
     return false
   }
 }
 
-mdb.wa = mdb.writeAll 
+
+
+//find doc and delete
+// mdb.d(=uuid=) or mdb.d({key:=value=})
+mdb.d = mdb.delete = function(quer='') {
+  if (quer) {
+    //quer valids
+    if (typeof quer == 'string') {
+      //assumes this is uuid
+      let index = mdb.a.findIndex(x => x.uuid == quer)
+      mdb.a.splice(index,1)
+      return {deledtedDoc: 1}
+
+    } else if (typeof quer == 'object' && !Array.isArray(quer)) {
+      //quer is obj
+      let key = Object.keys(quer)[0] 
+      if (key.includes('.')) {
+        //multi-level query
+        let part = key.split('.')
+        let index = mdb.a.findIndex(x => x[part[0]][part[1]] == quer[key])
+        mdb.a.splice(index,1)
+        return {deledtedDoc: 1}
+
+      } else {
+        //1-level
+        let index = mdb.a.findIndex(x => x[key] == quer[key])
+        mdb.a.splice(index,1)
+        return {deledtedDoc: 1}
+      }
+    }
+
+  } else {
+    //quer invalids
+    return false
+  }
+}
 
 
 
 
+//mdb.l | mdb.load -- loads data from db to mdb & return to user.
+// mdb.load({find:'',from:'test.prov})
+//tested ok, m/202312091635
+mdb.l = mdb.load = async function(quer='') {
+  if (Object.keys(quer).length && typeof quer == 'object') {
+    
+    let fromDb = await xd(quer)
+
+    if (fromDb.length) {
+      fromDb.forEach(doc => {
+        let existed = mdb.r(doc.uuid)
+
+        if (existed && existed != '') {
+          //assumes that the mdb is always more udpate than the db
+          existed._control.touchTime = Date.now()
+        } else {
+          //no this doc in mdb, just put in
+          doc._control.touchTime = Date.now()
+          mdb.a.push(doc)
+        }
+      })          
+
+      //so now the requiring data also in mdb too
+      return fromDb  
+
+    } else {
+      //if nothing from the db
+      return [] 
+    }
+
+  } else {
+    return false  //no input
+  }
+}
 
 
+//mdb.check | mdb.c -- checks if this data has update or not
+//mdb.c({=doc=}|[=arrayOfDocs=])
+// ! if the input is newer than mdb, it doesn't update the mdb
+mdb.c = mdb.check = mdb.checkUpdate = async function (inp='') {
+  // checks mdb is there updates for these docs
+  // if there is, returns that doc/set
+
+  let output = []
+  
+  //input is array
+  if (inp && Array.isArray(inp)) {
+    inp.forEach(inDoc => {
+      let exist = mdb.r(inDoc.uuid)
+      if (exist) {
+        mdb.touch(exist)
+        if (exist.time > inDoc.time) output.push(exist)
+        //has newer in mdb so will send this to user
+      } else {
+        //not exist in mdb so reload
+        mdb.load({
+          find: {uuid: inDoc.uuid}, 
+          from: inDoc._control.collection
+        }).then(fromDb => {
+          if (fromDb.length) {
+            fromDb = fromDb[0]
+            if (fromDb.time > inDoc.time) output.push(fromDb)
+            //fromDb is newer so will send to user
+          } 
+        })
+      }
+    })
+
+    if (output != '') return output
+    else return null
+
+  //input is obj
+  } else if (typeof inp == 'object') {
+    let exist = mdb.r(inp.uuid)
+    if (exist) {
+      mdb.touch(exist)
+      if (exist.time > inp.time) return exist
+      else return null
+    } else {
+      //inexisted, so reload
+      mdb.load({
+        find: {uuid: inp.uuid},
+        from: inp._control.collection
+      }).then(fromDb => {
+        if (fromDb.length) {
+          fromDb = fromDb[0]
+          if (fromDb.time > inp.time) return fromDb
+          else return null
+        } else {
+          return null //not found from db
+        } 
+      })
+    }
+
+  //wrong input
+  } else {
+    return false 
+  }
+
+  //
+}
 
 
+//sort by a key
+//default sort by string type but if put type='number|num|n' it will sort as number
+//way default is ascending, can change to 'de|descending'
+/*
+    mdb.sort('name') ===this is sort string, ascending
+    mdb.sort('name','s','de') =====string, descending
+    mdb.sort('time','n') ===number, ascending
+    mdb.sort('time','n','de') ===number, descending
+*/
+mdb.sort = function (key, typ='s', way='as') {
+  if (key) {
+    if (typ == 's' || typ == 'str') {
+      
+      //this is sorting string
+      if (way == 'as') {
+        mdb.a.sort((a,b) => {
+          if (a[key] < b[key]) return -1
+          if (a[key] > b[key]) return 1
+          return 0
+        })
+        return "Sorted strings, ascending way in mdb.a"
+
+      } else if (way == 'de') {
+        mdb.a.sort((a,b) => {
+          if (a[key] < b[key]) return 1
+          if (a[key] > b[key]) return -1
+          return 0
+        })
+        return "Sorted strings, decending way in mdb.a"
+
+      } else {
+        return false
+      }
+      
+      //number sort
+    } else if (typ == 'n' || typ == 'num') {
+      if (way == 'as') {
+        mdb.a.sort((a,b) => {
+          if (a[key] < b[key]) return -1
+          if (a[key] > b[key]) return 1
+          return 0
+        })
+        return "Sorted numbers, ascending in mdb.a"
+
+      } else if (way == 'de') {
+        mdb.a.sort((a,b) => {
+          if (a[key] < b[key]) return 1
+          if (a[key] > b[key]) return -1
+          return 0
+        })
+        return "Sorted numbers, decending in mdb.a"
+
+      } else {
+        return false
+      }
+    }
+  } else {
+    return false
+  }
+}
+
+
+//mdb.clear -- clears mdb at every interval to save memory but if docs often touched they may stay longer in mdb.
+//tested ok m/2023121222 
+mdb.livingPeriod = 60000 * 5
+mdb.clearInterval = 5000
+mdb.clearId = ''
+mdb.clear = function (v='start') {
+  if (v == 'start') {
+    mdb.clearId = setInterval(() => {
+      let notFinished = true
+      do {
+        let expired = mdb.a.findIndex(x => Date.now() - x._control.touchTime > mdb.livingPeriod)
+        if (expired < 0) {
+          notFinished = false
+        } else {
+          mdb.a.splice(expired,1)
+        }
+      } while (notFinished)
+    
+    }, mdb.clearInterval)
+  
+  } else if (v == 'stop') {
+    clearInterval(mdb.clearId)
+  }
+} 
+//mdb.clear()
 
 
 // exports -------------------------------------------------
@@ -856,7 +1318,7 @@ module.exports = {
   isJson, x2html, docNum, runThrough, convert,
   makeKey, password, randomWords, Packet, 
   cert, prepPacket, passwordRealHash, csv2obj,
-  mdb, xc, xf, xd
+  mdb, xc, xf, xd, DocControl
 }
 
 
