@@ -81,7 +81,7 @@ app.use(express.json())
  * open/insecured msg handling mainly used for static & web pages not private data.
  */
 
-app.get("/reqs", (req,resp)=>{
+app.get("/req", (req,resp)=>{
 
   //A) works on the input mainly for certifying msg
   console.log('//--------------------------------------')
@@ -129,8 +129,8 @@ app.post("/xserver", (req,resp)=> {
   //A) certifying msg
   console.log('-----------------------------------------------------')
   console.log('--POST packet, ', new Date().toISOString() )
-  console.log('--reqs packet = ', req.body)
-  console.log('--reqs ip = ', req.ip ,'\n')
+  console.log('--req packet = ', req.body)
+  console.log('--req ip = ', req.ip ,'\n')
 
   //got a packet
   let packet = req.body //just put name to avoid confuse

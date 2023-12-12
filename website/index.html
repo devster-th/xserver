@@ -149,13 +149,7 @@ loadProductCards() //this is very first content for everyone
 
 //request product cards
 function loadProductCards() {
-  XB.$( {send: { act: 'request_product_cards' } 
-  })/*.then(rePkg => {
-    //console.log(rePkg)
-    return XB.readPacketMsg(rePkg)
-  })*/ 
-  
-  .then(msg => {
+  xb.send({ act: 'request_product_cards' }).then(msg => {
     //console.log(msg)
 
     let masterIndex = msg.findIndex(item => item.master == true)
@@ -176,31 +170,20 @@ function loadProductCards() {
 
 //register sessionId
 async function init() {
-    if (!XB.secure.sessionId) {
-        XB.secure.sessionId = XB.uuid()
-        sessionStorage.setItem('sessionId', XB.secure.sessionId)
+    if (!xb.secure.sessionId) {
+        xb.secure.sessionId = xb.uuid()
+        sessionStorage.setItem('sessionId', xb.secure.sessionId)
         
-        if (!XB.ip) {
-            XB.ip = await XB.getIp()
+        if (!xb.ip) {
+            xb.ip = await xb.getIp()
         } 
-        let reMsg = await XB.$({send:{act:'new_session'}})
+        let reMsg = await xb.send({act:'new_session'})
         
-        //certify the packet
-    /*    if (await XB.cert(re)) {
-          //packet is certified
-
-          //unwrap msg
-          let msg = await XB.dec(re.msg, await XB.makeKey(re))
-          //console.log(msg)
-          if (XB.isJson(reMsg)) {
-            msg = JSON.parse(reMsg)
-          }
-*/
-
+   
           //set values
-          XB.active =           reMsg.sessionActivated
-          XB.xserver.serverId = reMsg.serverId
-          XB.secure.salt =      reMsg.yourNewSalt
+          xb.active =           reMsg.sessionActivated
+          xb.xserver.serverId = reMsg.serverId
+          xb.secure.salt =      reMsg.yourNewSalt
           sessionStorage.setItem('active', true)
           sessionStorage.setItem('serverId', reMsg.serverId)
           sessionStorage.setItem('salt', reMsg.yourNewSalt)
@@ -213,10 +196,10 @@ async function init() {
 */    
       } else {
         //has sessionId
-        XB.active = true
-        XB.secure.sessionId = sessionStorage.getItem('sessionId')
-        XB.xserver.serverId = sessionStorage.getItem('serverId')
-        XB.secure.salt = sessionStorage.getItem('salt')
+        xb.active = true
+        xb.secure.sessionId = sessionStorage.getItem('sessionId')
+        xb.xserver.serverId = sessionStorage.getItem('serverId')
+        xb.secure.salt = sessionStorage.getItem('salt')
     }
 }
 
@@ -224,35 +207,23 @@ async function init() {
 
 async function login() {
   userInfo.username = user_name.value,
-  userInfo.passwordHash = await XB.passwordRealHash(
+  userInfo.passwordHash = await xb.passwordRealHash(
     userInfo.username, 
     userInfo.passwordHash
   )
 
-  XB.$({send: 
+  xb.send( 
     {
       act:          'log_in',
       username:     userInfo.username,
       passwordHash: userInfo.passwordHash
     }
-
-  })/*.then(re => {
-    return XB.makeKey(re).then(gotKey => {
-      return XB.dec(
-        re.msg,
-        gotKey
-      )
-    })
-
-  })*/
-  
-  .then(msg => {
+  ).then(msg => {
     console.log(msg)
     msg = JSON.parse(msg)
 
     if (msg.pass) {
       // msg.pass == true
-      //XB.el('content').innerHTML = msg.content
       showMessage({
         title:    msg.content,
         message:  "You may now close this message box and continue your works on this platform. Happy using :-)",
@@ -263,7 +234,6 @@ async function login() {
 
     } else {
       // msg.pass == false
-      //XB.el('content').innerHTML = msg.content
       showMessage({
         title:    msg.content,
         message:  "Please try again. If the problem still persists you may need to seek advice from your support/admin.",
@@ -282,17 +252,6 @@ function loadLoginForm() {
   contentSet('save')
   con_tent.innerHTML = XV.template.log_in
 
-  /*
-  XB.$({send:
-    { act:'load_login_content'  }
-
-  }).then(respPacket => {
-    return XB.readPacketMsg(respPacket)
-  }).then(msg => {
-    //console.log(msg)
-    XB.el('content').innerHTML = msg.content
-  })
-  */
 }
 
 
@@ -414,7 +373,7 @@ function loadContent(obj) {
         }
       }
 
-      XB.el('content').append(newEl)
+      xb.el('content').append(newEl)
     })
   
   } else {
@@ -437,13 +396,13 @@ function loadContent(obj) {
       }
     }
 
-    XB.el('content').append(newEl)
+    xb.el('content').append(newEl)
   }
   
 
   //set class
   for (tagToSet in XV.class) {
-    let tags = XB.el('content').querySelectorAll(tagToSet.replace('_','-'))
+    let tags = xb.el('content').querySelectorAll(tagToSet.replace('_','-'))
     for (i=0; i < tags.length; i++) {
       tags[i].className = XV.class[tagToSet]
     }
@@ -591,13 +550,7 @@ function msgApprovalIs(cmd) {
       if (XV.pendingApprovalFor == 'logout') {
         //generally works, but will need further work to check if it is already logged out
 
-        XB.$({send:
-          {act: 'log_out'}  
-        })/*.then(rePkg => {
-          return XB.readPacketMsg(rePkg)
-        })*/ 
-        
-        .then(msg => {
+        xb.send({act: 'log_out'}).then(msg => {
           //console.log(msg)
 
           if (msg.success) {
@@ -702,14 +655,14 @@ function loadJustNote() {
 
 function saveJustNote() {
   if (just_note.note.value) {
-    XB.$({send: 
+    xb.send( 
       {
         act:  'add_justnote',
         note: just_note.note.value,
         tag:  just_note.tag.value,
         by:   just_note.by.value
       }
-    }).then(re => {
+    ).then(re => {
       alert(JSON.stringify(re))
     })
 
@@ -785,7 +738,7 @@ function addCard2(templName, data) {
 
 function chart() {
   //draw chart on card_id="9000"
-  let canvasEl = XB.el('#chart1000')
+  let canvasEl = xb.el('#chart1000')
 
   new Chart(canvasEl, {
     type:'bar',

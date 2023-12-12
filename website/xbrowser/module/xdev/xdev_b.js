@@ -3,12 +3,12 @@
  * 
  * There're 2 files (a) xdev.js for xserver, (b) xdev_b.js for the xbrowser.
  * 
- * version:   0.1
+ * version:   0.2
  * license:   none
  * doc:       xdev-guid.html (not created yet)
  * web:       ''
  * createdDate: 20230613
- * lastUpdated: 20230628.1655
+ * lastUpdated: 20231212.1139
  * staff:     M 
  * 
  * #use
@@ -17,9 +17,13 @@
  *      </head>
  * 
  *      <script>
- *          let el = XB.readForm2(formid)
+ *          let el = xb.readForm2(formid)
  *          let re = $({get:'customer'})
  *      </script>
+ * 
+ * #log
+ *  20231212  changed from XB to xb
+ * 
  */
 
 
@@ -31,7 +35,7 @@
 
 //define a global var here -----------------------------
 
-const XB = {
+const xb = {
   //this is main object
 
   info: {
@@ -50,12 +54,12 @@ const XB = {
 
   xserver: {
     serverId: '',
-    getUrl: '/reqs',
+    getUrl: '/req',
     postUrl: '/xserver'
   },
 
-  //talkLog: {reqs:'', resp:''},
-  sendLog: {reqs:'', resp:''},
+  sendServerUrl: '/xserver',
+  sendLog: {req:'', resp:''},
   active: false,
   ip: '',
   loggedIn: false
@@ -64,34 +68,26 @@ const XB = {
 
 
 
-
-
-
-
-
-
-
-
-
 // the $ interface
-XB.$ = async function(X) {
+/*
+xb.$ = async function(X) {
 
   switch (Object.keys(X)[0]) {
 
     case 'send':
-      // XB.$({send:{...}, to:'/xserver'})
+      // xb.$({send:{...}, to:'/xserver'})
       // if 'to' absenses, default is xserver.postUrl
 
       //valid check
       if (typeof X.send != 'object' || !X.send || !Object.keys(X.send).length) return false
 
       //start
-      if (!X.to) X.to = XB.xserver.postUrl
-      let packet = new XB.Packet
+      if (!X.to) X.to = xb.xserver.postUrl
+      let packet = new xb.Packet
       
-      let reMsg = XB.makeKey(packet).then(key => {
+      let reMsg = xb.makeKey(packet).then(key => {
         //wrap msg
-        return XB.enc(
+        return xb.enc(
           JSON.stringify(X.send), key
         )
 
@@ -102,10 +98,10 @@ XB.$ = async function(X) {
 
       }).then(() => {
         //certify packet, it updates the 'packet' directly
-        return XB.cert(packet)
+        return xb.cert(packet)
 
       }).then(certPacket => {
-        XB.sendLog.reqs = certPacket
+        xb.sendLog.reqs = certPacket
         
         return fetch(
           X.to,
@@ -120,18 +116,18 @@ XB.$ = async function(X) {
 
       }).then( reObj => {
         //the re now is obj and ready to use now
-        XB.sendLog.resp = reObj
+        xb.sendLog.resp = reObj
         //console.log(reObj)
         
         /*
-        XB.cert(re).then(re => {
+        xb.cert(re).then(re => {
           console.log(re)
         })*/
-
+/*
         return reObj  //this is responsed packet
       
       }).then(rePkg => {
-        return XB.readPacketMsg(rePkg)
+        return xb.readPacketMsg(rePkg)
       })
 
       return reMsg  //this is the responsed msg/ obj
@@ -144,6 +140,84 @@ XB.$ = async function(X) {
   }
  
 }
+*/
+
+xb.send = async function (dataa='', serverUrl=xb.sendServerUrl, option='') {
+  // sends data to server, this case is xserver
+  // this is generally used to send the POST message, not GET
+  // for the GET just use fetch(url)
+  // xb.send({=data=},'/xserver')
+  // keeps log in xb.sendLog
+  // {=data=} is object only
+
+  //first valid check
+  if (!dataa || typeof dataa != 'object' ||  !Object.keys(dataa).length || Array.isArray(dataa) || !serverUrl) return false
+
+  if (!option) {
+    option = {
+      method: 'POST', //can be 'GET'
+      headers: {
+        'Content-Type':'application/json; charset=utf-8'
+      }
+    }
+  } else {
+    //if option supplied but may not complete, or wrong
+    if (typeof option != 'object' || Array.isArray(option)) {
+      return false
+    }
+    if (!option.method) option.method = 'POST'
+    if (!option.headers) option.headers = {
+      'Content-Type':'application/json; charset=utf-8'
+    }
+  }
+
+  //start
+  let packet = new xb.Packet
+  let reMsg = xb.makeKey(packet).then(key => {
+    //wrap msg
+    return xb.enc(
+      JSON.stringify(dataa), key
+    )
+
+  }).then(wrap => {
+    //replace msg with wrap
+    packet.msg = wrap
+    return
+
+  }).then(() => {
+    //certify packet, it updates the 'packet' directly
+    return xb.cert(packet)
+
+  }).then(certPacket => {
+    xb.sendLog.req = certPacket
+    
+    return fetch(
+      serverUrl,
+      { 
+        method:   option.method,
+        headers:  option.headers,
+        body:     JSON.stringify(certPacket)
+      }
+    )
+
+  }).then( re => {
+    return re.json() //make it json
+
+  }).then( reObj => {
+    //the re now is obj and ready to use now
+    xb.sendLog.resp = reObj
+    return reObj  //this is responsed packet
+  
+  }).then(rePkg => {
+    return xb.readPacketMsg(rePkg)
+  })
+
+  return reMsg  //this is the responsed msg/ obj
+}
+
+
+
+
 
 
 
@@ -152,7 +226,7 @@ XB.$ = async function(X) {
 // default algor = AES-GCM
 
 //1-----------------------------------------
-XB.random = function () {
+xb.random = function () {
   //re Uint32Array, the random is in the re[0] eg, 3660119685
 
   const arr = new Uint32Array(1) //1
@@ -161,7 +235,7 @@ XB.random = function () {
 
 
 //2-----------------------------------------
-XB.uuid = function () {
+xb.uuid = function () {
   //re standard uuid eg 92798ca1-0bd5-4c32-bb9a-493c9e8050b2
 
   return self.crypto.randomUUID()
@@ -169,7 +243,7 @@ XB.uuid = function () {
 
 
 //3-----------------------------------------
-XB.hash = async function (words, algor=256) {
+xb.hash = async function (words, algor=256) {
   /*  xs.hash() | .hash(2) | .hash(256) | ...
 
       #eg  xs.hash('words')   ...this is default = SHA-256'
@@ -227,17 +301,17 @@ XB.hash = async function (words, algor=256) {
 
 
 //4-------------------------------------------------
-XB.cert = async function (packet) {
+xb.cert = async function (packet) {
   //certify the packet
   //20230813 - changed to hash the specific of sequence of fields to fix problem
 
-  let salt = XB.secure.salt? XB.secure.salt : XB.secure.defaultSalt
+  let salt = xb.secure.salt? xb.secure.salt : xb.secure.defaultSalt
 
   if (typeof packet.msg != 'string') packet.msg = JSON.stringify(packet.msg)
 
   if (packet.cert == '') {
     //this is sign work
-    packet.cert = await XB.hash(
+    packet.cert = await xb.hash(
       packet.from + 
       packet.to +
       packet.msg + 
@@ -252,7 +326,7 @@ XB.cert = async function (packet) {
     //this is verify
     if (typeof packet.msg != 'string') packet.msg = JSON.stringify(packet.msg)
 
-    let check = await XB.hash(
+    let check = await xb.hash(
       packet.from + 
       packet.to +
       packet.msg + 
@@ -274,7 +348,7 @@ XB.cert = async function (packet) {
 
 
 //5-----------------------------------------
-XB.genKey = async function (algor='aes') {
+xb.genKey = async function (algor='aes') {
   //  xdev.genKey('rsa'|'hmac'|'aes'|'ecdsa')
 
 //RSA-OAEP
@@ -300,7 +374,7 @@ XB.genKey = async function (algor='aes') {
       ['sign','verify']
     )//ok, get 1 key
 
-    key.export = await XB.exportKey(key,'hmac')
+    key.export = await xb.exportKey(key,'hmac')
     return key
     //ok
   
@@ -325,7 +399,7 @@ XB.genKey = async function (algor='aes') {
       ['encrypt','decrypt']
     )
 
-    key.export = await XB.exportKey(key)
+    key.export = await xb.exportKey(key)
     return key
     //ok
 
@@ -359,16 +433,16 @@ function hex2buf(hex) {
 
 
 //6-----------------------------------------
-/*XB.enc = async function ( msg, key) {
+/*xb.enc = async function ( msg, key) {
   //msg must be string or non-object
   //if msg is number, it treats as '123456'
   //if msg is [111,222], treats as '111,222'
-  return XB.encrypt( msg, key)
+  return xb.encrypt( msg, key)
 }//ok, make it a little bit shorter
 */
 
 
-XB.encrypt = async function( msg, key) {
+xb.encrypt = xb.enc = async function( msg, key) {
   //AES-GCM
 
   let key_ = hex2buf(key)
@@ -388,11 +462,10 @@ XB.encrypt = async function( msg, key) {
     new TextEncoder().encode(msg)
   )
 
-  return XB.buffer2base64(iv_) + XB.buffer2base64(cx)
+  return xb.buffer2base64(iv_) + xb.buffer2base64(cx)
 }
 
 
-XB.enc = XB.encrypt 
 
 
 /*
@@ -473,7 +546,7 @@ xdev.encrypt = async function (msg, key, cert='', algor='aes') {
 
 
 //7-----------------------------------------
-XB.buffer2hex = function (buffer) {
+xb.buffer2hex = function (buffer) {
   //  xdev.buffer2hex(buffer) ...gets hex code
 
   //buffer to hex
@@ -489,7 +562,7 @@ XB.buffer2hex = function (buffer) {
 
 
 //8-----------------------------------------
-XB.buffer2base64 = function (buffer) {
+xb.buffer2base64 = function (buffer) {
   //  xdev.buffer2base64(buffer) ...gets base64 codes
 
   const st = String.fromCharCode.apply(
@@ -502,7 +575,7 @@ XB.buffer2base64 = function (buffer) {
 
 
 //9-----------------------------------------
-XB.base64ToBuffer = function (base64) {
+xb.base64ToBuffer = function (base64) {
   //  xdev.base64ToBuffer(base64) ...gets buffer
 
   return new Uint8Array(
@@ -513,7 +586,7 @@ XB.base64ToBuffer = function (base64) {
 
 
 //10-----------------------------------------
-XB.buffer2utf8 = function (buffer) {
+xb.buffer2utf8 = function (buffer) {
   //  xdev.buffer2utf8(buffer) ...gets utf8 codes
 
   return new TextDecoder('utf-8').decode(
@@ -530,12 +603,12 @@ XB.buffer2utf8 = function (buffer) {
 
 
 //11------------------------------------------------------
-/*XB.dec = async function (cx, key) {
-  return XB.decrypt(cx, key)
+/*xb.dec = async function (cx, key) {
+  return xb.decrypt(cx, key)
 }*/
 
 
-XB.decrypt = async function (cx, key) {
+xb.decrypt = xb.dec = async function (cx, key) {
   /**
    * the input cx has format: [iv(16)][msgx][tag(16)]
    */
@@ -557,7 +630,6 @@ XB.decrypt = async function (cx, key) {
   return new TextDecoder().decode(msg_)
 }
 
-XB.dec = XB.decrypt
 
 
 /*
@@ -651,7 +723,7 @@ xdev.decrypt = async function (seal, key, cert='', algor='aes') {
 
 
 //12-----------------------------------------
-XB.exportKey = async function(key, format='aes') {
+xb.exportKey = async function(key, format='aes') {
   //  xdev.exportKey(key, 'priKey'|'pubKey'|'raw')
   //  output is base64
 
@@ -667,7 +739,7 @@ XB.exportKey = async function(key, format='aes') {
       key
     )
 
-    return XB.buffer2base64(key_) //don't put the PEM wrapper  
+    return xb.buffer2base64(key_) //don't put the PEM wrapper  
   
   } else {
     return 'ERROR! wrong input'
@@ -679,7 +751,7 @@ XB.exportKey = async function(key, format='aes') {
 
 
 //13-----------------------------------------
-XB.importKey = async function(key,format='aes') {
+xb.importKey = async function(key,format='aes') {
   //  xdev.importKey(key || key,'pubKey'|'aes'|'raw')  
 
   //get the base64 in and convert into a buffer
@@ -737,7 +809,7 @@ XB.importKey = async function(key,format='aes') {
 
 
 //14----------------------------------------------
-XB.sign = async function (msg, key, algor='hmac') {
+xb.sign = async function (msg, key, algor='hmac') {
   // take HMAC is the default sign algorithm
 
   //check the msg
@@ -754,7 +826,7 @@ XB.sign = async function (msg, key, algor='hmac') {
       msg_
     )
   
-    return XB.buffer2base64(buffer)
+    return xb.buffer2base64(buffer)
     //ok
 
 //HMAC    
@@ -765,7 +837,7 @@ XB.sign = async function (msg, key, algor='hmac') {
     try {
       if (key.match(/^[0-9a-zA-Z/=+]+$/)) {
         //the key is the exported one not obj
-        key = await XB.importKey(key,'hmac')
+        key = await xb.importKey(key,'hmac')
       }
     } catch {
       //the key is obj
@@ -779,7 +851,7 @@ XB.sign = async function (msg, key, algor='hmac') {
     )
 
     //return xdev.buffer2base64(buffer)
-    return XB.buffer2hex(buffer)
+    return xb.buffer2hex(buffer)
     //ok
   }
   
@@ -788,7 +860,7 @@ XB.sign = async function (msg, key, algor='hmac') {
 
 
 //15-------------------------------------------------
-XB.verify = async function (msg, signature, key, algor='hmac') {
+xb.verify = async function (msg, signature, key, algor='hmac') {
   // HMAC is default verify algor
   //const msg_ = new TextEncoder().encode(msg)
 
@@ -802,7 +874,7 @@ XB.verify = async function (msg, signature, key, algor='hmac') {
     return await crypto.subtle.verify(
       { name:'ECDSA', hash:{name:'SHA-384'} },
       key,
-      XB.base64ToBuffer(signature),
+      xb.base64ToBuffer(signature),
       new TextEncoder().encode(msg)
     )
     //ok
@@ -815,7 +887,7 @@ XB.verify = async function (msg, signature, key, algor='hmac') {
     try {
       if (key.match(/^[0-9a-zA-Z/+=]+$/)) {
         //it's base64
-        key = await XB.importKey(key,'hmac')
+        key = await xb.importKey(key,'hmac')
       }
     } catch {
       //it's not base64, assumes the correct key
@@ -846,7 +918,7 @@ xs.uuidx = function() {
 }//ok
 */
 
-XB.uuidx = function() {
+xb.uuidx = function() {
   // xdev.uuidx() ...get unique timestamp
 
   let t0 = Date.now()
@@ -865,14 +937,14 @@ XB.uuidx = function() {
 
 
 //17---------------------------------------------
-XB.utf8ToBuffer = function (msg) {
+xb.utf8ToBuffer = function (msg) {
   return new TextEncoder().encode(msg)
 }//ok
 
 
 
 //18---------------------------------------------
-XB.passKey = async function (passHash) {
+xb.passKey = async function (passHash) {
   //generate AES-GCM key from a password, this key will be unexactable, and should be destroyed at unnecessarily.
 
   //key material
@@ -888,7 +960,7 @@ XB.passKey = async function (passHash) {
   //key
   return crypto.subtle.deriveKey(
     { name:'PBKDF2',
-      salt: XB.utf8ToBuffer('xTKrg5fX-9l_'), //fix this
+      salt: xb.utf8ToBuffer('xTKrg5fX-9l_'), //fix this
       iterations: 100000,
       hash:'SHA-256'  
     },
@@ -905,11 +977,11 @@ XB.passKey = async function (passHash) {
 
 
 //19----------------------------------------------
-XB.promptKey = async function () {
+xb.promptKey = async function () {
   //gen an AES-GCM key from user prompt's password
 
-  return await XB.passKey(
-    await XB.hash(
+  return await xb.passKey(
+    await xb.hash(
       prompt('password:')
     )
   )
@@ -917,10 +989,10 @@ XB.promptKey = async function () {
 
 
 //20------------------------------------------------
-XB.promptHash = async function () {
+xb.promptHash = async function () {
   //prompt to get words and gen hash from it
 
-  return XB.hash(
+  return xb.hash(
     prompt('words:')
   )
 }
@@ -930,7 +1002,7 @@ XB.promptHash = async function () {
 
 //21------------------------------------------------
 //randomW is a random code tha containing only a-zA-Z nothing else
-XB.randomWords = function (length=16) {
+xb.randomWords = function (length=16) {
   //gen a js var style code contains only a-zA-Z
 
   let words = ''
@@ -947,7 +1019,7 @@ XB.randomWords = function (length=16) {
 
 
 //22--------------------------------------------
-XB.password = function (length=12) {
+xb.password = function (length=12) {
   //gen random password from 92 characters
 
   let pass = ''
@@ -963,7 +1035,7 @@ XB.password = function (length=12) {
 
 
 
-XB.pin = function (length=8) {
+xb.pin = function (length=8) {
   //gen random pin from A-Z and 0-9, default length is 8
 
   let pin = ''
@@ -979,9 +1051,9 @@ XB.pin = function (length=8) {
 
 
 
-XB.xDateCode = function (vari) {
+xb.xDateCode = function (vari) {
   //output is M 20-9-28 10:45
-  //use with XB.pin() we can have code like: #ABXYS45F TH 23-9-28
+  //use with xb.pin() we can have code like: #ABXYS45F TH 23-9-28
   //to use in mobile screen which we need as short as possible to show code or something
   /* input can have 3 options
       1. put the date string like new Date().toString() - string
@@ -1023,7 +1095,7 @@ XB.xDateCode = function (vari) {
 
 ///////////////////////////////////////////////////////
 //23---------------------------------------------
-XB.vaultAdd = async function (x) {
+xb.vaultAdd = async function (x) {
   /**
    * xs.vaultAdd() v0.1 m20230613
    * 
@@ -1042,7 +1114,7 @@ XB.vaultAdd = async function (x) {
   if (!x || typeof x != 'object' || !Object.keys(x).length
     || Array.isArray(x)) return {
       
-      func:'XB.vaultAdd()',
+      func:'xb.vaultAdd()',
       success: false,
       msg:"wrong input"
     }
@@ -1051,7 +1123,7 @@ XB.vaultAdd = async function (x) {
   for (label in x) {
     if (x[label] == '') return {
       
-        func:'XB.vaultAdd()', 
+        func:'xb.vaultAdd()', 
         success: false, 
         msg:"wrong label"
       }  
@@ -1063,19 +1135,19 @@ XB.vaultAdd = async function (x) {
   if (Object.keys(x).length > 1) {
     //has several labels-----------------------
 
-    if (!XB.vault) {
+    if (!xb.vault) {
       //firstly add
-      XB.vault = await XB.enc(
+      xb.vault = await xb.enc(
         JSON.stringify(x), 
-        await XB.promptHash() //prompt for pass and then hash it
+        await xb.promptHash() //prompt for pass and then hash it
       )
 
     } else {
       //more add if the xs.vault already exist
 
-      let key = await XB.promptHash() //prompt for pass
+      let key = await xb.promptHash() //prompt for pass
       let gold = JSON.parse(
-        await XB.dec(XB.vault, key)
+        await xb.dec(xb.vault, key)
       ) 
 
       for (label in x) {
@@ -1087,7 +1159,7 @@ XB.vaultAdd = async function (x) {
         }
       }
 
-      XB.vault = await XB.enc(
+      xb.vault = await xb.enc(
         JSON.stringify(gold), 
         key
       )
@@ -1099,27 +1171,27 @@ XB.vaultAdd = async function (x) {
     //has only 1 label-------------------------
      
     //if vault not already existed
-    if (!XB.vault) {
+    if (!xb.vault) {
 
       //firstly add
-      XB.vault = await XB.enc(
+      xb.vault = await xb.enc(
         JSON.stringify(x),  
-        await XB.promptHash()
+        await xb.promptHash()
       )
 
     } else {
       //if vault already existed
-      let key = await XB.promptHash()
+      let key = await xb.promptHash()
       
       let gold = JSON.parse(
-        await XB.dec(XB.vault, key)
+        await xb.dec(xb.vault, key)
       ) 
       let label = Object.keys(x)
 
       if (label in gold) {
         //dup
         return {
-          func:'XB.vaultAdd()',
+          func:'xb.vaultAdd()',
           success: false,
           msg:'label already existed, skipped'
         }
@@ -1128,7 +1200,7 @@ XB.vaultAdd = async function (x) {
         //label not duplicated
         gold[label] = x[label]
 
-        XB.vault = await XB.enc(
+        xb.vault = await xb.enc(
           JSON.stringify(gold), 
           key
         )
@@ -1141,7 +1213,7 @@ XB.vaultAdd = async function (x) {
 
 
 //24----------------------------------------------
-XB.vaultGet = async function (label) {
+xb.vaultGet = async function (label) {
   /**
    * xs.vaultGet() v0.1
    * 
@@ -1156,15 +1228,15 @@ XB.vaultGet = async function (label) {
    */
 
   if (!label || typeof label != 'string') return {
-    func:'XB.vaultGet()',
+    func:'xb.vaultGet()',
     success: false,
     msg:'wrong input, nothing done'
   }
 
   let gold = JSON.parse(
-    await XB.dec( 
-      XB.vault, 
-      await XB.promptHash()
+    await xb.dec( 
+      xb.vault, 
+      await xb.promptHash()
     )
   ) 
   
@@ -1172,7 +1244,7 @@ XB.vaultGet = async function (label) {
     return gold[label]
   } else {
     return {
-      func:'XB.vaultGet()',
+      func:'xb.vaultGet()',
       success: false,
       msg:'wrong label'
     } 
@@ -1196,7 +1268,7 @@ m/20230509
 //25----------------------------------------------
 /* if put {people: {...} }   the people is the collection
  */
-XB.db = function (x) {
+xb.db = function (x) {
   /**
    * xs.db() v0.1 20230613
    * 
@@ -1266,12 +1338,12 @@ XB.db = function (x) {
           if (Array.isArray(x[col])) { //many docs
   
             for (doc of x[col]) {
-              doc._id = XB.uuidx() //assign id to each doc
+              doc._id = xb.uuidx() //assign id to each doc
               db[col].push(doc)
             }
   
           } else { //1 doc
-            x[col]._id = XB.uuidx()
+            x[col]._id = xb.uuidx()
             db[col].push(x[col]) 
           }
         }
@@ -1291,13 +1363,13 @@ XB.db = function (x) {
             if (Array.isArray( x[col] )) {
               //add many docs to existing col
               for (doc of x[col]) {
-                doc._id = XB.uuidx()
+                doc._id = xb.uuidx()
                 db[col].push(doc) //push into existing col
               } 
   
             } else {
               //add 1 doc to existing col
-              x[col]._id = XB.uuidx()
+              x[col]._id = xb.uuidx()
               db[col].push( x[col] )
             }
   
@@ -1309,13 +1381,13 @@ XB.db = function (x) {
               //newly add many docs
   
               for (doc of x[col]) {
-                doc._id = XB.uuidx()
+                doc._id = xb.uuidx()
                 db[col].push(doc)
               }
   
             } else {
               //newly add 1 doc
-              x[col]._id = XB.uuidx()
+              x[col]._id = xb.uuidx()
               db[col].push(x[col]) //make it in a
             }
           }
@@ -1361,7 +1433,7 @@ XB.db = function (x) {
 
 ///////////////////////////////////////////////////////
 //26--------------------------------------------------
-XB.atime = function (same='hour') {
+xb.atime = function (same='hour') {
 
   let t = new Date()
   let y = t.getFullYear()
@@ -1410,7 +1482,7 @@ XB.atime = function (same='hour') {
 
 
 //27--------------------------------------------------
-XB.acode = async function (t=24) {
+xb.acode = async function (t=24) {
   //this is another simple kind of certifying an html doc
 
   switch (t) {
@@ -1442,44 +1514,45 @@ XB.acode = async function (t=24) {
       t = 'hour' //or 24
   }
 
-  return await XB.hash(
-    document.body + XB.atime(t)
+  return await xb.hash(
+    document.body + xb.atime(t)
   )
 }
 
 
 ///////////////////////////////////////////////////////
-XB.talk = async function (msg) {
+/*
+xb.talk = async function (msg) {
   //send packet to xserver & get response
   //put the msg needed to send to xserver in this func and then it will create a packet for it, wrap, cert and then send out to the xserver.
-  //keeps log in XB.talkLog 
+  //keeps log in xb.talkLog 
   //msg must be obj
   
   if (!msg || !Object.keys(msg).length) {
     return false
   }
 
-  let packet = new XB.Packet
+  let packet = new xb.Packet
   
-  if (XB.active) {
+  if (xb.active) {
     packet.state = 'active'
-    //this case the XB.xserver.serverId should exist
+    //this case the xb.xserver.serverId should exist
   } else {
     packet.state = 'register'
     //serverId inexists
   }
 
   packet.msg = JSON.stringify(packet.msg)
-  packet.msg = await XB.enc(
+  packet.msg = await xb.enc(
     packet.msg, 
-    await XB.makeKey(packet)
+    await xb.makeKey(packet)
   )
   
-  packet.cert = await XB.cert(packet)
-  XB.talkLog.reqs = packet
+  packet.cert = await xb.cert(packet)
+  xb.talkLog.reqs = packet
 
   let re = await fetch(
-    XB.xserver.postUrl,
+    xb.xserver.postUrl,
     {
       method:   'POST',
       headers:  {'Content-Type':'application/json; charset=utf-8'},
@@ -1490,7 +1563,7 @@ XB.talk = async function (msg) {
     return re.json() //make it json
   }).then( re => {
     //the re now is obj and ready to use now
-    XB.talkLog.resp = re
+    xb.talkLog.resp = re
     return re
   })
 
@@ -1502,7 +1575,8 @@ XB.talk = async function (msg) {
 
 
 //28------------------------------------------
-XB.send = function (value, urlToSendTo=XB.xserver.postUrl) {
+/*
+xb.send = function (value, urlToSendTo=xb.xserver.postUrl) {
   //seal the data and wrap it and send to the server
   /**
    * xs.send() -- wraps obj and send to xserver in POST method. When get response from the xserver, it unwraps then return the msg out to the caller.
@@ -1512,27 +1586,27 @@ XB.send = function (value, urlToSendTo=XB.xserver.postUrl) {
    * #note    use Promise inside the f to easier returning output
    * #staff   M
    */
-
+/*
   return new Promise((resolve,reject) => {
 
     //A - check server post url
     if (urlToSendTo == '') {
       reject(
-        {from:'XB.send()',
+        {from:'xb.send()',
         success: false,
         msg:'Wrong input.'}
       ) 
     }
 
     //log
-    XB.sendLog.req = value 
-    XB.sendLog.resp = '' //reset the value of resp 
+    xb.sendLog.req = value 
+    xb.sendLog.resp = '' //reset the value of resp 
 
 
     //convert, wrap
     if (typeof value == 'object') value = JSON.stringify(value)
     
-    XB.wrap(value).then(wrapped => {
+    xb.wrap(value).then(wrapped => {
 
       fetch(
         urlToSendTo,
@@ -1554,9 +1628,9 @@ XB.send = function (value, urlToSendTo=XB.xserver.postUrl) {
   
           //XBROWSER.sendLog.resp = re
   
-          XB.unwrap(re).then(msg => {
+          xb.unwrap(re).then(msg => {
             //console.log(msg)
-            XB.sendLog.resp = msg 
+            xb.sendLog.resp = msg 
   
             if (msg.msg && msg.from) {
               //this is resp from xs.$set command
@@ -1573,7 +1647,7 @@ XB.send = function (value, urlToSendTo=XB.xserver.postUrl) {
   
   
         } else {
-          XB.sendLog.resp = re 
+          xb.sendLog.resp = re 
           //if not wrap just put it in
           resolve(re) 
         }
@@ -1585,15 +1659,17 @@ XB.send = function (value, urlToSendTo=XB.xserver.postUrl) {
           from:     'xs.send()'
         })
       )*/
-
+/*
     })
 
   })//promise block 
   
 }//ok /m 20230512 
+*/
 
 
-XB.send2 = async function (value) {
+/*
+xb.send2 = async function (value) {
   /**
    * func: xs.send2() 
    * for: enhancing from xs.send() to include some data wrapping & encryption inside it.
@@ -1604,44 +1680,45 @@ XB.send2 = async function (value) {
    *      xs.send2(formEl | any value)
    *      xs.send2(form1) 
    */
-
+/*
   if (value instanceof HTMLFormElement) {
-    let formx = XB.readForm2(value)
+    let formx = xb.readForm2(value)
 
-    let cipher = await XB.$({
+    let cipher = await xb.$({
       encrypt: JSON.stringify(formx),
       key:     XBROWSER.security.key
     })
 
-    XB.send({wrap: cipher})
+    xb.send({wrap: cipher})
 
   }
 } 
+*/
 
 
-XB.wrap = async function(msg, key) {
+xb.wrap = async function(msg, key) {
   //wrap the packet.msg before sending to xserver
   //msg must be string
   //returns base64
   //#tested ok, m20230616
 
   if (!msg || !key) return false
-  return await XB.enc(msg, key)
+  return await xb.enc(msg, key)
 }
 
 
-XB.unwrap = async function(wrappedMsg, key) {
+xb.unwrap = async function(wrappedMsg, key) {
   //unwrap wrapped-data
   //let uw = await xs.unwrap(wrapObj)
   //return data before wrapping, if it's obj it gives you obj
   //#tested ok, m20230616
 
   if (!wrappedMsg || !key) return false
-  return await XB.dec(wrappedMsg, key)
+  return await xb.dec(wrappedMsg, key)
 }
 
 
-XB.isJson = function(sample) {
+xb.isJson = function(sample) {
   //test if the sample Json or not, if yes returns true, not returns false
   //let check = xs.isJson(aVar)
   //#tested ok, m20230616
@@ -1656,7 +1733,7 @@ XB.isJson = function(sample) {
 }
 
 
-XB.isHex = function (sample) {
+xb.isHex = function (sample) {
   //check if the input hex or not, returning true or false
   //#tested ok, m20230616
 
@@ -1676,7 +1753,7 @@ XB.isHex = function (sample) {
 
 
 //29-----------------------------------------------------
-XB.readForm = function (formid) {
+xb.readForm = function (formid) {
   // v0.5 --read form's input then return x of all filled data
 
   //make it smarter by auto recog all input of the form, so just put the formid to this func and it does the rest
@@ -1749,7 +1826,7 @@ XB.readForm = function (formid) {
 }//ok, m/20230512
 
 
-XB.readForm2 = function (el_s, validRule={}, noticeStyle='1px solid orange') {
+xb.readForm2 = function (el_s, validRule={}, noticeStyle='1px solid orange') {
   /**
    * xs.readForm2() upgrade the xs.readForm() 
    * version: 0.1
@@ -1801,7 +1878,7 @@ XB.readForm2 = function (el_s, validRule={}, noticeStyle='1px solid orange') {
   } else {
 
     let re = {
-      func:'XB.readForm2',
+      func:'xb.readForm2',
       success: false,
       msg:'wrong input, must be string or html element'
     }
@@ -1836,7 +1913,7 @@ XB.readForm2 = function (el_s, validRule={}, noticeStyle='1px solid orange') {
       if (e.type == 'textarea') {
         outputx[e.name] = e.value
 
-        if ( XB.validate(outputx[e.name], validRule[e.name]) ) {
+        if ( xb.validate(outputx[e.name], validRule[e.name]) ) {
           //pass
           if (e.style.border == noticeStyle) e.style.border = ''
         } else {
@@ -1854,7 +1931,7 @@ XB.readForm2 = function (el_s, validRule={}, noticeStyle='1px solid orange') {
           outputx[e.name] = el[e.name].value
           //this call get the: el.nameOfinput.value
 
-          if ( XB.validate(outputx[e.name], validRule[e.name]) ) {
+          if ( xb.validate(outputx[e.name], validRule[e.name]) ) {
             //pass
             if (e.parentElement.tagName == 'DIV' && e.parentElement.hasAttribute('_input-frame')) {
               //there's a div box so we can give notice
@@ -1892,7 +1969,7 @@ XB.readForm2 = function (el_s, validRule={}, noticeStyle='1px solid orange') {
 
         if (e.value == el[e.name][lastIndexOfCheckbox].value) {
           //this is last ele of the checkbox group
-          if ( XB.validate(outputx[e.name], validRule[e.name]) ) {
+          if ( xb.validate(outputx[e.name], validRule[e.name]) ) {
             //valid
             if (e.parentElement.tagName == 'DIV' && e.parentElement.hasAttribute('_input-frame')) {
               e.parentElement.style.border = ''
@@ -1919,7 +1996,7 @@ XB.readForm2 = function (el_s, validRule={}, noticeStyle='1px solid orange') {
         if (!e.disabled) { //if not disabled
           outputx[e.name] = e.value 
 
-          if ( XB.validate(outputx[e.name], validRule[e.name]) ) {
+          if ( xb.validate(outputx[e.name], validRule[e.name]) ) {
             //pass
             if (e.style.border == noticeStyle) e.style.border = ''           
           } else {
@@ -1943,7 +2020,7 @@ XB.readForm2 = function (el_s, validRule={}, noticeStyle='1px solid orange') {
 
 
 //30-----------------------------------------
-XB.jsonify = function (x) {
+xb.jsonify = function (x) {
   /**
    * make little shorter of the JSON.stringify()
    */
@@ -1954,7 +2031,7 @@ XB.jsonify = function (x) {
 
 
 //31-----------------------------------------
-XB.jparse = function (j) {
+xb.jparse = function (j) {
   /**
    * little shorter JSON.parse()
    */
@@ -1978,7 +2055,7 @@ XB.jparse = function (j) {
  * @author M 
  * @tested OK m20230702.1722
  */
-XB.showData = async function (data, toElement, opt) {
+xb.showData = async function (data, toElement, opt) {
   /**
    * xs.showData() -- takes data in array or obj or any format and show it in the specified html element.
    * 
@@ -2033,7 +2110,7 @@ XB.showData = async function (data, toElement, opt) {
         //make header from data
         htmlCode += '<tr>'
         for (k in data[0]) {
-          htmlCode += '<th>' + XB.toTitleCase(k) + '</th>'
+          htmlCode += '<th>' + xb.toTitleCase(k) + '</th>'
         }
         htmlCode += '</tr>'
       }
@@ -2156,7 +2233,7 @@ XB.showData = async function (data, toElement, opt) {
         }
         count++
       }
-      htmlCode += '</table><span style="font-size:20px;cursor:pointer;color:blue" onclick="XB.expandTable(this,this.previousSibling)" title="Click to expand or shrink this table.">+</span><br><br>'
+      htmlCode += '</table><span style="font-size:20px;cursor:pointer;color:blue" onclick="xb.expandTable(this,this.previousSibling)" title="Click to expand or shrink this table.">+</span><br><br>'
     })
 
     toElement.innerHTML = htmlCode
@@ -2164,7 +2241,7 @@ XB.showData = async function (data, toElement, opt) {
 }
 
 
-XB.expandTable = function(actor, tableEle) {
+xb.expandTable = function(actor, tableEle) {
   /**
    * #brief
    * xs.expandTable -- helps xs.showData when the xs.showData shows data in table in a short-mode (collapsed more rows if if has many). So this func expands it.
@@ -2195,7 +2272,7 @@ XB.expandTable = function(actor, tableEle) {
 
 
 // autoFill ------------------------------------------------
-XB.autoFill = function() {
+xb.autoFill = function() {
   /**
    * xs.autoFill() -- scans through the page and automatically fill datas into the element your specified.
    * 
@@ -2208,7 +2285,7 @@ XB.autoFill = function() {
     let commandToGetContent = ele.getAttribute('_content')
     eval('command = ' + commandToGetContent)
 
-    XB.$(command).then(dat => {
+    xb.$(command).then(dat => {
       //now got data, will show it on ele
 
       //check table option
@@ -2221,7 +2298,7 @@ XB.autoFill = function() {
         }
       }
 
-      XB.showData(dat,ele,opt)
+      xb.showData(dat,ele,opt)
     })
   })
 }
@@ -2230,7 +2307,7 @@ XB.autoFill = function() {
 
 
 // make Title case ----------------------------------------
-XB.toTitleCase = function (strin) {
+xb.toTitleCase = xb.toTitle = function (strin) {
   //xs.makeTitleCase() -- make the input string a Title case, e.g., if gets 'thailand', makes it 'Thailand'
   //#tested OK, m20230628.1947
   //needs more enhance eg if have multi-words, make it from snake, camel, etc.
@@ -2243,10 +2320,10 @@ XB.toTitleCase = function (strin) {
   }
   return part.join('') 
 }
-XB.toTitle = XB.toTitleCase 
+
 
 // make camel case -------------------------------
-XB.toCamelCase = function (strin) {
+xb.toCamelCase = xb.toCamel = function (strin) {
   //assumes input is multi words eg 'user name', makes it 'userName'
   //#tested OK, m20230628.2000
 
@@ -2257,22 +2334,21 @@ XB.toCamelCase = function (strin) {
   }
   return part.join('')
 }
-XB.toCamel = XB.toCamelCase 
+
 
 // make snake case -------------------------------------
-XB.toSnakeCase = function (strin) {
+xb.toSnakeCase = xb.toSnake = function (strin) {
   //assumes input is multi-words or space separations
   //#tested OK, m20230628.2003
 
   return strin.replaceAll(' ','_')
 }
-XB.toSnake = XB.toSnakeCase 
+
 
 //make dash case -----------------------------
-XB.toDashCase = function (strin) {
+xb.toDashCase = xb.toDash = function (strin) {
   return strin.replaceAll(' ','-')
 }
-XB.toDash = XB.toDashCase 
 
 
 
@@ -2287,7 +2363,7 @@ XB.toDash = XB.toDashCase
  * @lastUpdate 20230702.1359
  * @note added notNone rule
  */
-XB.validate = function(data, rule) {
+xb.validate = function(data, rule) {
   /**
    * xs.validate -- validates each data against the provided rules for that data. Returns true/false.
    * Will use this in the xdev server as well and to validate the mongodb inputting the data.
@@ -2418,7 +2494,7 @@ XB.validate = function(data, rule) {
  * @version 0.1
  * @tested OK 20230702.1645
  */
-XB.el = function(strin) {
+xb.el = function(strin) {
   return eval(`document.querySelector('${strin}')`)
 }
 
@@ -2432,7 +2508,7 @@ XB.el = function(strin) {
  * @version 0.1 
  * @tested OK 20230702.1645
  */
-XB.els = function(strin) {
+xb.els = function(strin) {
   return eval(`document.querySelectorAll('${strin}')`)
 }
 
@@ -2446,18 +2522,18 @@ XB.els = function(strin) {
  * @param {string|number} col
  * @returns {HTMLElement} - of the cell 
  */
-XB.tableCell = function (ele, row, col) {
+xb.tableCell = function (ele, row, col) {
   return ele.rows[row].cells[col]
 } 
 
 
 
 /**
- * XB.tradeVal - makes a numbers string to the trade value format.
+ * xb.tradeVal - makes a numbers string to the trade value format.
  * @param {string} strin - numbers in string type
  * @returns {string} - like '1,234,567.50'
  */
-XB.tradeVal = function(numString) {
+xb.tradeVal = function(numString) {
   let fullNum = []
   var allGood = true 
   var hasDecimal, num, deci 
@@ -2516,7 +2592,7 @@ XB.tradeVal = function(numString) {
 
 
 //get ip of this browser-----------------------------
-XB.getIp = async function () {
+xb.getIp = async function () {
   return fetch('https://api.ipify.org?format=json')
   .then(re => re.json())
   .then(output => {return output.ip})
@@ -2525,31 +2601,31 @@ XB.getIp = async function () {
 
 
 // initialization------------------------------
-//XB.getIp().then(re => XB.ip = re)
+//xb.getIp().then(re => xb.ip = re)
 
 
 // sessionId
 
 
 
-XB.Packet = class {
-  from = XB.secure.sessionId
-  to = XB.xserver.serverId
-  active = XB.active 
-  msg = ''
-  id = XB.ip + '_' + Date.now() + '_' + XB.uuid()
-  cert = ''
+xb.Packet = class {
+  from =    xb.secure.sessionId
+  to =      xb.xserver.serverId
+  active =  xb.active 
+  msg =     ''
+  id =      xb.ip + '_' + Date.now() + '_' + xb.uuid()
+  cert =    ''
 }
 
 
-XB.makeKey = async function (packet) {
+xb.makeKey = async function (packet) {
   //make key from the packet
 
   if (!packet) return false
 
   if (typeof packet == 'object' && packet.from && packet.id) {
-    return XB.hash(
-      packet.from + packet.to + packet.id + XB.secure.defaultSalt + XB.secure.salt 
+    return xb.hash(
+      packet.from + packet.to + packet.id + xb.secure.defaultSalt + xb.secure.salt 
     )
 
   } else {
@@ -2558,41 +2634,41 @@ XB.makeKey = async function (packet) {
 }
 
 
-XB.masterKey = async function () {
+xb.masterKey = async function () {
   //every session must have a masterKey for its security works
-  return await XB.hash(
-    XB.secure.sessionId.slice(7,23) 
-    + XB.ip + XB.secure.defaultSalt
+  return await xb.hash(
+    xb.secure.sessionId.slice(7,23) 
+    + xb.ip + xb.secure.defaultSalt
   )
 }
 
 
 
 async function init() {
-  XB.ip = await XB.getIp()
+  xb.ip = await xb.getIp()
 }
 init()
 
 
 /**
- * XB.passwordRealHash - makes the password hash more secure
+ * xb.passwordRealHash - makes the password hash more secure
  * @param {string} username 
  * @param {string/hex} passwordHash 
  * @returns hash/hex/sha256/64 digits
  */
-XB.passwordRealHash = async function (username, passwordHash) {
-  return XB.hash(
+xb.passwordRealHash = async function (username, passwordHash) {
+  return xb.hash(
     username + passwordHash + "D+DHDqyDC~P9"
   )
 }
 
 
 
-XB.readPacketMsg = async function (receivedPacket) {
-  /*  get the received packet from the XB.$send command and get the msg out from the packet */
+xb.readPacketMsg = async function (receivedPacket) {
+  /*  get the received packet from the xb.$send command and get the msg out from the packet */
 
-  return XB.makeKey(receivedPacket).then(gotKey => {
-    return XB.dec(
+  return xb.makeKey(receivedPacket).then(gotKey => {
+    return xb.dec(
       receivedPacket.msg,
       gotKey
     )
@@ -2606,11 +2682,11 @@ XB.readPacketMsg = async function (receivedPacket) {
 
 
 /*  Returns the text data url for the picture picked by user.
-    how:  <input type="file" onchange="XB.dataUrlFromPicFile(this).then(dataUrl => ...)">
+    how:  <input type="file" onchange="xb.dataUrlFromPicFile(this).then(dataUrl => ...)">
     tested: ok, m20230830 
     -works with png, jpg, jpeg  /m20230904 
 */
-XB.readPicFileAsDataUrl = async function (inputEl) {
+xb.readPicFileAsDataUrl = async function (inputEl) {
   return new Promise((resolve,reject) => {
     //const getFile = event.target.files[0]
     const getFile = inputEl.files[0]
@@ -2629,9 +2705,9 @@ XB.readPicFileAsDataUrl = async function (inputEl) {
 
 
 /*  Returns text string from the text file picked by user.
-    how:  <input type="file" onchange="XB.readTextFile(this).then(strin => ... )"
+    how:  <input type="file" onchange="xb.readTextFile(this).then(strin => ... )"
     tested: ok, m20230830   */
-XB.readTextFile = async function (inputEl) {
+xb.readTextFile = async function (inputEl) {
   return new Promise((resolve,reject) => {
     let getFile = inputEl.files[0]
     let FR = new FileReader()
@@ -2650,7 +2726,7 @@ XB.readTextFile = async function (inputEl) {
 
 
 
-XB.savePngFile = function (imgEle, fileName) {
+xb.savePngFile = function (imgEle, fileName) {
   //get pic from tag <img> then download to file, only png 
 
   if (!imgEle) return {msg:"Wrong input.", success:false} 
@@ -2683,7 +2759,7 @@ XB.savePngFile = function (imgEle, fileName) {
 
 
 
-XB.saveTextFile = function (text, fileName) {
+xb.saveTextFile = function (text, fileName) {
   // save text to fileName
 
   if (!text) return {msg:"Wrong input.", success:false} 
