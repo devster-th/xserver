@@ -31,7 +31,28 @@ let mongo = new MongoClient(
  //take the above block out and the distinctField now work, m20231124
 )
 
-const XS = require('./xdev2.js')
+const {v4: uuid} = require('uuid')
+class DocControl {
+  owner = ''
+  collection = ''
+  updatedBy = ''
+  createdTime = ''
+  createdBy = ''
+  rights = [
+    {owner:'read/write/edit/delete'},
+    {team:'read'},
+    {organization:'read'},
+    {public:''}
+  ] //{who: ,rights:'read/write/delete'}
+  version = {
+    name: '',
+    number: 1,
+    markedBy: '',
+    note: ''
+  }
+  active = true
+  touchTime = Date.now()
+}
 
 const info = {
     software:'xmongo.js',
@@ -46,6 +67,7 @@ const config = {
   userName:'SUPERADMIN',
   password:"c'CyVV/kzRDC"
 }
+
 
 
 
@@ -139,33 +161,56 @@ async function xd(X={}) {
     //add -------------------------------------------
     case 'add':  //OK
       // { add: {...}, to:'db.collec' }
+
       if (!X.add || !X.to) {
         return {
           fail: true,
-          msg: "Can not add empty data."
+          msg: "Wrong input."
         }
       }
 
-      //if X.add is obj, makes it array
+      //if X.add is obj, makes it array (we use insertMany command)
       if (!Array.isArray(X.add)) {
+        let docCon = new DocControl
+        X.add._control = docCon
+        X.add._control.collection = X.to
 
         //check if it already has uuid
         if ('uuid' in X.add) {
           //console.log('already has uuid')
         } else {
-          //let uuid = XS.uuid()
-          //console.log(uuid)
-          X.add.uuid = XS.uuid()
+          X.add.uuid = uuid()
         }
+
+        //time
+        if ('time' in X.add) {
+          //already has time
+        } else {
+          X.add.time = Date.now()
+        }
+
         X.add = [X.add]
+
+
+      //is array like: {add:[....] ...  
       } else {
         //this is insertMany and we have to add uuid in every doc
         //add uuid field if inexistence
-        X.add.forEach(x => {
-          if ('uuid' in x) {
+        X.add.forEach(y => {
+          let docCon = new DocControl
+          y._control = docCon
+          y._control.collection = X.to
+
+          if ('uuid' in y) {
             //already has
           } else {
-            x.uuid = XS.uuid()
+            y.uuid = uuid()
+          }
+
+          if ('time' in y) {
+            //has
+          } else {
+            y.time = Date.now()
           }
         })
       }
@@ -668,7 +713,7 @@ async function xd(X={}) {
 
 
     default:
-      return {fail:true, msg:'Wrong command.'}
+      return {fail:true, msg:'Wrong input.'}
   }
 } //$
 
@@ -893,7 +938,7 @@ function easierFilter(queryObj) {
 }
 
 //module.exports = {info, config, $, ObjectId, connect, disconnect}
-module.exports = {xd, ObjectId, xdConnect, xdDisconnect}
+module.exports = {xd, ObjectId, xdConnect, xdDisconnect, uuid, DocControl}
 
 /* NOTE
 
@@ -914,7 +959,9 @@ v3.1
     functions exports from module are: 
       {xd, ObjectId, xdConnect, xdDisconnect}
 
-
+2023-12-13
+- added _control to every doc, removed _xdb == done
+  uses DocControl class
 
 
 

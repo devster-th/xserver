@@ -685,13 +685,20 @@ class DocControl {
   updatedBy = ''
   createdTime = ''
   createdBy = ''
-  rights = [] //{who: ,rights:'read/write/delete'}
+  rights = [
+    {owner:'read/write/edit/delete'},
+    {team:'read'},
+    {organization:'read'},
+    {public:''}
+  ] //{who: ,rights:'read/write/delete'}
   version = {
     name: '',
-    number: '',
-    markedBy: ''
+    number: 1,
+    markedBy: '',
+    note: ''
   }
   active = true
+  touchTime = Date.now()
 }
 
 
@@ -739,9 +746,10 @@ mdb.touch = function(doc) {
 }
 
 
-mdb.r = mdb.read = function (quer='') {
+mdb.r = mdb.read = async function (quer='', option='') {
   // reads the mdb, read only, no sync
   // gives =obj= if query by =uuid=, [=set=] if queried by key
+  // if inexist will reload from db
 
   if (quer) {
 
@@ -752,8 +760,24 @@ mdb.r = mdb.read = function (quer='') {
       if (found) {
         mdb.touch(found)
         return found
+
       } else {
-        return null //no ext so just give blank
+        //not found in mdb so let's find/reload from db
+        // the input has to be: mdb.r(=uuid=,=db.col=)
+        if (option && typeof option == 'string') {
+          return mdb.l({
+            find: {uuid: quer},
+            from: option
+          }).then(result => {
+            if (result != '' && result[0].uuid == quer) {
+              return result[0]
+            } else {
+              return null
+            }
+          })
+        } else {
+          return null
+        }
       }
 
     //obj query
@@ -768,8 +792,24 @@ mdb.r = mdb.read = function (quer='') {
         if (found != '') {
           mdb.touch(found)
           return found
+
         } else {
-          return null
+          //not found so let's try in db
+          //input has to be: mdb.r({key: xxxxx, from:'db.col'})
+          if (quer.from) {
+            return mdb.l({
+              find: {[key]: quer[key]},
+              from: quer.from
+            }).then(found => {
+              if (found != '') {
+                return found
+              } else {
+                return null
+              }
+            })
+          } else {
+            return null
+          }
         }
 
       //general search
@@ -784,7 +824,22 @@ mdb.r = mdb.read = function (quer='') {
             mdb.touch(found)
             return found
           } else {
-            return null
+            //not in mdb so reload from db
+            //input must have: mdb.r({aaa:..., from:...})
+            if (quer.from) {
+              return mdb.l({
+                find: {[key]: quer[key]},
+                from: quer.from
+              }).then(found => {
+                if (found != '') {
+                  return found
+                } else {
+                  return null
+                }
+              })
+            } else {
+              return null
+            }
           }
           //supports only 2 level should be fine
 
@@ -796,7 +851,21 @@ mdb.r = mdb.read = function (quer='') {
             mdb.touch(found)
             return found
           } else {
-            return null
+            //not found in mdb so reload from db
+            if (quer.from) {
+              return mdb.l({
+                find: {[key]: quer[key]},
+                from: quer.from
+              }).then(found => {
+                if (found != '') {
+                  return found
+                } else {
+                  return null
+                }
+              })
+            } else {
+              return null
+            }
           }
         }
       }
@@ -813,6 +882,7 @@ mdb.r = mdb.read = function (quer='') {
   }
 
   //tested ok, m/202312111604
+  //tested ok, changed to async, make it reloads if data not exist in mdb; changed format like: await mdb.r(=uuid=,'test.product') or mdb.r({aaa: ,from: }) so if data is not loaded into mdb it reloads; m/20231213.1505
 }
 
 
@@ -829,16 +899,17 @@ mdb.u = mdb.update = async function (dat='') {
     //array input
     if (Array.isArray(dat)) {
 
-      var updateQty   = 0
-      var skipQty     = 0
+      let updateQty = 0; skipQty = 0; count = 0
 
       for (upDoc of dat) {
+        count++
         if (upDoc.uuid && upDoc.time && upDoc._control) {
-          let exist = mdb.r(upDoc.uuid)
+          let exist = await mdb.r(
+            upDoc.uuid, 
+            upDoc._control.collection
+          )
     
-          if (exist) {
-            mdb.touch(exist)
-    
+          if (exist) { //means in db too as mdb.r will pull from db too
             if (upDoc.time > exist.time) {
               //input is newer so update the current
               let done = 0
@@ -867,66 +938,45 @@ mdb.u = mdb.update = async function (dat='') {
                     time: upDoc.time,
                   })
                 }
+
+                if (count == dat.length) {
+                  let msg = {}
+                  if (updateQty) msg.updatedQty = updateQty
+                  if (skipQty) msg.skippedQty = skipQty
+                  return msg
+                }
     
               } else {
                 skipQty++
+                if (count == dat.length) {
+                  let msg = {}
+                  if (updateQty) msg.updatedQty = updateQty
+                  if (skipQty) msg.skippedQty = skipQty
+                  return msg
+                }
               }
     
             } else {
               //input is not newer so just skip
               skipQty++
-            }
-          
-          //doc inexist in mdb so need to reload from db
-          } else {
-            let fromDb = await mdb.load({
-              find: {uuid: upDoc.uuid},
-              from: upDoc._control.collection
-            })
-    
-            if (fromDb.length) { //this point fromDb already in mdb
-              fromDb = fromDb[0]
-
-              if (upDoc.time > fromDb.time) {
-                let done = 0
-                for (key in upDoc) {
-                  if (key != 'uuid' || key != '_control') {
-                    fromDb[key] = upDoc[key]
-                    done++
-                  }
-                }
-                mdb.touch(fromDb)
-    
-                if (done) {
-                  updateQty++
-                  let sync = await xd({ //sync
-                    change: {uuid: upDoc.uuid},
-                    with:   fromDb,
-                    to:     upDoc._control.collection 
-                  })
-    
-                  if (sync.modifiedCount) {
-                    //done in db
-                  } else {
-                    mdb.syncError.push({
-                      uuid: upDoc.uuid,
-                      time: upDoc.time
-                    })
-                  }
-
-                //not done on updating, skip
-                } else {
-                  skipQty++
-                }
-
-              //upDoc not newer db, just keep in mdb, not update
-              } else {
-                skipQty++
+              if (count == dat.length) {
+                let msg = {}
+                if (updateQty) msg.updatedQty = updateQty
+                if (skipQty) msg.skippedQty = skipQty
+                return msg
               }
-    
-            //not found in db
-            } else {
-              skipQty++
+            }
+
+           
+          
+          //doc inexist in mdb & db
+          } else {
+            skipQty++
+            if (count == dat.length) {
+              let msg = {}
+              if (updateQty) msg.updatedQty = updateQty
+              if (skipQty) msg.skippedQty = skipQty
+              return msg
             }
           }
     
@@ -934,23 +984,25 @@ mdb.u = mdb.update = async function (dat='') {
         //upDoc is bad, has no uuid, time, _control
         } else {
           skipQty++
+          if (count == dat.length) {
+            let msg = {}
+            if (updateQty) msg.updatedQty = updateQty
+            if (skipQty) msg.skippedQty = skipQty
+            return msg
+          }
         }  
       }
       
-      //return msg
-      let msg = {}
-      if (updateQty) msg.updatedQty = updateQty
-      if (skipQty) msg.skippedQty   = skipQty  
-      return msg
+    
 
-      //! for looping the async func it doesn't work so we need to have the loop and the codes inside the loop in the same block. If we loop can call func inside the loop, not work.
+      /* when looping the async func, uses for..of is better than forEach. If we use forEach, it is meaning that the async func will run under forEach method/func so it's deeper another level. */
 
 
 
     //the input is object-------------------------------------  
     } else {
       if (dat.uuid && dat.time && dat._control) {
-        let exist = mdb.r(dat.uuid)
+        let exist = await mdb.r(dat.uuid)
   
         if (exist) {
           mdb.touch(exist)
@@ -1208,8 +1260,8 @@ mdb.l = mdb.load = async function(quer='') {
     let fromDb = await xd(quer)
 
     if (fromDb.length) {
-      fromDb.forEach(doc => {
-        let exist = mdb.r(doc.uuid)
+      fromDb.forEach(async doc => {
+        let exist = await mdb.r(doc.uuid)
 
         if (exist && exist != '') {
           //assumes that the mdb is always more udpate than the db
@@ -1242,58 +1294,46 @@ mdb.c = mdb.check = mdb.checkUpdate = async function (inp='') {
   // checks mdb is there updates for these docs
   // if there is, returns that doc/set
 
-  let output = []
+  let output = []; count = 0
   
   //input is array
   if (inp && Array.isArray(inp)) {
-    inp.forEach(inDoc => {
-      let exist = mdb.r(inDoc.uuid)
+
+    for (inDoc of inp) {
+      count++
+      let exist = await mdb.r(
+        inDoc.uuid, inDoc._control.collection
+      )
+      
       if (exist) {
-        mdb.touch(exist)
         if (exist.time > inDoc.time) output.push(exist)
-        //has newer in mdb so will send this to user
-
+        if (count == inp.length) {
+          if (output != '') return output
+          else return null
+        }
       } else {
-        //not exist in mdb so reload
-        mdb.load({
-          find: {uuid: inDoc.uuid}, 
-          from: inDoc._control.collection
-        }).then(fromDb => {
-          if (fromDb.length) {
-            fromDb = fromDb[0]
-            if (fromDb.time > inDoc.time) output.push(fromDb)
-            //fromDb is newer so will send to user
-          } 
-        })
+        if (count == inp.length) {
+          if (output != '') return output
+          else return null
+        }
       }
-    })
-
-    if (output != '') return output
-    else return null
+    }
+    /* in async mode, encouraging to use for...of rather than forEach */
+    
 
   //input is obj
   } else if (typeof inp == 'object') {
-    let exist = mdb.r(inp.uuid)
+    let exist = await mdb.r(
+      inp.uuid, 
+      inp._control.collection
+    )
 
     if (exist) {
       mdb.touch(exist)
       if (exist.time > inp.time) return exist
       else return null
-
     } else {
-      //inexisted, so reload
-      mdb.load({
-        find: {uuid: inp.uuid},
-        from: inp._control.collection
-      }).then(fromDb => {
-        if (fromDb.length) {
-          fromDb = fromDb[0]
-          if (fromDb.time > inp.time) return fromDb
-          else return null
-        } else {
-          return null //not found from db
-        } 
-      })
+      return null
     }
 
   //wrong input
@@ -1302,6 +1342,7 @@ mdb.c = mdb.check = mdb.checkUpdate = async function (inp='') {
   }
 
   //tested ok, m/202312111711
+  //tested ok, changed to new mdb.r() in async mode
 }
 
 
