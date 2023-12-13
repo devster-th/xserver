@@ -171,35 +171,31 @@ function loadProductCards() {
 //register sessionId
 async function init() {
     if (!xb.secure.sessionId) {
-        xb.secure.sessionId = xb.uuid()
-        sessionStorage.setItem('sessionId', xb.secure.sessionId)
-        
-        if (!xb.ip) {
-            xb.ip = await xb.getIp()
-        } 
-        let reMsg = await xb.send({act:'new_session'})
-        
-   
-          //set values
-          xb.active =           reMsg.sessionActivated
-          xb.xserver.serverId = reMsg.serverId
-          xb.secure.salt =      reMsg.yourNewSalt
-          sessionStorage.setItem('active', true)
-          sessionStorage.setItem('serverId', reMsg.serverId)
-          sessionStorage.setItem('salt', reMsg.yourNewSalt)
+      xb.secure.sessionId = xb.uuid()
+      sessionStorage.setItem('sessionId', xb.secure.sessionId)
+      
+      if (!xb.ip) {
+          xb.ip = await xb.getIp()
+      } 
+      let reMsg = await xb.send({act:'new_session'})
+      
+  
+      //set values
+      xb.active =           reMsg.sessionActivated
+      xb.xserver.serverId = reMsg.serverId
+      xb.secure.salt =      reMsg.yourNewSalt
+      sessionStorage.setItem('active', true)
+      sessionStorage.setItem('serverId', reMsg.serverId)
+      sessionStorage.setItem('salt', reMsg.yourNewSalt)
 
-          console.log('everything done!')
-/*
-        } else {
-          console.log('the resp not certified')
-        }
-*/    
-      } else {
-        //has sessionId
-        xb.active = true
-        xb.secure.sessionId = sessionStorage.getItem('sessionId')
-        xb.xserver.serverId = sessionStorage.getItem('serverId')
-        xb.secure.salt = sessionStorage.getItem('salt')
+      console.log('everything done!')
+   
+    } else {
+      //has sessionId
+      xb.active = true
+      xb.secure.sessionId = sessionStorage.getItem('sessionId')
+      xb.xserver.serverId = sessionStorage.getItem('serverId')
+      xb.secure.salt = sessionStorage.getItem('salt')
     }
 }
 

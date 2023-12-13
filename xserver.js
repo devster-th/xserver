@@ -29,9 +29,11 @@ const {core}  = require('./module/core/core.js')
 //const sales = require('./module/sales/sales.js')
 //global.model = require('./module/xdev/xDataModel.js')
 
+const {test} = require('./module/test/test.js')
 
 
 
+// variables
 global.XSERVER = {
   appName:  "xserver",
   version:  "0.1",
@@ -147,12 +149,10 @@ app.post("/xserver", (req,resp)=> {
     //session already active
 
     //check xdb
-    xd(
-      { find: { sessionId: packet.from },
-        from: 'xdb.session'
-      }
-    
-    ).then(found => {
+    xd({ 
+      find: { sessionId: packet.from },
+      from: 'xdb.session'
+    }).then(found => {
       if (found.length == 1 ) found = found[0]
 
       if (found.active) {
@@ -165,11 +165,10 @@ app.post("/xserver", (req,resp)=> {
             xs.makeKey(packet, found.salt).then(gotKey => {
 
               //unwrap packet.msg
-              return xc(
-                { decrypt:  packet.msg,
-                  key:      gotKey
-                }
-              )
+              return xc({ 
+                decrypt:  packet.msg,
+                key:      gotKey
+              })
             
             }).then(unwrappedMsg => {
               packet.msg = JSON.parse(unwrappedMsg)
@@ -187,10 +186,11 @@ app.post("/xserver", (req,resp)=> {
                 //run the module
                 //like sales.$({..input..})
                 try {
-
+                                      
                   let module = eval(packet.msg.module)
                   console.log(module)         
 
+                  //tried to change to: this[packet.msg.module](...) not works
                   module(packet.msg).then(result => {
                     //this is resp from the module
                     console.log(result)
@@ -202,10 +202,10 @@ app.post("/xserver", (req,resp)=> {
                       console.log(rePacket)
 
                       //log
-                      xd(
-                        { add:  rePacket,
-                          to:   'xdb.log' }
-                      )
+                      xd({ 
+                        add:  rePacket,
+                        to:   'xdb.log' 
+                      })
 
                       //send back to XB
                       resp.json(rePacket)
@@ -226,7 +226,6 @@ app.post("/xserver", (req,resp)=> {
                 // this for the core.js works
 
                 console.log('if no module specified, regards it as for core module')
-
                 packet.msg.sessionId = packet.from
 
                 core(packet.msg).then(re => {
@@ -242,10 +241,10 @@ app.post("/xserver", (req,resp)=> {
                   console.log(rePacket)
 
                   //log
-                  xd(
-                    { add:  rePacket,
-                      to:   'xdb.log' }
-                  )
+                  xd({ 
+                    add:  rePacket,
+                    to:   'xdb.log' 
+                  })
 
                   //send back to XB
                   resp.json(rePacket)
@@ -275,32 +274,6 @@ app.post("/xserver", (req,resp)=> {
 
     })
 
-/*
-    // response
-    let rePacket = new XS.Packet
-    rePacket.from = XSERVER.secure.serverId
-    rePacket.to = packet.from
-    rePacket.active = true
-
-    rePacket.msg = JSON.stringify({
-      msg:"We haven't done for active state yet."
-    }) //future wrap this
-
-    XS.cert(rePacket).then(() => {
-
-      //log
-      xd(
-        { add: {packet: rePacket}, to:'xdb.log' }
-      )
-
-      resp.json(rePacket)
-    })
-*/
-
-
-
-
-
   
   } else {
     //  INACTIVE ----------------------------------------
@@ -316,10 +289,10 @@ app.post("/xserver", (req,resp)=> {
         xs.makeKey(packet).then(gotKey => {
           //console.log(gotKey)
 
-          return xc(
-            { decrypt:  packet.msg, 
-              key:      gotKey }
-          )
+          return xc({ 
+            decrypt:  packet.msg, 
+            key:      gotKey 
+          })
         
         }).then(unwrappedMsg => {
           packet.msg = JSON.parse(unwrappedMsg)
@@ -329,26 +302,23 @@ app.post("/xserver", (req,resp)=> {
           if (packet.msg.act == 'new_session') {
 
             //check xdb.session
-            xd(
-              { find: {sessionId: packet.from},
-                from: 'xdb.session'  }
-
-            ).then(found => {
+            xd({ 
+              find: {sessionId: packet.from},
+              from: 'xdb.session'  
+            }).then(found => {
               if (found == '') {
                 //sessionId not already existed, good to go
                 let salt = xs.password()
                 
                 //register new session
-                xd(
-                  { add: 
-                      {
-                        sessionId:  packet.from,
-                        salt:       salt,
-                        active:     true    
-                      },
-                    to: 'xdb.session'
-                  }
-                )
+                xd({ 
+                  add: {  
+                    sessionId:  packet.from,
+                    salt:       salt,
+                    active:     true 
+                  },
+                  to: 'xdb.session'
+                })
 
                 //response
                 let rePacket    = new xs.Packet
@@ -369,29 +339,27 @@ app.post("/xserver", (req,resp)=> {
                   //console.log(gotKey)
 
                   //wrap msg
-                  return xc(
-                    { encrypt: JSON.stringify(rePacket.msg),
-                      key: gotKey }
-                  )
+                  return xc({ 
+                    encrypt:  JSON.stringify(rePacket.msg),
+                    key:      gotKey 
+                  })
                 
                 }).then(wrap => {
                   rePacket.msg = wrap
-
                   //certify
                   return xs.cert(rePacket)
 
                 }).then(() => {
 
                   //log
-                  xd(
-                    { add: {packet: rePacket}, to:'xdb.log' }
-                  )
+                  xd({ 
+                    add:  {packet: rePacket}, 
+                    to:   'xdb.log' 
+                  })
 
                   console.log('\n--response packet = ', rePacket)
-
                   resp.json(rePacket)
                   return
-
                 })
 
                 
