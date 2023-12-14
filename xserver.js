@@ -1,11 +1,15 @@
-/**
- * xserver is a platform for everything.
- * Version: 0.1
- * Web:''
- * Date: 2023-06-13
- * Contact: mutita.org@gmail.com
- * License: none
- */
+global.fileTag = {
+  fileName:     'xserver.js',
+  brief:        'xserver is a platform for everything.',
+  version:      '0.5',
+  component:    ['nodejs','expressjs','mongodb','js','html','css'],
+  web:          'localhost:2000',
+  createdDate:  '2023-06-13',
+  teamMember:   ['M'],
+  license:      null,
+  releasedDate: 'not yet',
+  status:       'dev'
+}
 
 
 
@@ -13,18 +17,15 @@
 
 //1) initialize/config -----------------------------------------
 
-
-    
-
-
 //load modules
 const express = require("express")
-const app   = express()
-const xs    = require('./module/xdev/xdev.js')
-const x$    = xs.$
-const {xd}  = require('./module/xdev/xmongo.js')
-const {xf}  = require('./module/xdev/xfile.js')
-const {xc}  = require('./module/xdev/xcrypto.js')
+const app     = express()
+const xs      = require('./module/xdev/xdev.js')
+const x$      = xs.$
+const mdb     = xs.mdb
+const {xd, ObjectId, DocControl}  = require('./module/xdev/xmongo.js')
+const {xf}    = require('./module/xdev/xfile.js')
+const {xc}    = require('./module/xdev/xcrypto.js')
 const {core}  = require('./module/core/core.js')
 //const sales = require('./module/sales/sales.js')
 //global.model = require('./module/xdev/xDataModel.js')
@@ -35,29 +36,24 @@ const {test} = require('./module/test/test.js')
 
 // variables
 global.XSERVER = {
-  appName:  "xserver",
-  version:  "0.1",
-  startTime: Date.now(),
-  domain:   "localhost",
-  port:     2000,
-  operator: 'nexWorld',
+  appName:    "xserver",
+  version:    fileTag.version,
+  startTime:  Date.now(),
+  domain:     "localhost",
+  port:       2000,
+  operator:   'nexWorld',
   secure:{
     defaultSalt: "#|~}v4&u&1R",
     serverId: xs.uuid(),
     masterKey: 'c40b93b2dfb61810e5ad22d132de54b7e718d10f66a8f523379826de95dbadf1'
   },
-  xRootPath:'/home/sunsern/xserver/', //root of xserver
-  xsModulePath:'module/',
-  websitePath:'website/',
-  xbrowserPath:'xbrowser/', //put after websitePath 
-  xbrowserModulePath:'module/', //put after xbrowserPath
-  xbrowserDocPath:'doc/' //after xbrowserModulePath
+  xRootPath:          '/home/sunsern/xserver/', //root of xserver
+  xsModulePath:       'module/',
+  websitePath:        'website/',
+  xbrowserPath:       'xbrowser/', //put after websitePath 
+  xbrowserModulePath: 'module/', //put after xbrowserPath
+  xbrowserDocPath:    'doc/' //after xbrowserModulePath
 }
-
-global.POOL = {} //pool of data that exchanging between the server & browsers so that we won't directly accessing the xdb but accessing the POOL instead. Like POOL.message can contain all messages that are currently exchanging, POOL.product, POOL.alert, etc.
-
-//console.log(XSERVER.secure.serverId)
-//xd({find:'',from:'user'}).then(console.log)
 
 
 
@@ -65,20 +61,11 @@ global.POOL = {} //pool of data that exchanging between the server & browsers so
 app.use(express.static("website"))
 app.use(express.json())
 
-//else
-//_xserver.serverid = xdev.random()
-
-
-
-// data model
-//core.id = xs.uuid()
 
 
 
 
-
-
-//2) GET works ----------------------------------------
+//2) GET works ----------------------------------------------------
 /**
  * open/insecured msg handling mainly used for static & web pages not private data.
  */
@@ -88,7 +75,6 @@ app.get("/req", (req,resp)=>{
   //A) works on the input mainly for certifying msg
   console.log('//--------------------------------------')
   console.log('//@xserver: received GET message at ', new Date().toISOString() )
-  console.log(req.ip)
   //console.log(req.method)
   console.log(req.query)
 
@@ -119,84 +105,86 @@ app.get("/req", (req,resp)=>{
 
 
 
-//3 POST works -----------------------------------
+//3 POST works ------------------------------------------------
 /**
  * secured msg handling
  * POST will be main channel for all communications in the app
  * Takes only JSON data
  */
 
-app.post("/xserver", (req,resp)=> {
-
+app.post("/xserver", async (req,resp)=> {
   //A) certifying msg
   console.log('-----------------------------------------------------')
   console.log('--POST packet, ', new Date().toISOString() )
   console.log('--req packet = ', req.body)
-  console.log('--req ip = ', req.ip ,'\n')
 
   //got a packet
   let packet = req.body //just put name to avoid confuse
 
   //log
-  xd(
-    { add: {packet: packet}, to: 'xdb.log'  }
-  )
+  xd({ add:{packet: packet}, to:'log' })
 
 
   // ACTIVE ---------------------------------------------------
-  //check if the session active or not
+  //if the packet.active means this is active communications between server & browser. But will need to check it the db that there's record or not too.
   if (packet.active) { 
     //session already active
 
-    //check xdb
-    xd({ 
-      find: { sessionId: packet.from },
-      from: 'xdb.session'
-    }).then(found => {
-      if (found.length == 1 ) found = found[0]
+    //check xdb, double check. The mdb.r() will return null if not found, if found will return array of doc.
+    let foundSess = await mdb.read({ 
+      sessionId:  packet.from,
+      from:       'session'
+    })
 
-      if (found.active) {
+    if (foundSess) {
+      foundSess = foundSess[0]
+      if (foundSess.active) {
         //in the xdb.session also active so the session is good to work with
 
-        xs.cert(packet, found.salt).then(certified => {
+        //uses salt in the found record form db to cert the coming packet
+        xs.cert(packet, foundSess.salt).then(certified => {
           if (certified) {
 
             //packet is certified, now unwrap the packet.msg
-            xs.makeKey(packet, found.salt).then(gotKey => {
+            xs.makeKey(packet, foundSess.salt).then(gotKey => {
 
               //unwrap packet.msg
               return xc({ 
                 decrypt:  packet.msg,
                 key:      gotKey
               })
+// ! what if the decrypt fail?
             
             }).then(unwrappedMsg => {
+// ! what to do if the unwrap bad?
+
               packet.msg = JSON.parse(unwrappedMsg)
               console.log(packet.msg)
 
               if (packet.msg.module) {
-                //this is action for a module
+                //if there's module regards it as a module call
                 /*
                   like 
-                    { act: 'order', 
-                      docNum: 'xxx', 
-                      module: 'sales' } 
+                    { 
+                      module: =moduleName=, 
+                      act:    =actionName=, 
+                      anyKey: ==== 
+                    } 
                 */
 
                 //run the module
                 //like sales.$({..input..})
                 try {
-                                      
-                  let module = eval(packet.msg.module)
-                  console.log(module)         
+                  let thisModule = eval(packet.msg.module)
+                  console.log(thisModule)         
 
                   //tried to change to: this[packet.msg.module](...) not works
-                  module(packet.msg).then(result => {
+                  thisModule(packet.msg).then(moResp => {
                     //this is resp from the module
-                    console.log(result)
+                    console.log(moResp)
 
                     //prep packet to send to XB
-                    return xs.prepPacket(result, found)
+                    return xs.prepPacket(moResp, foundSess)
                     
                   }).then(rePacket => {
                       console.log(rePacket)
@@ -204,7 +192,7 @@ app.post("/xserver", (req,resp)=> {
                       //log
                       xd({ 
                         add:  rePacket,
-                        to:   'xdb.log' 
+                        to:   'log' 
                       })
 
                       //send back to XB
@@ -221,9 +209,8 @@ app.post("/xserver", (req,resp)=> {
 
 
               } else {
-                //not for module but for the xserver
-                //like {act: 'log_in', input:{...} }
-                // this for the core.js works
+                //not specified module so regards this as for the xserver or the core module
+                //like {act: 'log_in', =otherFields= }
 
                 console.log('if no module specified, regards it as for core module')
                 packet.msg.sessionId = packet.from
@@ -231,11 +218,11 @@ app.post("/xserver", (req,resp)=> {
                 core(packet.msg).then(re => {
                   console.log('return from core: ', re)
 
-                  if (!re) re = {
+                  if (!re) re = { //in case something wrong in the module
                     module: 'core',
                     msg:    'none'
                   }
-                  return xs.prepPacket(re, found)
+                  return xs.prepPacket(re, foundSess)
                 
                 }).then(rePacket => {
                   console.log(rePacket)
@@ -243,7 +230,7 @@ app.post("/xserver", (req,resp)=> {
                   //log
                   xd({ 
                     add:  rePacket,
-                    to:   'xdb.log' 
+                    to:   'log' 
                   })
 
                   //send back to XB
@@ -257,22 +244,22 @@ app.post("/xserver", (req,resp)=> {
               }
             })
             
-            
 
           } else {
             //packet not certified, will reject
             console.log('packet not certified')
-
           }
         })
 
       } else {
         //the session is expired
         console.log('session expired')
-
       }
 
-    })
+    //not actually found the session in the db
+    } else {
+      console.log('something wrong with the packet')        
+    } 
 
   
   } else {
@@ -293,34 +280,37 @@ app.post("/xserver", (req,resp)=> {
             decrypt:  packet.msg, 
             key:      gotKey 
           })
+// ! what if dec has problem?          
         
         }).then(unwrappedMsg => {
           packet.msg = JSON.parse(unwrappedMsg)
           //console.log(packet)
+// ! if unwrap or parse has problem?
 
           //check action in the packet.msg
           if (packet.msg.act == 'new_session') {
 
-            //check xdb.session
-            xd({ 
-              find: {sessionId: packet.from},
-              from: 'xdb.session'  
+            //check mdb/db is there any dup sessionId? If not found the mdb.r() returns null
+            mdb.read({ 
+              sessionId:  packet.from,
+              from:       'session'  
             }).then(found => {
-              if (found == '') {
+
+              if (!found) {
                 //sessionId not already existed, good to go
-                let salt = xs.password()
+                let newSalt = xs.password()
                 
                 //register new session
                 xd({ 
                   add: {  
-                    sessionId:  packet.from,
-                    salt:       salt,
-                    active:     true 
+                    sessionId:  packet.from, //regis this id
+                    salt:       newSalt,
+                    active:     true,
                   },
-                  to: 'xdb.session'
+                  to: 'session'
                 })
 
-                //response
+                //response to browser
                 let rePacket    = new xs.Packet
                 rePacket.from   = XSERVER.secure.serverId
                 rePacket.to     = packet.from
@@ -334,7 +324,7 @@ app.post("/xserver", (req,resp)=> {
                   yourNewSalt:      salt, 
                   serverId:         XSERVER.secure.serverId
                 }
-                
+console.log(rePacket)
                 xs.makeKey(rePacket).then(gotKey => {
                   //console.log(gotKey)
 
@@ -343,6 +333,7 @@ app.post("/xserver", (req,resp)=> {
                     encrypt:  JSON.stringify(rePacket.msg),
                     key:      gotKey 
                   })
+// ! if this got problem?                  
                 
                 }).then(wrap => {
                   rePacket.msg = wrap
@@ -354,7 +345,7 @@ app.post("/xserver", (req,resp)=> {
                   //log
                   xd({ 
                     add:  {packet: rePacket}, 
-                    to:   'xdb.log' 
+                    to:   'log' 
                   })
 
                   console.log('\n--response packet = ', rePacket)
@@ -370,11 +361,10 @@ app.post("/xserver", (req,resp)=> {
                 resp.json({
                   msg:'session already existed.'
                 })*/
-
                 console.log('session already active')
               }
 
-            })// end XD block
+            })// end of {act:'new_session}
 
 
           } else {
@@ -382,14 +372,11 @@ app.post("/xserver", (req,resp)=> {
 
             console.log('this is inactive session & for other action other than new_session')
 
-            /*resp.json({
-              msg:"Invalid action."
-            })*/
+            /* Generally the first contact of the browser the packet.active = false so the browser usually call {act:'new_session'} but there can be more action to come as we dev. */
 
           }
+        })//end of certified block
 
-
-        })//end of XS.makeKey block
         
       } else {
         //not certified, probaby something wrong at the XB, like someone hacking it, so we don't allow this browser to get in.
@@ -397,15 +384,12 @@ app.post("/xserver", (req,resp)=> {
         /*resp.json(
           { msg:"Packet not certified." }
         )*/
-
         console.log('packet not certified, will block this session/browser/access')
       }
 
     })//end cert block
 
   } //end if (packet.active)
-
-
 
 }) //end app.post()
 

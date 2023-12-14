@@ -769,7 +769,7 @@ mdb.r = mdb.read = async function (quer='', option='') {
             find: {uuid: quer},
             from: option
           }).then(result => {
-            if (result != '' && result[0].uuid == quer) {
+            if (result && result[0].uuid == quer) {
               return result[0]
             } else {
               return null

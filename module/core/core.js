@@ -1,30 +1,33 @@
-/**
- * core.js is the main program of the app/software.
- * version: 0.1
- * license: none
- * date: 2023-06-13
- * web:''
- * contact: mutita.org@gmail.com
- * 
- * @param {object} X - can have various properties  
- * @returns {object} - output of the work
- * 
- * note: the X is actually the packet.msg
- */
+global.coreInfo = {
+  program:  'core module for xserver',
+  version:  '0.1',
+  staff:    ['M'],
+  date:     '2023-12-14'
+}
 
-/*  #use
-          const core = require('./core.js')
-          core.$({do:'something', ...})
+/* Each module in xserver platform will be a function which receiving input as an object, like:
 
-      --change
-          const {core} = require(...)
-          core({
-            act: =processName=,
-            //data for this action
-          })
+  core({act:__, otherKeys:__})
+
+The rule is no-rules. So the dev can set any form of object to communicate with his/her module but little recommendation for a common protocol among our ecosystem, we should have at least following format:
+
+  moduleName(
+    {
+      act:___,
+      module:___,
+
+    }
+  )
+
+So at least we have these 2 keys. The module name will tell xserver which function to call. Another important thing is that we shouldn't have duplication of the moduleName so each module has to have a registration process which will be layed out later.  
+
 */
 
-const {xd} = require('/home/sunsern/xserver/module/xdev/xmongo.js')
+const xs = require('/home/sunsern/xserver/module/xdev/xdev.js')
+const x$ = xs.x$
+const {xc} = require('/home/sunsern/xserver/module/xdev/xcrypto.js')
+const {xf} = require('/home/sunsern/xserver/module/xdev/xfile.js')
+const {xd, DocControl} = require('/home/sunsern/xserver/module/xdev/xmongo.js')
 
 
 exports.core = async function (X) {
@@ -197,3 +200,9 @@ exports.core = async function (X) {
 
 
 }
+
+
+/* 
+2023-12-14
+  -updated little on the top.
+*/
