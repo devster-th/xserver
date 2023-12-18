@@ -139,8 +139,8 @@ const userInfo = {
   username: '', passwordHash: ''
 }
 
-init()    
-loadProductCards() //this is very first content for everyone
+init().then(() => loadCard())    
+ //this is very first content for everyone
 
 
 
@@ -148,18 +148,17 @@ loadProductCards() //this is very first content for everyone
 //----------------------------------------------------------------
 
 //request product cards
-function loadProductCards() {
-  xb.send({ act: 'request_product_cards' }).then(msg => {
+function loadCard() {
+  xb.send({ act: 'load_card' }).then(card => {
     //console.log(msg)
 
-    let masterIndex = msg.findIndex(item => item.master == true)
-    msg.splice(masterIndex,1)
+//    let masterIndex = msg.findIndex(item => item.master == true)
+//    msg.splice(masterIndex,1)
 
     loadContent(
-      { template:'card',
-        tagToCreate:'card',
-        data: msg
-      }
+      { template:     'card',
+        tagToCreate:  'card',
+        data:         card       }
     )
 
   })
@@ -170,7 +169,8 @@ function loadProductCards() {
 
 //register sessionId
 async function init() {
-    if (!xb.secure.sessionId) {
+    if (!sessionStorage.getItem('sessionId')) {
+//! in case user refreshes, this may re assign the new session which is unnecessary? May check the sessionStorage too?      
       xb.secure.sessionId = xb.uuid()
       sessionStorage.setItem('sessionId', xb.secure.sessionId)
       
@@ -185,6 +185,7 @@ async function init() {
       xb.xserver.serverId = reMsg.serverId
       xb.secure.salt =      reMsg.yourNewSalt
       sessionStorage.setItem('active', true)
+      sessionStorage.setItem('sessionId', xb.secure.sessionId)
       sessionStorage.setItem('serverId', reMsg.serverId)
       sessionStorage.setItem('salt', reMsg.yourNewSalt)
 
@@ -246,7 +247,7 @@ function loadLoginForm() {
   //console.log('load login form')
 
   contentSet('save')
-  con_tent.innerHTML = XV.template.log_in
+  con_tent.innerHTML = xv.template.log_in
 
 }
 
@@ -352,8 +353,8 @@ function loadContent(obj) {
 
       //make many cards
       let newEl = document.createElement(obj.tagToCreate)
-      newEl.innerHTML = XV.template[obj.template]
-      newEl.querySelector('img').src = XV.picPath + dd.img
+      newEl.innerHTML = xv.template[obj.template]
+      newEl.querySelector('img').src = xv.picPath + dd.img
       newEl.querySelector('pic-mark').textContent = dd.pic_mark
       newEl.querySelector('card-name').textContent = dd.card_name
       newEl.querySelector('card-brief').textContent = dd.card_brief
@@ -375,8 +376,8 @@ function loadContent(obj) {
   } else {
     //make 1 card
     let newEl = document.createElement(obj.tagToCreate)
-    newEl.innerHTML = XV.template[obj.template]
-    newEl.querySelector('img').src = XV.picPath + obj.data.img
+    newEl.innerHTML = xv.template[obj.template]
+    newEl.querySelector('img').src = xv.picPath + obj.data.img
     newEl.querySelector('pic-mark').textContent = obj.data.pic_mark
     newEl.querySelector('card-name').textContent = obj.data.card_name
     newEl.querySelector('card-brief').textContent = obj.data.card_brief
@@ -397,10 +398,10 @@ function loadContent(obj) {
   
 
   //set class
-  for (tagToSet in XV.class) {
+  for (tagToSet in xv.class) {
     let tags = xb.el('content').querySelectorAll(tagToSet.replace('_','-'))
     for (i=0; i < tags.length; i++) {
-      tags[i].className = XV.class[tagToSet]
+      tags[i].className = xv.class[tagToSet]
     }
   }
 
@@ -498,17 +499,17 @@ function contentSet(cmd) {
 
   switch (cmd) {
     case 'save': 
-      XV.contentKeep.html = con_tent.innerHTML
-      XV.contentKeep.scrollPosition = document.documentElement.scrollTop
+      xv.contentKeep.html = con_tent.innerHTML
+      xv.contentKeep.scrollPosition = document.documentElement.scrollTop
       break
 
     case 'reload': 
-      con_tent.innerHTML = XV.contentKeep.html
-      document.documentElement.scrollTop = XV.contentKeep.scrollPosition
+      con_tent.innerHTML = xv.contentKeep.html
+      document.documentElement.scrollTop = xv.contentKeep.scrollPosition
       break
 
     case 'close': 
-      if (XV.contentKeep.html) {
+      if (xv.contentKeep.html) {
         contentSet('reload')
       } else {
         //if there's no saved content then loads the product cards
@@ -534,7 +535,7 @@ function logout() {
         button: 'yesno'
       }
   ) 
-  XV.pendingApprovalFor = 'logout'
+  xv.pendingApprovalFor = 'logout'
 }
 
 
@@ -543,7 +544,7 @@ function logout() {
 function msgApprovalIs(cmd) {
   switch (cmd) {
     case 'yes': 
-      if (XV.pendingApprovalFor == 'logout') {
+      if (xv.pendingApprovalFor == 'logout') {
         //generally works, but will need further work to check if it is already logged out
 
         xb.send({act: 'log_out'}).then(msg => {
@@ -591,7 +592,7 @@ function msgApprovalIs(cmd) {
 
 function loadProfilePage() {
   contentSet('save')
-  con_tent.innerHTML = XV.template.profile 
+  con_tent.innerHTML = xv.template.profile 
 }
 
 function saveProfile() {
@@ -605,18 +606,18 @@ function saveProfile() {
 
 function loadProductPage() {
   contentSet('save')
-  con_tent.innerHTML = XV.template.products
+  con_tent.innerHTML = xv.template.products
 }
 
 
 function loadSalesPage() {
   contentSet('save')
-  con_tent.innerHTML = XV.template.sales
+  con_tent.innerHTML = xv.template.sales
 }
 
 function loadBusinessPage() {
   contentSet('save')
-  con_tent.innerHTML = XV.template.my_business
+  con_tent.innerHTML = xv.template.my_business
 }
 
 
@@ -632,20 +633,20 @@ function uploadProfilePic(event) {
 
 function loadBasketPage() {
   contentSet('save')
-  con_tent.innerHTML = XV.template.basket 
+  con_tent.innerHTML = xv.template.basket 
 }
 
 
 function loadMoreItemPage() {
   contentSet('save')
-  con_tent.innerHTML = XV.template.more_item
+  con_tent.innerHTML = xv.template.more_item
 }
 
 
 
 function loadJustNote() {
   //contentSet('save') -- don't need to save the more_item page
-  con_tent.innerHTML = XV.template.just_note
+  con_tent.innerHTML = xv.template.just_note
 }
 
 
@@ -696,12 +697,12 @@ function addCard(templName, dataObj, colorClass) {
   // colorClass = 'w3-pale-blue'
 
   let card = document.createElement('div')
-  card.className = XV.template[templName].cardClass
-  card.style = XV.template[templName].cardStyle  
-  card.innerHTML = XV.template[templName].html
+  card.className = xv.template[templName].cardClass
+  card.style = xv.template[templName].cardStyle  
+  card.innerHTML = xv.template[templName].html
 
   if (colorClass) card.classList.add(colorClass)
-  else card.classList.add(XV.template[templName].defaultColorClass)
+  else card.classList.add(xv.template[templName].defaultColorClass)
 
   for (field in dataObj) {
     card.querySelector(`[_${field}]`).textContent = dataObj[field]
@@ -717,15 +718,15 @@ function addCard2(templName, data) {
   //check data
 
   let scrip = document.createElement('script')
-  scrip.textContent = XV.template[templName].script
+  scrip.textContent = xv.template[templName].script
   con_tent.prepend(scrip)
 
   let card = document.createElement('div')
-  card.className = XV.template[templName].class
-  card.style = XV.template[templName].style
-  let att = Object.keys(XV.template[templName].attribute)
-  card.setAttribute(att[0], XV.template[templName].attribute[att[0]])
-  card.innerHTML = XV.template[templName].html
+  card.className = xv.template[templName].class
+  card.style = xv.template[templName].style
+  let att = Object.keys(xv.template[templName].attribute)
+  card.setAttribute(att[0], xv.template[templName].attribute[att[0]])
+  card.innerHTML = xv.template[templName].html
   con_tent.prepend(card)
   
   document.documentElement.scrollTop = 0
@@ -756,7 +757,7 @@ function chart() {
   })
   
 }
-chart()
+//chart()
 
 
 </script>

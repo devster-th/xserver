@@ -1,0 +1,532 @@
+<html>
+<head>
+<style>
+.big-font {font-size:64px}
+.italic {font-style:italic}
+.big-button {padding:8px; margin:8px; font-size: 20px; font-family: sans-serif;}
+table {width:100%; border-collapse: collapse;}
+th,td,tr {border:1px solid gray}
+</style>
+</head>
+<body>
+<h1>test browser</h1>
+<div>
+  <h2>PART 1: DIV</h2>
+  <p>This is a paragraph, yooooooooooooooooooooooooooo.</p>
+  <p>Thailand is a country</p>
+  <p>A cat is cute and seems meny people loves it.</p>
+  <button>Yes</button><button>No</button><button>Cancel</button>
+  <ol>
+    <li>yes</li>
+    <li>no</li>
+    <li>maybe</li>
+  </ol>
+</div>
+<hr>
+
+<div>
+  <h2>PART 2: FORM</h2>
+  <p>This is the form that you need to fill out ASAP. If not, there'll be penalty.</p>
+  
+  <form>
+    <label>Your name</label> <input type="text"><br>
+    <label>Your lastname</label> <input><br>
+    <label>Your age</label> <input><br>
+  </form>
+  <button>Submit</button>
+</div>
+
+<hr>
+<div id="300">
+  <h2>PART 3: TABLE</h2>
+  <table></table>
+</div>
+
+<hr>
+
+<div>
+  <h2>PART 4: SELECT</h2>
+  <select></select>
+</div>
+
+<hr>
+
+<div>
+  <h2>PART 5: LIST</h2>
+  <ul></ul>
+</div>
+
+
+<script>
+/* 
+el('h1').set({
+  color: 'red', 
+  class: 'big-font', 
+  attri: {name: 'ssssssssssssssssss'}
+}) 
+*/
+
+const xb = {}
+
+xb.sel = function (pattern) {
+  //optio can be 'all' only for now
+  //findSubs is finds ele in the this, not from the document
+  var outpu = document.querySelector(pattern)
+
+  //return
+  outpu.sel      = xb.sel2
+  outpu.selAll   = xb.selAll2
+  outpu.add      = xb.add
+  outpu.del      = xb.del
+  outpu.hide     = xb.hide
+  outpu.show     = xb.show
+  outpu.toggle   = xb.toggle
+  outpu.setHtml  = xb.setHtml
+  if (outpu.tagName == 'TABLE') outpu.fillTable = xb.fillTable
+  if (outpu.tagName == 'SELECT') outpu.fillSelect = xb.fillSelect
+  if (outpu.tagName && outpu.tagName.match(/OL|UL/)) outpu.fillList = xb.fillList
+
+  if (outpu.length) {
+    for (elemen of outpu) {
+      elemen.sel      = xb.sel2
+      elemen.selAll   = xb.selAll2
+      elemen.add      = xb.add
+      elemen.del      = xb.del
+      elemen.hide     = xb.hide
+      elemen.show     = xb.show
+      elemen.toggle   = xb.toggle
+      elemen.setHtml  = xb.setHtml
+      if (elemen.tagName == 'TABLE') elemen.fillTable = xb.fillTable
+      if (elemen.tagName == 'SELECT') elemen.fillSelect = xb.fillSelect
+      if (element.tagName && elemen.tagName.match(/OL|UL/)) elemen.fillList = xb.fillList
+    }
+  }
+
+  return outpu
+}
+
+xb.selAll = function (pattern) {
+  //optio can be 'all' only for now
+  //findSubs is finds ele in the this, not from the document
+
+  var outpu = document.querySelectorAll(pattern)
+
+  //return
+  outpu.sel     = xb.sel2
+  outpu.selAll  = xb.selAll2
+  outpu.add     = xb.add
+  outpu.del     = xb.del
+  outpu.hide    = xb.hide
+  outpu.show    = xb.show
+  outpu.toggle  = xb.toggle
+  outpu.setHtml = xb.setHtml
+  if (outpu.tagName == 'TABLE') outpu.fillTable = xb.fillTable
+  if (outpu.tagName == 'SELECT') outpu.fillSelect = xb.fillSelect
+  if (outpu.tagName && outpu.tagName.match(/OL|UL/)) outpu.fillList = xb.fillList
+
+  if (outpu.length) {
+    for (elemen of outpu) {
+      elemen.sel      = xb.sel2
+      elemen.selAll   = xb.selAll2
+      elemen.add      = xb.add
+      elemen.del      = xb.del
+      elemen.hide     = xb.hide
+      elemen.show     = xb.show
+      elemen.toggle   = xb.toggle
+      elemen.setHtml  = xb.setHtml
+      if (elemen.tagName == 'TABLE') elemen.fillTable = xb.fillTable
+      if (elemen.tagName == 'SELECT') elemen.fillSelect = xb.fillSelect
+      if (elemen.tagName && elemen.tagName.match(/OL|UL/)) elemen.fillList = xb.fillList
+    }
+  }
+
+  return outpu
+}
+
+xb.sel2 = function (pattern) {
+  //optio can be 'all' only for now
+  //findSubs is finds ele in the this, not from the document
+  var outpu = this.querySelector(pattern)
+
+  //return
+  outpu.sel      = xb.sel2
+  outpu.selAll   = xb.selAll2
+  outpu.add      = xb.add
+  outpu.del      = xb.del
+  outpu.hide     = xb.hide
+  outpu.show     = xb.show
+  outpu.toggle   = xb.toggle
+  outpu.setHtml  = xb.setHtml
+  if (outpu.tagName == 'TABLE') outpu.fillTable = xb.fillTable
+  if (outpu.tagName == 'SELECT') outpu.fillSelect = xb.fillSelect
+  if (outpu.tagName && outpu.tagName.match(/OL|UL/)) outpu.fillList = xb.fillList
+
+  if (outpu.length) {
+    for (elemen of outpu) {
+      elemen.sel      = xb.sel2
+      elemen.selAll   = xb.selAll2
+      elemen.add      = xb.add
+      elemen.del      = xb.del
+      elemen.hide     = xb.hide
+      elemen.show     = xb.show
+      elemen.toggle   = xb.toggle
+      elemen.setHtml  = xb.setHtml
+      if (elemen.tagName == 'TABLE') elemen.fillTable = xb.fillTable
+      if (elemen.tagName == 'SELECT') elemen.fillSelect = xb.fillSelect
+      if (elemen.tagName && elemen.tagName.match(/OL|UL/)) elemen.fillList = xb.fillList
+    }
+  }
+  return outpu
+}
+
+xb.selAll2 = function (pattern) {
+  //optio can be 'all' only for now
+  //findSubs is finds ele in the this, not from the document
+
+  var outpu = this.querySelectorAll(pattern)
+
+  //return
+  outpu.sel     = xb.sel2
+  outpu.selAll  = xb.selAll2
+  outpu.add     = xb.add
+  outpu.del     = xb.del
+  outpu.hide    = xb.hide
+  outpu.show    = xb.show
+  outpu.toggle  = xb.toggle
+  outpu.setHtml = xb.setHtml
+  if (outpu.tagName == 'TABLE') outpu.fillTable = xb.fillTable
+  if (outpu.tagName == 'SELECT') outpu.fillSelect = xb.fillSelect
+  if (outpu.tagName && outpu.tagName.match(/OL|UL/)) outpu.fillList = xb.fillList
+
+  if (outpu.length) {
+    for (elemen of outpu) {
+      elemen.sel      = xb.sel2
+      elemen.selAll   = xb.selAll2
+      elemen.add      = xb.add
+      elemen.del      = xb.del
+      elemen.hide     = xb.hide
+      elemen.show     = xb.show
+      elemen.toggle   = xb.toggle
+      elemen.setHtml  = xb.setHtml
+      if (elemen.tagName == 'TABLE') elemen.fillTable = xb.fillTable
+      if (elemen.tagName == 'SELECT') elemen.fillSelect = xb.fillSelect
+      if (elemen.tagName && elemen.tagName.match(/OL|UL/)) elemen.fillList = xb.fillList
+    }
+  }
+  return outpu
+}
+
+//add 
+
+xb.add = function (addObj) {
+  /* Adds classes, styles and attributes to selected elements. */
+
+  if (this.length) {
+    this.forEach(elemen => {
+      add(elemen)
+    })
+  } else {
+    add(this)
+  }
+
+  //func
+  function add(elemen) {
+    if (addObj.class) {
+    // xb.el('#aaa').add({ class:'aaaa bbbb cccc' })
+    let part = addObj.class.split(' ')
+    part.forEach(clas => elemen.classList.add(clas))
+    }
+
+    if (addObj.style) {
+      // xb.el('#aaa').add({ style:{color:'red', font-size:'48px'} })
+      for (ky in addObj.style) {
+        elemen.style[ky] = addObj.style[ky]
+      }
+    }
+
+    if (addObj.attri) {
+      // xb.el('#aaa').add({ attri:{id:'yeah', name:'yoooh'} })
+      for (ky in addObj.attri) {
+        elemen.setAttribute(ky, addObj.attri[ky])
+      }
+    }
+  }
+}
+
+//del
+xb.del = function (delObjec) {
+  /* Deletes classes, styles and attributes of selected elements. If not put delObjec will regard as deletion of this element. */
+
+  if (this.length) {
+    this.forEach(elemen => {
+      if (delObjec) del(elemen)
+      else elemen.remove()
+    })
+  } else {
+    if (delObjec) del(this)
+    else this.remove()
+  }
+
+  //func
+  function del(elemen) {
+    if (delObjec.class) {
+    // xb.el('#aaa').del({class:'aaa bbb ccc'})
+    let part = delObjec.class.split(' ')
+    part.forEach(clas => elemen.classList.remove(clas))
+    }
+
+    if (delObjec.style) {
+      // xb.el('#aaa').del({style:'aaa bbb ccc'})
+      let part = delObjec.style.split(' ')
+      part.forEach(sty => elemen.style[sty] = '')
+    }
+
+    if (delObjec.attri) {
+      // xb.el('#aaa').del({attri:'aaa bbb ccc'})
+      let part = delObjec.attri.split(' ')
+      part.forEach(att => elemen.removeAttribute(att))
+    }
+  }
+}
+
+//hide
+xb.hide = function () {
+  /* Hides selected elements. */
+
+  if (this.length) {
+    this.forEach(elemen => {
+      elemen.hidden = true
+    })
+  } else {
+    this.hidden = true
+  }
+}
+
+//show
+xb.show = function () {
+  /* Shows selected elements. */
+
+  if (this.length) {
+    this.forEach(elemen => {
+      elemen.hidden = false
+    })
+  } else {
+    this.hidden = false
+  }
+}
+
+//toggle
+xb.toggle = function () {
+  /* Toggles show/hide of an element or all selected elements. */
+
+  if (this.length) {
+    this.forEach(elemen => {
+      if (elemen.hidden == true) elemen.hidden = false
+      else elemen.hidden = true  
+    })
+  } else {
+    if (this.hidden == true) this.hidden = false
+    else this.hidden = true
+  }
+}
+
+//innerHTML
+xb.setHtml = function (html) {
+  if (this.length) {
+    this.forEach(elemen => elemen.innerHTML = html)
+  } else {
+    this.innerHTML = html
+  }
+}
+
+
+//createElement
+xb.newEl = function (inp) {
+  /* 
+  xb.createEl({
+    tag:    ___,
+    class:  ___,
+    style:  ___,
+    html:   ___,
+    attri:  ___,
+    id:     ___,
+    name:   ___,
+    value:  ___,
+    type:   ___,
+    title:  ___,
+    hidden: true|false,
+  }) 
+  */
+  if (!inp.tag) return false
+
+  let el = document.createElement(inp.tag)
+  if (inp.class) el.className = inp.class
+  if (inp.html) el.innerHTML = inp.html
+  if (inp.css) el.style.cssText = inp.css
+  if (inp.id) el.setAttribute('id', inp.id)
+  if (inp.name) el.setAttribute('name', inp.name)
+  if (inp.value) el.setAttribute('value', inp.value)
+  if (inp.hidden) el.setAttribute('hidden', inp.hidden)
+  if (inp.type) el.setAttribute('type', inp.type)
+  if (inp.title) el.setAttribute('title', inp.title)
+  if (inp.src) el.setAttribute('src', inp.src)
+  if (inp.attri) {
+    for (ky in inp.attri) {
+      el.setAttribute(ky, inp.attri[ky])
+    }
+  }
+  if (inp.style) {
+    for (ky in inp.style) {
+      el.style[ky] = inp.style[ky]
+    }
+  }
+/*
+  if (inp.appendTo) { //these 2 cannot stay together
+    xb.sel(inp.appendTo).append(el)
+  } else if (inp.prependTo) {
+    xb.sel(inp.prependTo).prepend(el)
+  } 
+*/
+
+el.appendTo = function (targetEl) {
+    xb.sel(targetEl).append(el)
+  }
+
+  el.prependTo = function (targetEl) {
+    xb.sel(targetEl).prepend(el)
+  }
+
+  return el
+}
+
+
+
+xb.fillTable = function (inp) {
+  /* 
+  inp = {
+    head: 'Name Age Sex',
+    data: [
+      {name:__, age:__, sex:__},
+      //
+    ]
+  } 
+  */
+  if (this.tagName == 'TABLE') {
+    /* if the inp.head not provided, takes the data keys as head */
+    let htmlCode = ''
+
+    if (inp.head) {
+      //inp.head provided
+      htmlCode = '<tr>'
+      let headKey = inp.head.split(' ')
+      headKey.forEach(ky => {
+        htmlCode += '<th>' + ky + '</th>'
+      })
+      htmlCode += '</tr>'
+    } else {
+      //inp.head not provided
+      let makeHead = inp.data[0]
+      htmlCode = '<tr>'
+      for (ky in makeHead) {
+        htmlCode += '<th>' + ky + '</th>'
+      }
+      htmlCode += '</tr>'
+    }
+    
+    //data
+    inp.data.forEach(row => {
+      htmlCode += '<tr>'
+      for (ky in row) {
+        htmlCode += '<td>' + row[ky] + '</td>'
+      }
+      htmlCode += '</tr>'
+    })
+
+    this.innerHTML = htmlCode
+  }
+}
+
+
+xb.fillSelect = function (inp) {
+  /*
+
+  inp = ['aaaaa','bbbbbbb','cccccccccccc', ]
+  
+  */
+
+  if (this.tagName == 'SELECT') {
+    let htmlCode = ''
+    inp.forEach(optio => {
+      htmlCode += '<option>' + optio + '</option>'
+    })
+    this.innerHTML = htmlCode
+  }
+}
+
+
+xb.fillList = function (inp) {
+  /*
+
+  inp = ['aaaaaaaaaaaaa','bbbbbbbbbb','cccccccccccccc']
+  
+  */
+
+  if (this.tagName && this.tagName.match(/OL|UL/)) {
+    let htmlCode = ''
+    inp.forEach(lis => {
+      htmlCode += '<li>' + lis + '</li>'
+    })
+    this.innerHTML = htmlCode
+  }
+}
+
+
+xb.sort = function (arry, way='asc', key='') {
+  /*
+      arry = [1000,1234,541354,11245, ...]
+      arry = ['aaaa','bbbb','asdfasdfasdf', ...]
+      arry = [
+        {name:'john', age:23, sex:'male'},
+        {...}
+      ]
+
+    use
+      xb.sort(ARRAY) ......ascending sort on plain array
+      xb.sort(ARRAY,'des') .....descending sort on plain array
+      xb.sort(ARRAY,0,'name') ...ascending sort object array on key name
+      xb.sort(array,'des','age') ...descending on object array
+  */
+  arry.sort((a,b) => {
+    if (way == 'asc') {
+      if (key) {
+        if (a[key] < b[key]) return -1
+        if (a[key] > b[key]) return 1
+        return 0
+      } else {
+        if (a < b) return -1
+        if (a > b) return 1
+        return 0
+      }
+      
+    } else if (way == 'des') {
+      if (key) {
+        if (a[key] < b[key]) return 1
+        if (a[key] > b[key]) return -1
+        return 0
+      } else {
+        if (a < b) return 1
+        if (a > b) return -1
+        return 0
+      }
+    }
+  })
+  return arry
+
+  /* Tested OK, 20231218.1703 M */
+}
+
+
+
+</script>
+</body>
+</html>

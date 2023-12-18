@@ -1,17 +1,17 @@
-// XV is a global var for template
+// xv is a global var foXVr template
 
-globalThis.XV = {}
+globalThis.xv = {}
 
-XV.contentKeep = {
+xv.contentKeep = {
   html: '',
   scrollPosition: 0
 }
 
-XV.picPath = './pic/'
-XV.pendingApprovalFor = ''
+xv.picPath = './pic/'
+xv.pendingApprovalFor = ''
 
-XV.template = {
-  log_in: `<div class="w3-container"><h1>Please log in</h1>\n  <p>Before you can do anything beyond the browsing for general contents you have to log-in first so that you can do everything this platform provides.</p>\n  <br>\n  <label>Username</label> <input class="w3-input w3-border" id="user_name" type="text"><br>\n  <label>Password</label> <input class="w3-input w3-border" id="pass_word" type="password" onchange="XB.hash(this.value).then(h => userInfo.passwordHash = h).then(this.value = '')">\n  <br><br>\n  <button class="w3-btn w3-blue" onclick="login()">Log in</button> &nbsp; <button class="w3-btn w3-yellow" onclick="contentSet('close')">Close</button></div>`,
+xv.template = {
+  log_in: `<div class="w3-container"><h1>Please log in</h1>\n  <p>Before you can do anything beyond the browsing for general contents you have to log-in first so that you can do everything this platform provides.</p>\n  <br>\n  <label>Username</label> <input class="w3-input w3-border" id="user_name" type="text"><br>\n  <label>Password</label> <input class="w3-input w3-border" id="pass_word" type="password" onchange="xb.hash(this.value).then(h => userInfo.passwordHash = h).then(this.value = '')">\n  <br><br>\n  <button class="w3-btn w3-blue" onclick="login()">Log in</button> &nbsp; <button class="w3-btn w3-yellow" onclick="contentSet('close')">Close</button></div>`,
   
   card: `<pic-frame>
   <img src="" style="width:100%; cursor: pointer;" onclick="chooseItem(this)">
@@ -35,7 +35,7 @@ XV.template = {
 
   profile: `<div class="w3-container">
 <h1>My profile</h1>
-<div>My picture <input id="get_profile_pic" type="file" accept="image/*" onchange="XB.readPicFileAsDataUrl(this).then(durl => profile_pic.src = durl)"> </div>
+<div>My picture <input id="get_profile_pic" type="file" accept="image/*" onchange="xb.readPicFileAsDataUrl(this).then(durl => profile_pic.src = durl)"> </div>
 <div><img id="profile_pic" width="160"></div>
 <div>My username <input class="w3-input w3-border" type="text"> </div>
 <div>Change password <input class="w3-input w3-border" type="password"> </div>
@@ -139,16 +139,16 @@ XV.template = {
 }
 
 //change _ to - in html
-XV.class = {
-  pic_mark: "w3-xxlarge w3-opacity w3-text-gray",
-  qty: "w3-white w-padding",
-  check: "fa fa-check-circle",
-  card_name: "w3-xxlarge",
-  vendor_logo: "w3-xlarge",
-  special_tag: "w3-tag w3-small w3-red", //color can change
-  price_tag: "w3-tag w3-small w3-blue",
-  star: "fa fa-star w3-xlarge",
-  star_half: "fa fa-star-half-o w3-xlarge",
-  card_brief: "w3-large",
-  more: "fa fa-ellipsis-h w3-tag w3-light-gray w3-text-gray w3-xlarge"
+xv.class = {
+  pic_mark:     "w3-xxlarge w3-opacity w3-text-gray",
+  qty:          "w3-white w-padding",
+  check:        "fa fa-check-circle",
+  card_name:    "w3-xxlarge",
+  vendor_logo:  "w3-xlarge",
+  special_tag:  "w3-tag w3-small w3-red", //color can change
+  price_tag:    "w3-tag w3-small w3-blue",
+  star:         "fa fa-star w3-xlarge",
+  star_half:    "fa fa-star-half-o w3-xlarge",
+  card_brief:   "w3-large",
+  more:         "fa fa-ellipsis-h w3-tag w3-light-gray w3-text-gray w3-xlarge"
 }

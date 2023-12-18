@@ -747,7 +747,7 @@ mdb.touch = function(doc) {
 
 
 mdb.r = mdb.read = async function (quer='', option='') {
-  // reads the mdb, read only, no sync
+  /* Finds doc in mdb if not found continue finding in db. If found, loads into mdb. All found records return to caller. */
   // gives =obj= if query by =uuid=, [=set=] if queried by key
   // if inexist will reload from db
 
@@ -1252,7 +1252,7 @@ mdb.d = mdb.delete = function(quer='') {
 
 
 mdb.l = mdb.load = async function(quer='') {
-  // loads data from mongodb into mdb & send to user
+  /* Loads data from db and check if that doc is not in mdb will keep in mdb too. Returns all matched docs to caller. This command will directly pass queryObject to the xd() function. */
   // also keep the loaded data in mdb
 
   if (Object.keys(quer).length && typeof quer == 'object') {
@@ -1435,7 +1435,7 @@ mdb.clear = function (v='start') {
     clearInterval(mdb.clearId)
   }
 } 
-//mdb.clear()
+mdb.clear()
 
 
 // exports -------------------------------------------------

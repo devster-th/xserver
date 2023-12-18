@@ -2660,6 +2660,7 @@ xb.passwordRealHash = async function (username, passwordHash) {
   return xb.hash(
     username + passwordHash + "D+DHDqyDC~P9"
   )
+  /* This func embeded the salt but will need to find ways to handle this more securely. */
 }
 
 

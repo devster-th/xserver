@@ -126,7 +126,10 @@ app.post("/xserver", async (req,resp)=> {
 
 
   // ACTIVE ---------------------------------------------------
-  //if the packet.active means this is active communications between server & browser. But will need to check it the db that there's record or not too.
+  /* if the packet.active means this is active communications between server & browser. But will need to check it the db that there's record or not too. 
+  
+  Normally the browser/user may call the core or other modules to work. */
+
   if (packet.active) { 
     //session already active
 
@@ -264,7 +267,7 @@ app.post("/xserver", async (req,resp)=> {
   
   } else {
     //  INACTIVE ----------------------------------------
-    //session not active, needs to register session
+    /* Inactive state can be the first connection of the browser/user to xserver so what normally do is to initiate or register new session. The browser will do: {act:'new_session} and after the xserver registered then both sides can communicate further. */
 
     //check cert
     xs.cert(packet).then(certified => {
@@ -321,7 +324,7 @@ app.post("/xserver", async (req,resp)=> {
                   msg: 'Your new session is now activated.',
                   refPacketId:      packet.id,
                   sessionActivated: true,
-                  yourNewSalt:      salt, 
+                  yourNewSalt:      newSalt, 
                   serverId:         XSERVER.secure.serverId
                 }
 console.log(rePacket)
@@ -411,17 +414,12 @@ app.listen(XSERVER.port, () => {
 })
 
 
-
-// 5 - child functions ///////////////////////////////////////
-//function f(){}
-
-
-
-
-// 6 - test //////////////////////////////////////////////////
-//function testScript() {}
-
-//put all test command here
+/*
+2023-12-14
+  -reviewed codes, made some notes, and uses mdb.r() instead of xd() 
+  
+  
+*/
 
 
 

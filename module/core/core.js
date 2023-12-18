@@ -24,24 +24,24 @@ So at least we have these 2 keys. The module name will tell xserver which functi
 */
 
 const xs = require('/home/sunsern/xserver/module/xdev/xdev.js')
-const x$ = xs.x$
+const x$ = xs.x$ , mdb = xs.mdb
 const {xc} = require('/home/sunsern/xserver/module/xdev/xcrypto.js')
 const {xf} = require('/home/sunsern/xserver/module/xdev/xfile.js')
 const {xd, DocControl} = require('/home/sunsern/xserver/module/xdev/xmongo.js')
 
 
-exports.core = async function (X) {
+exports.core = async function (v) {
 
-  console.log('core', X)
+  console.log('core', v)
   
-  switch (X.act) {
+  switch (v.act) {
     
     case 'info':
       return {
-        moduleName: 'core',
-        brief:      'the core of this xserver platform',
-        version:    '0.1',
-        by:         'nexWorld',
+        moduleName:   'core',
+        brief:        'the core of this xserver platform',
+        version:      '0.1',
+        by:           'nexWorld',
         releasedDate: '2023' 
       }
       break
@@ -49,12 +49,16 @@ exports.core = async function (X) {
 
     case 'log_in':
       /* input would be like
-            {act:'log_in, username: , passwordHash: }
+            {
+              act:          'log_in', 
+              username:     ___,
+              passwordHash: ___
+            }
       */
 
       let found = await xd({
-        find: { username: X.username },
-        from: 'xdb.user'
+        find: { username: v.username },
+        from: 'user'
       })
 
       console.log(found)
@@ -64,15 +68,15 @@ exports.core = async function (X) {
         
         found = found[0]
 
-        if (found.passwordHash == X.passwordHash) {
+        if (found.passwordHash == v.passwordHash) {
           //pass
           console.log('password correct')
   
           //now attach user.userId to xdb.session  
           xd({
-            change: {sessionId: X.sessionId},
-            with:   {userId: found.userId},
-            to:     'xdb.session'
+            change: {sessionId: v.sessionId},
+            with:   {userId:    found.userId},
+            to:     'session'
           }) 
 
           let getContent = await xd({
@@ -150,7 +154,7 @@ exports.core = async function (X) {
 
     case 'log_out':
       let re = await xd({
-        change: {sessionId: X.sessionId},
+        change: {sessionId: v.sessionId},
         with:   {userId: ''},
         to:     'xdb.session'
       })
@@ -159,16 +163,19 @@ exports.core = async function (X) {
 
       return {
         act:      'log_out',
-        sessionId: X.sessionId,
+        sessionId: v.sessionId,
         success:  true
       }
       break
 
 
 
-    case 'request_product_cards':
-      return await xd({
-        find:'', from:'xdb.product'
+    case 'load_card':
+      /* The data rights need to be set so each person may not see the same set of cards. The logged in user may sees cards that matched to her profile or search. But not-login user might see others. There're lots of things to be define & set. */
+
+      // ! check if the mdb.load() will take from memory in case the doc is already there?
+      return await mdb.load({
+        find:'', from:'product'
       })
       break
 
@@ -176,9 +183,9 @@ exports.core = async function (X) {
     case 'add_justnote': 
       return await xd({
         add: {
-          note: X.note,
-          tag:  X.tag,
-          by:   X.by
+          note: v.note,
+          tag:  v.tag,
+          by:   v.by
         },
         to: 'mutita.justNote'
       })
@@ -205,4 +212,5 @@ exports.core = async function (X) {
 /* 
 2023-12-14
   -updated little on the top.
+  -renamed the act:'request_product_cards' to 'load_card'
 */
