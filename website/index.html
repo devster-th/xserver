@@ -8,6 +8,7 @@
 <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-2021.css">
 <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-highway.css">
 
+
 <style>
   /* standard elements */
   html {scroll-behavior: smooth}
@@ -132,12 +133,16 @@
 
 
 
+
 <script>
 ////////////////////////////////////////////////////////////////////
 
+/*
 const userInfo = {
   username: '', passwordHash: ''
 }
+*/
+
 
 init().then(() => loadCard())    
  //this is very first content for everyone
@@ -170,67 +175,68 @@ function loadCard() {
 //register sessionId
 async function init() {
     if (!sessionStorage.getItem('sessionId')) {
-//! in case user refreshes, this may re assign the new session which is unnecessary? May check the sessionStorage too?      
+/* ! in case user refreshes, this may re assign the new session which is unnecessary? May check the sessionStorage too?      */
+
       xb.secure.sessionId = xb.uuid()
       sessionStorage.setItem('sessionId', xb.secure.sessionId)
       
-      if (!xb.ip) {
-          xb.ip = await xb.getIp()
-      } 
       let reMsg = await xb.send({act:'new_session'})
-      
   
       //set values
       xb.active =           reMsg.sessionActivated
       xb.xserver.serverId = reMsg.serverId
       xb.secure.salt =      reMsg.yourNewSalt
-      sessionStorage.setItem('active', true)
+      sessionStorage.setItem('active', xb.active)
       sessionStorage.setItem('sessionId', xb.secure.sessionId)
       sessionStorage.setItem('serverId', reMsg.serverId)
       sessionStorage.setItem('salt', reMsg.yourNewSalt)
+      sessionStorage.setItem('userLoggedIn', false)
 
       console.log('everything done!')
+
+// ! what if the new_session got problem?      
    
     } else {
-      //has sessionId
-      xb.active = true
+      //has sessionId, so this is on going use of the session
+      xb.active = JSON.parse(sessionStorage.getItem('active')) 
+      //uses JSON.parse to get actual true/false not 'true'/'false'
       xb.secure.sessionId = sessionStorage.getItem('sessionId')
       xb.xserver.serverId = sessionStorage.getItem('serverId')
       xb.secure.salt = sessionStorage.getItem('salt')
+      xb.secure.userLoggedIn = JSON.parse(sessionStorage.getItem('userLoggedIn'))
     }
 }
 
 //---------------------------------------------------------
 
 async function login() {
-  userInfo.username = user_name.value,
-  userInfo.passwordHash = await xb.passwordRealHash(
-    userInfo.username, 
-    userInfo.passwordHash
-  )
-
+  xb.secure.username = user_name.value
   xb.send( 
     {
       act:          'log_in',
-      username:     userInfo.username,
-      passwordHash: userInfo.passwordHash
+      username:     xb.secure.username,
+      passwordHash: xb.secure.passwordHash
     }
   ).then(msg => {
     console.log(msg)
-    msg = JSON.parse(msg)
+    //msg = JSON.parse(msg)
 
     if (msg.pass) {
       // msg.pass == true
+      xb.secure.userLoggedIn = true
+      sessionStorage.setItem('userLoggedIn',true)
+
       showMessage({
         title:    msg.content,
         message:  "You may now close this message box and continue your works on this platform. Happy using :-)",
         color:    'green' 
       })
 
-      contentSet('close')
+      contentSet('close') //close login-page and reload the saved-page
 
     } else {
       // msg.pass == false
+      xb.secure.userLoggedIn = false
       showMessage({
         title:    msg.content,
         message:  "Please try again. If the problem still persists you may need to seek advice from your support/admin.",
@@ -551,6 +557,9 @@ function msgApprovalIs(cmd) {
           //console.log(msg)
 
           if (msg.success) {
+            xb.secure.userLoggedIn = false
+            sessionStorage.setItem('userLoggedIn', false)
+            
             showMessage({
               title:  "You're now logged out.",
               message: "See you soon, we've saved all your information securely, don't worry.",

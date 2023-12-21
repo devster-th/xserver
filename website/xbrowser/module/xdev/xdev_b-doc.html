@@ -3,7 +3,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
   <meta name="author" content="mutita.org@gmail.com">
-  <title>xdev_b2.js doc</title>
+  <title>xdev_b doc</title>
   <style>
     textarea {width: 100%; background-color:lavender; font-family: monospace; overflow:hidden; border:none; color:darkred}
     code {background-color:lavender; font-family: monospace; color:darkred}
@@ -35,7 +35,7 @@
 <!-- table of contents -->
 <div id="toc">
   <!-- doc title -->
-  <h1 id="title">xdev_b2.js doc</h1>
+  <h1 id="title">xdev_b doc</h1>
   <p>Table of contents</p>
   <ol>
     <li><a href="#brief">Brief</a></li>
@@ -58,10 +58,9 @@
 
 
   <h2 id="config">Config</h2>
-  <p>Get the <mark>xdev_b2.js</mark> into your directory for browser. The general command language is:</p>
+  <p>Get the <mark>xdev_b.js</mark> into your directory for browser and loads into the html file.</p>
   <textarea>
-  XB.$({ ...command... })
-  XB.functionName()
+<script src="/=path=/xdev_b.js"></script>
   </textarea>
   <p>The XB object has some thing can be set/configured, look at file <mark>xdev_b2.js</mark>.</p>
 
@@ -72,12 +71,30 @@
 
 
   <h2 id="send">send</h2>
-  <p>Sends data to xserver. If the <code>to:</code> is absent, it is default to <code>'/xserver'</code>. We call what sending to the xserver is 'packet'.</p>
-  <textarea rows="5">
-  XB.$({
-    send: {..data..},
-    to:   'fetch path' //default is '/xserver'
-  })
+  <p>Sends data to server and get response. The default is sending to <code>/xserver</code> if not specified else. The message will be encrypted and embed into what we called, a 'packet.' So this is secured by itself without the need of https or else.</p>
+  <textarea rows="32">
+xb.send({
+  act: =action=,
+  =dataForAction=
+})
+
+//example
+xb.send({
+  act:          'log_in',
+  username:     =userName=,
+  passwordHash: =passwordHash=
+})
+
+//sample of packet
+{
+  from:   '69c1fa43-6d80-4846-b0b2-ce0af5aa7d4c',
+  to:     '647e6ad5-a5da-4198-a31d-a9797c522640',
+  active: true,
+  msg:    't5891aZAKJytShZEX6rwyuHE9y32mFsaYixAAA+IBqwvNU0AnHU6prZc5SV4tPQ=',
+  id:     '_1702940500007_23deb331-9380-4fa3-9060-4cd5c5af006d',
+  cert: '5db66d863a9c272c1e01fd9ab2530d0a2cf04f9825044311a584050263581ace'
+}
+
   </textarea>
 
   <h2 id="random">random</h2>

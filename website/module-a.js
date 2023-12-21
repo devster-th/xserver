@@ -5,4 +5,6 @@ export function sayHi(user) {
 }
 */
 
-export const secret = 'thisisasecretinfo'
+export function secret() {
+  console.log('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
+}

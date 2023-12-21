@@ -11,7 +11,7 @@ xv.picPath = './pic/'
 xv.pendingApprovalFor = ''
 
 xv.template = {
-  log_in: `<div class="w3-container"><h1>Please log in</h1>\n  <p>Before you can do anything beyond the browsing for general contents you have to log-in first so that you can do everything this platform provides.</p>\n  <br>\n  <label>Username</label> <input class="w3-input w3-border" id="user_name" type="text"><br>\n  <label>Password</label> <input class="w3-input w3-border" id="pass_word" type="password" onchange="xb.hash(this.value).then(h => userInfo.passwordHash = h).then(this.value = '')">\n  <br><br>\n  <button class="w3-btn w3-blue" onclick="login()">Log in</button> &nbsp; <button class="w3-btn w3-yellow" onclick="contentSet('close')">Close</button></div>`,
+  log_in: `<div class="w3-container"><h1>Please log in</h1>\n  <p>Before you can do anything beyond the browsing for general contents you have to log-in first so that you can do everything this platform provides.</p>\n  <br>\n  <label>Username</label> <input class="w3-input w3-border" id="user_name" type="text"><br>\n  <label>Password</label> <input class="w3-input w3-border" id="pass_word" type="password" onchange="xb.hash(this.value).then(h => xb.secure.passwordHash = h).then(this.value = '')">\n  <br><br>\n  <button class="w3-btn w3-blue" onclick="login()">Log in</button> &nbsp; <button class="w3-btn w3-yellow" onclick="contentSet('close')">Close</button></div>`,
   
   card: `<pic-frame>
   <img src="" style="width:100%; cursor: pointer;" onclick="chooseItem(this)">

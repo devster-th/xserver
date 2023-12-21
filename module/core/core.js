@@ -68,7 +68,11 @@ exports.core = async function (v) {
         
         found = found[0]
 
-        if (found.passwordHash == v.passwordHash) {
+        //make passwordRealHash
+        let realHash = await xs.passwordRealHash(
+          v.username, v.passwordHash)
+
+        if (found.passwordHash == realHash) {
           //pass
           console.log('password correct')
   

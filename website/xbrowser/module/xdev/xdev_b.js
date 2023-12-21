@@ -49,7 +49,11 @@ const xb = {
   secure: {
     sessionId: sessionStorage.getItem('sessionId'),
     defaultSalt: "#|~}v4&u&1R",
-    salt: ''
+    salt: '',
+    username: '',
+    passwordHash: '',
+    pinHash: '',
+    userLoggedIn: false
   },
 
   xserver: {
@@ -62,9 +66,8 @@ const xb = {
   sendLog: {req:'', resp:''},
   active: false,
   ip: '',
-  loggedIn: false
+  //loggedIn: false
 }
-
 
 
 
@@ -141,6 +144,8 @@ xb.$ = async function(X) {
  
 }
 */
+
+// COMMUNICATIONS PART //////////////////////////////////////////
 
 xb.send = async function (dataa='', serverUrl=xb.sendServerUrl, option='') {
   // sends data to server, this case is xserver
@@ -221,7 +226,7 @@ xb.send = async function (dataa='', serverUrl=xb.sendServerUrl, option='') {
 
 
 
-
+// CRYPTO PART ///////////////////////////////////////////////////
 //-----------crypto-------------------------------------
 // default algor = AES-GCM
 
@@ -1264,7 +1269,7 @@ m/20230509
 
 
 
-//////////////////////////////////////////////////////////
+// LOCAL DB ////////////////////////////////////////////////////////
 //25----------------------------------------------
 /* if put {people: {...} }   the people is the collection
  */
@@ -1695,7 +1700,7 @@ xb.send2 = async function (value) {
 } 
 */
 
-
+/*
 xb.wrap = async function(msg, key) {
   //wrap the packet.msg before sending to xserver
   //msg must be string
@@ -1716,6 +1721,12 @@ xb.unwrap = async function(wrappedMsg, key) {
   if (!wrappedMsg || !key) return false
   return await xb.dec(wrappedMsg, key)
 }
+*/
+
+
+
+
+// OTHER PART ///////////////////////////////////////////////////
 
 
 xb.isJson = function(sample) {
@@ -2272,6 +2283,7 @@ xb.expandTable = function(actor, tableEle) {
 
 
 // autoFill ------------------------------------------------
+/*
 xb.autoFill = function() {
   /**
    * xs.autoFill() -- scans through the page and automatically fill datas into the element your specified.
@@ -2279,6 +2291,7 @@ xb.autoFill = function() {
    * #use   just put it in the script part at bottom of the page.
    * #tested OK, m-20230628.2240
    */
+  /*
   const toFill = document.querySelectorAll('[_autofill]')
 
   toFill.forEach(ele => {
@@ -2302,7 +2315,7 @@ xb.autoFill = function() {
     })
   })
 }
-
+*/
 
 
 
@@ -2608,6 +2621,9 @@ xb.getIp = async function () {
 
 
 
+// PACKET HANDLING /////////////////////////////////////////////
+
+
 xb.Packet = class {
   from =    xb.secure.sessionId
   to =      xb.xserver.serverId
@@ -2633,7 +2649,7 @@ xb.makeKey = async function (packet) {
   }
 }
 
-
+/*
 xb.masterKey = async function () {
   //every session must have a masterKey for its security works
   return await xb.hash(
@@ -2641,13 +2657,15 @@ xb.masterKey = async function () {
     + xb.ip + xb.secure.defaultSalt
   )
 }
+*/
 
-
-
+/*
 async function init() {
   xb.ip = await xb.getIp()
 }
 init()
+*/
+
 
 
 /**
@@ -2666,7 +2684,7 @@ xb.passwordRealHash = async function (username, passwordHash) {
 
 
 xb.readPacketMsg = async function (receivedPacket) {
-  /*  get the received packet from the xb.$send command and get the msg out from the packet */
+  /*  get the received packet from the xb.send command and get the msg out from the packet */
 
   return xb.makeKey(receivedPacket).then(gotKey => {
     return xb.dec(
@@ -2679,6 +2697,10 @@ xb.readPacketMsg = async function (receivedPacket) {
   })
 }
 
+
+
+
+// FILE HANDLING /////////////////////////////////////////////////
 
 
 
@@ -2777,3 +2799,645 @@ xb.saveTextFile = function (text, fileName) {
   tested OK, m20230904
   */
 }
+
+
+// HTML ELEMENT TOOL /////////////////////////////////////////////
+
+// 20231218 
+/* 
+
+This set of functions added after tested. They're mainly working on html elements. 
+
+sample of the uses are:
+
+    xb.sel('ol').selAll('li').add({style:{color:'red'} })
+    xb.sel('table').fillTable(data)
+    xb.newEl({tag:'img', src:'./pic.jpg'}).appendTo('body')
+    xb.sort(ARRAY,'des','objectKey')
+
+
+*/
+
+xb.sel = function (pattern) {
+  /* This func shortens the document.querySelector and added more features so at the end the coding time is reduced a lot.
+
+  xb.sel('div').selAll('button')[1]   //also works
+  xb.sel('#anid').add({class:__, style:__, attri:__})
+
+  */
+
+  var outpu = document.querySelector(pattern)
+
+  //return
+  outpu.sel      = xb.sel2
+  outpu.selAll   = xb.selAll2
+  outpu.add      = xb.add
+  outpu.del      = xb.del
+  outpu.hide     = xb.hide
+  outpu.show     = xb.show
+  outpu.toggle   = xb.toggle
+  outpu.setHtml  = xb.setHtml
+  if (outpu.tagName == 'TABLE') outpu.fillTable = xb.fillTable
+  if (outpu.tagName == 'SELECT') outpu.fillSelect = xb.fillSelect
+  if (outpu.tagName && outpu.tagName.match(/OL|UL/)) outpu.fillList = xb.fillList
+
+  if (outpu.length) {
+    for (elemen of outpu) {
+      elemen.sel      = xb.sel2
+      elemen.selAll   = xb.selAll2
+      elemen.add      = xb.add
+      elemen.del      = xb.del
+      elemen.hide     = xb.hide
+      elemen.show     = xb.show
+      elemen.toggle   = xb.toggle
+      elemen.setHtml  = xb.setHtml
+      if (elemen.tagName == 'TABLE') elemen.fillTable = xb.fillTable
+      if (elemen.tagName == 'SELECT') elemen.fillSelect = xb.fillSelect
+      if (element.tagName && elemen.tagName.match(/OL|UL/)) elemen.fillList = xb.fillList
+    }
+  }
+
+  return outpu
+}
+
+xb.selAll = function (pattern) {
+  //optio can be 'all' only for now
+  //findSubs is finds ele in the this, not from the document
+
+  var outpu = document.querySelectorAll(pattern)
+
+  //return
+  outpu.sel     = xb.sel2
+  outpu.selAll  = xb.selAll2
+  outpu.add     = xb.add
+  outpu.del     = xb.del
+  outpu.hide    = xb.hide
+  outpu.show    = xb.show
+  outpu.toggle  = xb.toggle
+  outpu.setHtml = xb.setHtml
+  if (outpu.tagName == 'TABLE') outpu.fillTable = xb.fillTable
+  if (outpu.tagName == 'SELECT') outpu.fillSelect = xb.fillSelect
+  if (outpu.tagName && outpu.tagName.match(/OL|UL/)) outpu.fillList = xb.fillList
+
+  if (outpu.length) {
+    for (elemen of outpu) {
+      elemen.sel      = xb.sel2
+      elemen.selAll   = xb.selAll2
+      elemen.add      = xb.add
+      elemen.del      = xb.del
+      elemen.hide     = xb.hide
+      elemen.show     = xb.show
+      elemen.toggle   = xb.toggle
+      elemen.setHtml  = xb.setHtml
+      if (elemen.tagName == 'TABLE') elemen.fillTable = xb.fillTable
+      if (elemen.tagName == 'SELECT') elemen.fillSelect = xb.fillSelect
+      if (elemen.tagName && elemen.tagName.match(/OL|UL/)) elemen.fillList = xb.fillList
+    }
+  }
+
+  return outpu
+}
+
+xb.sel2 = function (pattern) {
+  //optio can be 'all' only for now
+  //findSubs is finds ele in the this, not from the document
+  var outpu = this.querySelector(pattern)
+
+  //return
+  outpu.sel      = xb.sel2
+  outpu.selAll   = xb.selAll2
+  outpu.add      = xb.add
+  outpu.del      = xb.del
+  outpu.hide     = xb.hide
+  outpu.show     = xb.show
+  outpu.toggle   = xb.toggle
+  outpu.setHtml  = xb.setHtml
+  if (outpu.tagName == 'TABLE') outpu.fillTable = xb.fillTable
+  if (outpu.tagName == 'SELECT') outpu.fillSelect = xb.fillSelect
+  if (outpu.tagName && outpu.tagName.match(/OL|UL/)) outpu.fillList = xb.fillList
+
+  if (outpu.length) {
+    for (elemen of outpu) {
+      elemen.sel      = xb.sel2
+      elemen.selAll   = xb.selAll2
+      elemen.add      = xb.add
+      elemen.del      = xb.del
+      elemen.hide     = xb.hide
+      elemen.show     = xb.show
+      elemen.toggle   = xb.toggle
+      elemen.setHtml  = xb.setHtml
+      if (elemen.tagName == 'TABLE') elemen.fillTable = xb.fillTable
+      if (elemen.tagName == 'SELECT') elemen.fillSelect = xb.fillSelect
+      if (elemen.tagName && elemen.tagName.match(/OL|UL/)) elemen.fillList = xb.fillList
+    }
+  }
+  return outpu
+}
+
+xb.selAll2 = function (pattern) {
+  //optio can be 'all' only for now
+  //findSubs is finds ele in the this, not from the document
+
+  var outpu = this.querySelectorAll(pattern)
+
+  //return
+  outpu.sel     = xb.sel2
+  outpu.selAll  = xb.selAll2
+  outpu.add     = xb.add
+  outpu.del     = xb.del
+  outpu.hide    = xb.hide
+  outpu.show    = xb.show
+  outpu.toggle  = xb.toggle
+  outpu.setHtml = xb.setHtml
+  if (outpu.tagName == 'TABLE') outpu.fillTable = xb.fillTable
+  if (outpu.tagName == 'SELECT') outpu.fillSelect = xb.fillSelect
+  if (outpu.tagName && outpu.tagName.match(/OL|UL/)) outpu.fillList = xb.fillList
+
+  if (outpu.length) {
+    for (elemen of outpu) {
+      elemen.sel      = xb.sel2
+      elemen.selAll   = xb.selAll2
+      elemen.add      = xb.add
+      elemen.del      = xb.del
+      elemen.hide     = xb.hide
+      elemen.show     = xb.show
+      elemen.toggle   = xb.toggle
+      elemen.setHtml  = xb.setHtml
+      if (elemen.tagName == 'TABLE') elemen.fillTable = xb.fillTable
+      if (elemen.tagName == 'SELECT') elemen.fillSelect = xb.fillSelect
+      if (elemen.tagName && elemen.tagName.match(/OL|UL/)) elemen.fillList = xb.fillList
+    }
+  }
+  return outpu
+}
+
+//add 
+
+xb.add = function (addObj) {
+  /* Adds classes, styles and attributes to selected elements. */
+
+  if (this.length) {
+    this.forEach(elemen => {
+      add(elemen)
+    })
+  } else {
+    add(this)
+  }
+
+  //func
+  function add(elemen) {
+    if (addObj.class) {
+    // xb.el('#aaa').add({ class:'aaaa bbbb cccc' })
+    let part = addObj.class.split(' ')
+    part.forEach(clas => elemen.classList.add(clas))
+    }
+
+    if (addObj.style) {
+      // xb.el('#aaa').add({ style:{color:'red', font-size:'48px'} })
+      for (ky in addObj.style) {
+        elemen.style[ky] = addObj.style[ky]
+      }
+    }
+
+    if (addObj.attri) {
+      // xb.el('#aaa').add({ attri:{id:'yeah', name:'yoooh'} })
+      for (ky in addObj.attri) {
+        elemen.setAttribute(ky, addObj.attri[ky])
+      }
+    }
+  }
+}
+
+//del
+xb.del = function (delObjec) {
+  /* Deletes classes, styles and attributes of selected elements. If not put delObjec will regard as deletion of this element. */
+
+  if (this.length) {
+    this.forEach(elemen => {
+      if (delObjec) del(elemen)
+      else elemen.remove()
+    })
+  } else {
+    if (delObjec) del(this)
+    else this.remove()
+  }
+
+  //func
+  function del(elemen) {
+    if (delObjec.class) {
+    // xb.el('#aaa').del({class:'aaa bbb ccc'})
+    let part = delObjec.class.split(' ')
+    part.forEach(clas => elemen.classList.remove(clas))
+    }
+
+    if (delObjec.style) {
+      // xb.el('#aaa').del({style:'aaa bbb ccc'})
+      let part = delObjec.style.split(' ')
+      part.forEach(sty => elemen.style[sty] = '')
+    }
+
+    if (delObjec.attri) {
+      // xb.el('#aaa').del({attri:'aaa bbb ccc'})
+      let part = delObjec.attri.split(' ')
+      part.forEach(att => elemen.removeAttribute(att))
+    }
+  }
+}
+
+//hide
+xb.hide = function () {
+  /* Hides selected elements. */
+
+  if (this.length) {
+    this.forEach(elemen => {
+      elemen.hidden = true
+    })
+  } else {
+    this.hidden = true
+  }
+}
+
+//show
+xb.show = function () {
+  /* Shows selected elements. */
+
+  if (this.length) {
+    this.forEach(elemen => {
+      elemen.hidden = false
+    })
+  } else {
+    this.hidden = false
+  }
+}
+
+//toggle
+xb.toggle = function () {
+  /* Toggles show/hide of an element or all selected elements. */
+
+  if (this.length) {
+    this.forEach(elemen => {
+      if (elemen.hidden == true) elemen.hidden = false
+      else elemen.hidden = true  
+    })
+  } else {
+    if (this.hidden == true) this.hidden = false
+    else this.hidden = true
+  }
+}
+
+//innerHTML
+xb.setHtml = function (html) {
+  if (this.length) {
+    this.forEach(elemen => elemen.innerHTML = html)
+  } else {
+    this.innerHTML = html
+  }
+}
+
+
+//createElement
+xb.newEl = function (inp) {
+  /* 
+  xb.createEl({
+    tag:    ___,
+    class:  ___,
+    style:  ___,
+    css:    ___,
+    html:   ___,
+    attri:  ___,
+    id:     ___,
+    name:   ___,
+    value:  ___,
+    type:   ___,
+    title:  ___,
+    hidden: true|false,
+  }) 
+  */
+  if (!inp.tag) return false
+
+  let el = document.createElement(inp.tag)
+  if (inp.class) el.className = inp.class
+  if (inp.html) el.innerHTML = inp.html
+  if (inp.css) el.style.cssText = inp.css
+  if (inp.id) el.setAttribute('id', inp.id)
+  if (inp.name) el.setAttribute('name', inp.name)
+  if (inp.value) el.setAttribute('value', inp.value)
+  if (inp.hidden) el.setAttribute('hidden', inp.hidden)
+  if (inp.type) el.setAttribute('type', inp.type)
+  if (inp.title) el.setAttribute('title', inp.title)
+  if (inp.src) el.setAttribute('src', inp.src)
+  if (inp.attri) {
+    for (ky in inp.attri) {
+      el.setAttribute(ky, inp.attri[ky])
+    }
+  }
+  if (inp.style) {
+    for (ky in inp.style) {
+      el.style[ky] = inp.style[ky]
+    }
+  }
+/*
+  if (inp.appendTo) { //these 2 cannot stay together
+    xb.sel(inp.appendTo).append(el)
+  } else if (inp.prependTo) {
+    xb.sel(inp.prependTo).prepend(el)
+  } 
+*/
+
+el.appendTo = function (targetEl) {
+    xb.sel(targetEl).append(el)
+  }
+
+  el.prependTo = function (targetEl) {
+    xb.sel(targetEl).prepend(el)
+  }
+
+  return el
+}
+
+
+
+xb.fillTable = function (inp) {
+  /* 
+  inp = {
+    head: 'Name Age Sex',
+    data: [
+      {name:__, age:__, sex:__},
+      //
+    ]
+  } 
+  */
+  if (this.tagName == 'TABLE') {
+    /* if the inp.head not provided, takes the data keys as head */
+    let htmlCode = ''
+
+    if (inp.head) {
+      //inp.head provided
+      htmlCode = '<tr>'
+      let headKey = inp.head.split(' ')
+      headKey.forEach(ky => {
+        htmlCode += '<th>' + ky + '</th>'
+      })
+      htmlCode += '</tr>'
+    } else {
+      //inp.head not provided
+      let makeHead = inp.data[0]
+      htmlCode = '<tr>'
+      for (ky in makeHead) {
+        htmlCode += '<th>' + ky + '</th>'
+      }
+      htmlCode += '</tr>'
+    }
+    
+    //data
+    inp.data.forEach(row => {
+      htmlCode += '<tr>'
+      for (ky in row) {
+        htmlCode += '<td>' + row[ky] + '</td>'
+      }
+      htmlCode += '</tr>'
+    })
+
+    this.innerHTML = htmlCode
+  }
+}
+
+
+xb.fillSelect = function (inp) {
+  /*
+
+  inp = ['aaaaa','bbbbbbb','cccccccccccc', ]
+  
+  */
+
+  if (this.tagName == 'SELECT') {
+    let htmlCode = ''
+    inp.forEach(optio => {
+      htmlCode += '<option>' + optio + '</option>'
+    })
+    this.innerHTML = htmlCode
+  }
+}
+
+
+xb.fillList = function (inp) {
+  /*
+
+  inp = ['aaaaaaaaaaaaa','bbbbbbbbbb','cccccccccccccc']
+  
+  */
+
+  if (this.tagName && this.tagName.match(/OL|UL/)) {
+    let htmlCode = ''
+    inp.forEach(lis => {
+      htmlCode += '<li>' + lis + '</li>'
+    })
+    this.innerHTML = htmlCode
+  }
+}
+
+
+xb.sort = function (arry, way='asc', key='') {
+  /*
+      arry = [1000,1234,541354,11245, ...]
+      arry = ['aaaa','bbbb','asdfasdfasdf', ...]
+      arry = [
+        {name:'john', age:23, sex:'male'},
+        {...}
+      ]
+
+    use
+      xb.sort(ARRAY) ......ascending sort on plain array
+      xb.sort(ARRAY,'des') .....descending sort on plain array
+      xb.sort(ARRAY,0,'name') ...ascending sort object array on key name
+      xb.sort(array,'des','age') ...descending on object array
+  */
+
+  if (!Array.isArray(arry)) return false
+
+  arry.sort((a,b) => {
+    if (way == 'asc') {
+      if (key) {
+        if (a[key] < b[key]) return -1
+        if (a[key] > b[key]) return 1
+        return 0
+      } else {
+        if (a < b) return -1
+        if (a > b) return 1
+        return 0
+      }
+      
+    } else if (way == 'des') {
+      if (key) {
+        if (a[key] < b[key]) return 1
+        if (a[key] > b[key]) return -1
+        return 0
+      } else {
+        if (a < b) return 1
+        if (a > b) return -1
+        return 0
+      }
+    }
+  })
+  return arry
+
+  /* Tested OK, 20231218.1703 M */
+}
+
+
+
+
+
+// SESSION DATA HANDLING ///////////////////////////////////////
+/* Handle sessionStorage like a little db or like an object. This maybe litterally call a "session base" or sessb. We aim to use this little thing to keep some secret info in the sessionStorage.
+
+  xb.sessb.r()              == read whole data
+  xb.sessb.r('sessionId')   == read sessionId 
+  xb.sessb.w({aaa: ___})    == writes data
+
+  keeps data in json in the sessionStorage.sessb variable. Keeps data like this:
+
+  sessionStorage.sessb = {
+    aaa: ___, bbb: ___, ccc: ___, =and goes on=
+  }
+
+  * will encrypt the sessb too to make it secure
+*/
+
+xb.sess = {}   //main object
+
+xb.sess.r = async function (keyx='') {
+  /* The read is doing 1-by-1 like 
+      xb.sessb.r('name')
+      xb.sessb.r('age')
+      or to get whole data: xb.sessb.r()
+  */
+
+  if (!keyx) {
+    //if keyx == '' reads the whole data
+    let readx = sessionStorage.getItem('sess')
+    if (readx) {
+      readx = JSON.parse(
+        await xb.dec(
+          readx, 
+          await xb.masterKey()
+        )
+      )
+      return readx
+    } else {
+      return null
+    }
+
+  } else if (typeof keyx == 'string') {
+    //keyx is the key of object we need to find
+    let readx = sessionStorage.getItem('sess')
+    if (readx) {
+      readx = JSON.parse(
+        await xb.dec(
+          readx,
+          await xb.masterKey()
+        )
+      )
+
+      if (keyx in readx) return readx[keyx]
+      else return false
+      
+    } else {
+      return null
+    }
+
+  } else {
+    return false
+  }
+}
+
+xb.sess.w = async function (obj='') {
+  /* Writes data into the sessb:
+        xb.sessb.w({name:'john', age:23, note:'this is good guy'})
+
+    ! if we put a duplicated key, it will replace the existing one
+
+  */
+
+  if (!obj || typeof obj != 'object') return false
+
+  if (Array.isArray(obj)) {
+    //don't accept array
+    return false
+
+  } else if (Object.keys(obj).length) {
+    //object like {name:'john', age:23, note:'this is good guy'}
+    let readx = sessionStorage.getItem('sess')
+
+    if (readx) {
+      readx = JSON.parse(
+        await xb.dec(
+          readx,
+          await xb.masterKey()
+        ) 
+      )
+      
+      for (keyx in obj) {
+        readx[keyx] = obj[keyx]
+      }
+      
+      sessionStorage.setItem('sess', 
+        await xb.enc(
+          JSON.stringify(readx),
+          await xb.masterKey()
+        )
+      )
+      return true
+
+    } else {
+      //don't have existing sessdb so this is new write
+      readx = {}
+
+      for (keyx in obj) {
+        readx[keyx] = obj[keyx]
+      }
+      
+      sessionStorage.setItem('sess', 
+        await xb.enc(
+          JSON.stringify(readx),
+          await xb.masterKey()
+        )
+      )
+      return true
+    }
+  }
+}
+
+
+xb.sess.c = function () {
+  /* To clear the sessb from sessionStorage */
+  sessionStorage.removeItem('sess')
+  if (!sessionStorage.getItem('sess')) return true
+  else return false
+}
+
+
+/* everything works fine for all r,w,c functions. Now uses the xb.acode() for the key as temporarily. Will need to find more secured one. */
+
+
+
+
+// SOME SECURITY ///////////////////////////////////////////////////
+
+xb.masterKey = async function () {
+  /* This generates a fixed key (sha256) for a session. So it can be used in security purposes within a session. ! The issue now is how to hide this code? */
+
+  return await xb.hash(
+    xb.secure.sessionId +
+    navigator.userAgent +
+    location.host +
+    xb.secure.defaultSalt
+  )
+}
+
+
+
+
+// initialize somethings ///////////////////////////////////////
+
+xb.getIp().then(ip => xb.ip = ip)
