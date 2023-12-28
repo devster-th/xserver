@@ -1438,13 +1438,39 @@ mdb.clear = function (v='start') {
 mdb.clear()
 
 
+
+
+// FORMATING HTML ////////////////////////////////////////////////
+
+function pretty(strin) {
+  let outpu = strin
+  //outpu = outpu.replaceAll('[','[<br>')
+  /*
+  outpu = outpu.replace(/^\{/,'{<br>&nbsp;&nbsp;')
+  outpu = outpu.replace(/\}$/, '<br>}')
+  outpu = outpu.replaceAll(',', ',<br>&nbsp;&nbsp;')
+  outpu = outpu.replaceAll(':',': ')
+  outpu = outpu.replaceAll(': {', ': {<br>&nbsp;&nbsp;&nbsp;&nbsp;')
+  outpu = outpu.replaceAll('[{', '[<br>&nbsp;&nbsp;&nbsp;&nbsp;{')
+  outpu = outpu.replaceAll('}]', '}<br>&nbsp;&nbsp;]')
+  */
+  return outpu
+}
+
+
+
+
+
+
+
+
 // exports -------------------------------------------------
 module.exports = {
   masterKeyFile, $, uuidx, uuid, isHex, 
   isJson, x2html, docNum, runThrough, convert,
   makeKey, password, randomWords, Packet, 
   cert, prepPacket, passwordRealHash, csv2obj,
-  mdb, xc, xf, xd, DocControl
+  mdb, xc, xf, xd, DocControl, pretty
 }
 
 

@@ -7,7 +7,7 @@ xv.contentKeep = {
   scrollPosition: 0
 }
 
-xv.picPath = './pic/'
+xv.picPath = '/pic/'
 xv.pendingApprovalFor = ''
 
 xv.template = {
@@ -86,14 +86,68 @@ xv.template = {
   <h1>More items</h1>
   <p>This page shows menu that beyonds the space of the main menu box</p>
   <br>
-  <button class="w3-btn w3-blue" onclick="loadJustNote()">Just a note -- save notes to mutita.justNote db</button> <br><br>
+  <button class="w3-btn w3-blue" onclick="loadJustNote()">Just a note -- save notes to mutita.justNote db</button>
+   
+  <br><br>
 
   <hr>
   <button class="w3-btn w3-gray" onclick="contentSet('close')">Close</button>
   </div>`,
+
+  writer: `<h3>Writes a story here</h3>
+
+  <!-- Create the editor container -->
+  <div id="editor"></div><br>
+  <label>Tag</label> <input id="tagg" type="text" size="35">
+  
+  <div style="margin-top:8px">
+    <button onclick="wrtierSave()">Save</button> <button onclick="document.querySelector('.ql-editor').innerHTML=''">Clear</button> 
+  </div>
+  
+  <hr>
+  <code id="dataa"></code>
+  
+  
+  <!-- Initialize Quill editor -->
+  <script>
+    var quill = new Quill('#editor', 
+      {
+        theme: 'snow',
+        placeholder: 'Writes your story here...',
+        modules: {
+          toolbar: [
+            {'header':[false,1,2]},
+            {'font':[]},
+            //{'size':['large',false,'huge','small']},
+            'bold','italic','underline',
+            {'color':[]},{'background':[]},
+            {'list':'ordered'},{'list':'bullet'},
+            {'align':[]},
+            'code-block','link','image','video'
+          ]
+        }
+      }
+    );
+  
+  
+    function save() {
+      let oj = {
+        html: document.querySelector('.ql-editor').innerHTML,
+        tag:  tagg.value
+      }
+      console.log(oj)
+      
+      let svReply = xb.send({
+        act:  'save_story',
+        data: oj
+      })
+  
+      alert(svReply.msg)
+    }
+  </script>`,
   
   just_note: `<div class="w3-container">
-  <h1>Just a note -- fills note to mutita.justNote</h1>
+  <h3>Just a note -- fills note to mutita.justNote</h3>
   <form id="just_note">
     Note*<br>
     <textarea name="note" rows="12" style="width:100%"></textarea>

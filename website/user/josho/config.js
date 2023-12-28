@@ -7,7 +7,7 @@ xv.contentKeep = {
   scrollPosition: 0
 }
 
-xv.picPath = './pic/'
+xv.picPath = '/pic/'
 xv.pendingApprovalFor = ''
 
 xv.template = {

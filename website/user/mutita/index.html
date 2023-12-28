@@ -41,6 +41,17 @@
 
 </style>
 
+
+<!-- for writer -->
+<!-- Include stylesheet -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<!-- Include the Quill library -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+
+
+
+
 <!--load scripts here-->
 <script src="/xbrowser/module/xdev/xdev_b.js"></script>
 <script src="/xbrowser/library/md5/md5.min.js"></script>
@@ -51,14 +62,33 @@
 <body class="w3-content" style="max-width:600px">
 
 
+  
+
+
 <!-- content / this is where all the content shown to the user -->
 <content id="con_tent" class="">
+  <div id="pro_file" class="w3-container">
+    <h1 style="color:darkred">@mutita</h1>
+    <code style="color:cornflowerblue"><a href="http://xvold.io/user/mutita">http://xvold.io/user/mutita</a></code><br>
+    <small><code>JOINED: 2023-12-01 +07:00</code></small>
+    <p>How the wold can be evolved into a more civilization called a "Wisdom Age." I'm pushing this force.</p>  
+    <img src="./pic/myart.jpg" style="width:100%">
+  </div>
+  <hr>
+  <div class="w3-container">
+    <small>2023-12-22 14:56 +07:00</small>
+    <h2 style="color:darkred; font-family: Georgia, 'Times New Roman', Times, serif;">Thailand is trying to move forward but it stalls</h2>
+    <img src="./pic/F9XCRO3acAAr88Z.jpeg" style="float:left; width:30%; margin-right:6px;">
+    <p>There gona be a lot lot more time that we can actually moved from this point. People in political still at very best to protect their power.</p>
+    <small>#THAILAND #POLITIC</small>
+  </div>
+  <hr>
+  <div class="w3-container">
+    <small>2023-12-22 08:00 +07:00</small>
+    <p>Well, I just want to be alone for awhile.</p>
+  </div>
 
-
-
-</content>
-
-
+  <div style="height:36px"></div>
 
 
 
@@ -88,7 +118,7 @@
   onclick="loadLoginForm(); me_nu.hidden=true"><i class="fa fa-sign-in"></i> &nbsp; Log in</menu-item>
   
   <menu-item class="w3-bar-item w3-button w3-padding-24" 
-  onclick="loadProductPage(); me_nu.hidden=true"><i class="fa fa-coffee"></i> &nbsp; Products</menu-item>
+  onclick="xb.sel('#pro_file').hide();loadCard();me_nu.hidden=true"><i class="fa fa-coffee"></i> &nbsp; Products</menu-item>
   
   <menu-item class="w3-bar-item w3-button w3-padding-24" 
   onclick="loadSalesPage(); me_nu.hidden=true"><i class="fa fa-dollar"></i> &nbsp; Sales</menu-item>
@@ -144,7 +174,7 @@ const userInfo = {
 */
 
 
-init().then(() => loadCard())    
+init() /*.then(() => loadCard())    */
  //this is very first content for everyone
 
 
@@ -671,6 +701,11 @@ function loadJustNote() {
   con_tent.innerHTML = xv.template.just_note
 }
 
+/*
+function loadWriter() {
+  con_tent.innerHTML = xv.template.writer
+}
+*/
 
 function saveJustNote() {
   if (just_note.note.value) {

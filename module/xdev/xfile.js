@@ -76,15 +76,12 @@ async function xf (X={}) {
     if (!fs.existsSync(X.makeDir)) {
       try {
         fs.mkdirSync(X.makeDir)
+        return true
       } catch (error) {
         return error
       }
     } else {
-      return {
-        msg: "The file name is dupplicating. Aborted.",
-        success: false,
-        fail: true
-      }
+      return false
     }
 
 
@@ -115,9 +112,9 @@ async function xf (X={}) {
     fs.copyFile(
       X.copy,
       X.to,
-      (error) => console.log(error)
+      (error) => {return error}
     )
-
+    return true
 
   } else if (command == 'copyDir') {
     //XF.$({ copyDir:'<<source dir name>>', to:'<<target dir name>>' })
@@ -325,7 +322,9 @@ m/ok, all test done. 20230501
     const {xf} = require(...) not XF = require(...)
     OK
 
-
+2023-12-22
+- make the makeDir & copy returns true & false instead of nothing.
+- will need to review all the msg for this module again, to return something valuable.
 
 
 

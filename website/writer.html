@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#editor {min-height: 160px;}
+img {width:100%}  
+</style>
+<!-- Include stylesheet -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<!-- Include the Quill library -->
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+<script src="./xbrowser/module/xdev/xdev_b.js"></script>
+</head>
+<body>
+<h3>Writer 0.1</h3>
+
+<!-- Create the editor container -->
+<div id="editor"></div><br>
+
+<div style="margin-top:8px">
+  <button onclick="document.querySelector('.ql-editor').innerHTML=''" style="background-color: yellow;">Clear</button> 
+  <button onclick="writerSave()" style="background-color: lightskyblue;">Save to html file</button> 
+</div><br>
+<small>You can write or edit text and then save it in html format. The picture, video and link can be used in your story too.</small>
+
+
+
+
+<!-- Initialize Quill editor -->
+<script>
+  var quill = new Quill('#editor', 
+    {
+      theme: 'snow',
+      placeholder: 'Writes your story here...',
+      modules: {
+        toolbar: [
+          {'header':[false,1,2]},
+          {'font':[]},
+          //{'size':['large',false,'huge','small']},
+          'bold','italic','underline',
+          {'color':[]},{'background':[]},
+          {'list':'ordered'},{'list':'bullet'},
+          {'align':[]},
+          'code-block','link','image','video'
+        ]
+      }
+    }
+  );
+
+
+  function writerSave() {
+    xb.saveTextFile(
+      '<!DOCTYPE html><html><head><style>img {width:100%}</style></head><body>' +
+      document.querySelector('.ql-editor').innerHTML +
+      '</body><!-- this doc gen by Writer 0.1 --></html>',
+      Date.now() + '.html'
+    )
+  }
+</script>
+</body>
+</html>

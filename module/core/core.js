@@ -46,7 +46,7 @@ exports.core = async function (v) {
       }
       break
 
-
+    //-----------------------------------------------------------
     case 'log_in':
       /* input would be like
             {
@@ -56,60 +56,61 @@ exports.core = async function (v) {
             }
       */
 
-      let found = await xd({
+      let foundUser = await xd({
         find: { username: v.username },
         from: 'user'
       })
 
-      console.log(found)
+      console.log(foundUser)
 
-      if (found.length) {
+      if (foundUser.length) {
         //found username in xdb
         
-        found = found[0]
+        foundUser = foundUser[0]
 
         //make passwordRealHash
         let realHash = await xs.passwordRealHash(
           v.username, v.passwordHash)
 
-        if (found.passwordHash == realHash) {
+        if (foundUser.passwordHash == realHash) {
           //pass
           console.log('password correct')
   
           //now attach user.userId to xdb.session  
           xd({
             change: {sessionId: v.sessionId},
-            with:   {userId:    found.userId},
+            with:   {userId:    foundUser.uuid},
             to:     'session'
           }) 
-
+/*
           let getContent = await xd({
             find: {state: 'pass'},
             from: 'xdb.content',
             getOnly: 'content'
           })
-  
+*/  
           return {
-            act:      'log_in',
-            pass:     true,
-            content:  getContent[0].content
+            act:      'reply_log_in',
+            done:     true,
+            username: v.username,
+            msg:      "Login done."
           }
   
   
         } else {
           //fail password
           console.log('wrong password')
-
+/*
           let getContent = await xd({
             find:     {state: 'wrong_password'},
             from:     'xdb.content',
             getOnly:  'content'
           })
-
+*/
           return {
-            act:      'log_in',
-            pass:     false,
-            content:  getContent[0].content
+            act:      'reply_log_in',
+            done:     false,
+            msg:      "Fail, wrong password."
           }
         }
 
@@ -118,24 +119,24 @@ exports.core = async function (v) {
         //username not found
 
         console.log('not found this username in xdb')
-
+/*
         let getContent = await xd({
           find:     {state: 'wrong_username'},
           from:     'xdb.content',
           getOnly:  'content'
         })
-
+*/
         return {
-          act:      'log_in',
-          pass:     false,
-          content:  getContent[0].content
+          act:      'reply_log_in',
+          done:     false,
+          msg:      "Fail, username not found."
         }
       }
       break
 
 
 
-
+    //------------------------------------------------------------
     case 'load_login_content':
       let contentFound = await xd({
         find: {act: 'load_login_content'},
@@ -160,15 +161,17 @@ exports.core = async function (v) {
       let re = await xd({
         change: {sessionId: v.sessionId},
         with:   {userId: ''},
-        to:     'xdb.session'
+        to:     'session'
       })
 
       console.log(re)
 
       return {
-        act:      'log_out',
-        sessionId: v.sessionId,
-        success:  true
+        act:        'log_out',
+        ref:        '',
+        msg:        'Logout done.',
+        sessionId:  v.sessionId,
+        done:       true
       }
       break
 
@@ -196,14 +199,149 @@ exports.core = async function (v) {
       break
 
 
+    //------------------------------------------------------------
+    case 'sign_up':
+      // v = {act:'sign_up', username:___, passwordHash:___}
 
+      //find db is there's duplicate
+      let dup = await xd({
+        find: {username: v.username} ,
+        from: 'user'
+      })
+
+      if (dup[0]) {
+        //reject & ask user to try new username
+        return {
+          act:  'reply_sign_up',
+          ref:  '',
+          done: false,
+          msg:  'The specified username is already existed.'
+        }
+      } else {
+        //good to go
+
+        let newUser = await xd({
+          add: {
+            username:     v.username,
+            passwordHash: await xs.passwordRealHash(
+                            v.username, v.passwordHash
+                          )
+          },
+          to: 'user'
+        })
+
+        if (newUser.insertedCount) {
+          //now create directory & files
+          let clear = !await xf({
+            exist: `./website/user/${v.username}`
+          })
+
+          if (clear) {
+            let doneMakeDir = await xf({
+              makeDir:  `./website/user/${v.username}`
+            })
+            if (doneMakeDir) {
+              let doneCopyIndexFile = await xf({
+                copy: './website/index.html',
+                to:   `./website/user/${v.username}/index.html`
+              }) 
+              if (doneCopyIndexFile) {
+                let doneCopyConfFile = await xf({
+                  copy: './website/config.js',
+                  to:   `./website/user/${v.username}/config.js`
+                })
+
+                if (doneCopyConfFile) {
+                  //now the homepage of new user is done, next to sign-in automatically
+                  let newUserRecord = await xd({
+                    find: {username: v.username},
+                    from: 'user'
+                  })
+
+                  //attach new-user's uuid to the active session
+                  if (newUserRecord[0]) {
+                    let attachUserId = await xd({
+                      change: {sessionId: v.sessionId},
+                      with:   {userId: newUserRecord[0].uuid},
+                      to:     'session'
+                    })
+
+                    //reply
+                    if (attachUserId.modifiedCount) {
+                      return {
+                        act:        'reply_sign_up',
+                        ref:        '',
+                        done:       true,
+                        newUsername: v.username,
+                        newUserHome:`/user/${v.username}`,
+                        msg:        "Sign-up done."
+                      }
+                    }
+                  }
+                 
+                }
+              }
+            }
+          } else {
+            //something wrong the file with same name already existed
+            console.log('directory not clear')
+            return {
+              act:  'reply_sign_up',
+              ref:  '',
+              done: false,
+              msg:  "Problem with the file system."
+            }
+          }
+        } else {
+          //return error
+          console.log('db problem')
+          return {
+            act:  'reply_sign_up',
+            ref:  '',
+            done: false,
+            msg:  "Problem with the database."
+          }
+        }
+      }
+      break
+
+
+
+
+
+    case 'forgot_password':
+      break
+
+
+
+
+
+    case 'save_story':
+      //for testing the writer module
+      let dbReply = await xd({
+        add: v.data,
+        to: 'test.story'
+      })
+
+      if (dbReply.insertedCount) {
+        return {
+          done: true,
+          msg:  "The story saved."
+        }
+      } else {
+        return {
+          done: false,
+          msg:  "Db error, the story not saved."
+        }
+      }
+      break
 
 
     default:
       return {
-        msg: "Invalid input.",
-        fail: true,
-        from: 'core.js',
+        act:  'reply from core',
+        msg:  "Wrong input.",
+        done: false,
       }
   }
   

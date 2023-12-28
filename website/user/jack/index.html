@@ -52,7 +52,7 @@
 
 
 <!-- content / this is where all the content shown to the user -->
-<content id="con_tent" class="">
+<content id="con_tent" class="w3-container">
 
 
 
@@ -64,11 +64,11 @@
 
 <!-- logo, alert, basket & other indicator at the top -->
 
-<logo class="fa fa-superpowers w3-spin" style="position:fixed; top:4px; right:4px; font-size:36px; color:orangered; z-index:30" onclick="location.href='/'"></logo>
+<logo class="fa fa-superpowers w3-spin" style="position:fixed; top:4px; right:4px; font-size:36px; color:orangered; z-index:30" onclick="ale_rt.style.display='inline'"></logo>
 
 <basket id="bas_ket" class="fa fa-shopping-basket w3-text-pink" style="position:fixed; top:4px; right:180px; font-size:30px; display:none" onclick="loadBasketPage()"> 0</basket>
 
-<alert id="ale_rt" class="fa fa-exclamation w3-text-yellow" style="position:fixed; top:4px; right: 100px; font-size:30px;" onclick="showAlert(); ale_rt.style.display='none'"> 6</alert>
+<alert id="ale_rt" class="fa fa-exclamation w3-text-yellow" style="position:fixed; top:4px; right: 100px; font-size:30px; display:none" onclick="showAlert(); ale_rt.style.display='none'"> 6</alert>
 
 
 
@@ -82,7 +82,7 @@
 <div id="me_nu" class="w3-bar-block w3-dark-gray w3-text-black" style="width:80%; position:fixed; left:0; bottom:0; z-index: 30" hidden>
 
   <menu-item class="w3-bar-item w3-button w3-padding-24" 
-  onclick="loadHomePage(); me_nu.hidden=true"><i class="fa fa-male"></i> &nbsp; Home</menu-item>
+  onclick="loadProfilePage(); me_nu.hidden=true"><i class="fa fa-male"></i> &nbsp; Home</menu-item>
 
   <menu-item class="w3-bar-item w3-button w3-padding-24" 
   onclick="loadLoginForm(); me_nu.hidden=true"><i class="fa fa-sign-in"></i> &nbsp; Log in</menu-item>
@@ -211,49 +211,43 @@ async function init() {
 //---------------------------------------------------------
 
 async function login() {
-  if (user_name.value) {
-    xb.secure.username = user_name.value
+  xb.secure.username = user_name.value
+  xb.send( 
+    {
+      act:          'log_in',
+      username:     xb.secure.username,
+      passwordHash: xb.secure.passwordHash
+    }
+  ).then(serverResp => {
+    console.log(serverResp)
+    //msg = JSON.parse(msg)
 
-    xb.send( 
-      {
-        act:          'log_in',
-        username:     xb.secure.username,
-        passwordHash: xb.secure.passwordHash
-      }
-    ).then(serverResp => {
-      console.log(serverResp)
-      //msg = JSON.parse(msg)
+    if (serverResp.success) {
+      // msg.pass == true
+      xb.secure.userLoggedIn = true
+      xb.secure.username = serverResp.username
+      sessionStorage.setItem('userLoggedIn',true)
+      sessionStorage.setItem('username', xb.secure.username)
+/*      
+      showMessage({
+        title:    serverResp.msg,
+        message:  "You may now close this message box and continue your works on this platform. Happy using :-)",
+        color:    'green' 
+      })
+*/
+      //contentSet('close') //close login-page and reload the saved-page
+      location.href = '/user/' + xb.secure.username
 
-      if (serverResp.done) {
-        // msg.pass == true
-        xb.secure.userLoggedIn = true
-        xb.secure.username = serverResp.username
-        sessionStorage.setItem('userLoggedIn',true)
-        sessionStorage.setItem('username', xb.secure.username)
-    /*      
-        showMessage({
-          title:    serverResp.msg,
-          message:  "You may now close this message box and continue your works on this platform. Happy using :-)",
-          color:    'green' 
-        })
-    */
-        //contentSet('close') //close login-page and reload the saved-page
-        location.href = '/user/' + xb.secure.username
-
-      } else {
-        // msg.pass == false
-        xb.secure.userLoggedIn = false
-        showMessage({
-          title:    serverResp.msg,
-          message:  "Please try again. If the problem still persists you may need to seek advice from your support/admin.",
-          color:    'yellow'
-        })
-      }
-    })
-  } else {
-    alert("Wrong input, please try again.")
-  }
-  
+    } else {
+      // msg.pass == false
+      xb.secure.userLoggedIn = false
+      showMessage({
+        title:    serverResp.msg,
+        message:  "Please try again. If the problem still persists you may need to seek advice from your support/admin.",
+        color:    'yellow'
+      })
+    }
+  })
   //console.log(userInfo)
 }
 
@@ -566,10 +560,9 @@ function msgApprovalIs(cmd) {
         xb.send({act: 'log_out'}).then(msg => {
           //console.log(msg)
 
-          if (msg.done) {
+          if (msg.success) {
             xb.secure.userLoggedIn = false
             sessionStorage.setItem('userLoggedIn', false)
-            location.href = '/'
 
             showMessage({
               title:  "You're now logged out.",
@@ -578,7 +571,6 @@ function msgApprovalIs(cmd) {
               color:  'green',
               button: 'close'
             })
-
           
           } else {
             //fail
@@ -611,10 +603,9 @@ function msgApprovalIs(cmd) {
 
 //----------------------------------------------------------
 
-function loadHomePage() {
-  //contentSet('save')
-  //con_tent.innerHTML = xv.template.profile 
-  location.href = '/user/' + xb.secure.username
+function loadProfilePage() {
+  contentSet('save')
+  con_tent.innerHTML = xv.template.profile 
 }
 
 function saveProfile() {
@@ -799,7 +790,7 @@ async function signUp() {
       }
     )
 
-    if (serverResp.done) {
+    if (serverResp.success) {
       //open the user-homepage
       xb.secure.userLoggedIn = true
       xb.secure.username = serverResp.newUsername

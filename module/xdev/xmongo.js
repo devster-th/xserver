@@ -32,40 +32,56 @@ let mongo = new MongoClient(
 )
 
 const {v4: uuid} = require('uuid')
+
 class DocControl {
-  owner = ''
-  collection = ''
-  updatedBy = ''
+  owner       = []
+  team        = []
+  project     = []
+  org         = []
+  collection  = ''
+  updatedBy   = ''
   createdTime = ''
-  createdBy = ''
-  rights = [
-    {owner:'read/write/edit/delete'},
-    {team:'read'},
-    {organization:'read'},
-    {public:''}
-  ] //{who: ,rights:'read/write/delete'}
-  version = {
-    name: '',
-    number: 1,
-    markedBy: '',
-    note: ''
+  createdBy   = ''
+  rights      = {
+    allGeneralFields: { //excludes sesitive fields by default
+      owner:  ['full','!delete'],
+      team:   ['read','comment'],
+      project:['read','comment'],
+      group:  ['read','comment'],
+      org:    ['read','comment'],
+      all:    []
+    },
+    allSensitiveFields: {
+      owner:  ['create','read'],
+      team:   [],
+      project:[],
+      group:  [],
+      org:    [],
+      all:    []
+    }
   }
-  active = true
-  touchTime = Date.now()
+  version     = {
+    name:     '',
+    number:   2,
+    markedBy: '',
+    note:     ''
+  }
+  active      = true
+  touchTime   = Date.now()
 }
 
 const info = {
-    software:'xmongo.js',
-    version:'2.0',
-    by:'mutita.org@gmail.com',
-    license:'none'
+    software: 'xmongo.js',
+    version:  '2.0',
+    by:       'mutita.org@gmail.com',
+    license:  'none'
 }
 
 const config = {
-  host:'localhost',
-  port:'27017',
-  userName:'SUPERADMIN',
-  password:"c'CyVV/kzRDC"
+  host:       'localhost',
+  port:       '27017',
+  userName:   'SUPERADMIN',
+  password:   "c'CyVV/kzRDC"
 }
 
 

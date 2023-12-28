@@ -2679,6 +2679,7 @@ xb.passwordRealHash = async function (username, passwordHash) {
     username + passwordHash + "D+DHDqyDC~P9"
   )
   /* This func embeded the salt but will need to find ways to handle this more securely. */
+  //this func will use in the server 
 }
 
 
@@ -2696,6 +2697,30 @@ xb.readPacketMsg = async function (receivedPacket) {
     return JSON.parse(msgJson)
   })
 }
+
+
+xb.readPacket = async function (packt) {
+  /* Certifies packet and read its msg. If not certified will return cert error. In case msg has modified it will fail from the certifying check. */
+
+  if (await xb.cert(packt)) {
+    try {
+      return xb.readPacketMsg(packt)
+    } catch {
+      return {
+        fail: true, success: false,
+        msg: "Error of reading this packet."
+      }
+    }
+  } else {
+    return {
+      fail: true, success: false,
+      msg: "Packet not certified."
+    }
+  }
+
+  //tested ok, 20231223.1820/m
+}
+
 
 
 
@@ -2787,7 +2812,7 @@ xb.saveTextFile = function (text, fileName) {
 
   if (!text) return {msg:"Wrong input.", success:false} 
   if (!fileName) fileName = Date.now() + '.txt'
-  if (!fileName.match(/\w+.txt$/)) fileName = fileName + '.txt'
+  //if (!fileName.match(/\w+.txt$/)) fileName = fileName + '.txt'
   
   let link = document.createElement('a')
   link.download = fileName

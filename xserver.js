@@ -70,15 +70,15 @@ app.use(express.json())
  * open/insecured msg handling mainly used for static & web pages not private data.
  */
 
-app.get("/req", (req,resp)=>{
+app.get("/req", async (i,o)=>{
 
   //A) works on the input mainly for certifying msg
   console.log('//--------------------------------------')
   console.log('//@xserver: received GET message at ', new Date().toISOString() )
   //console.log(req.method)
-  console.log(req.query)
+  console.log(i.query)
 
-  let getMsg = req.query //put a name to prevent confuse
+  let getMsg = i.query //put a name to prevent confuse
   //getMsg.method = 'get'
 
   /*  browser can embed xs command like this:
@@ -98,10 +98,99 @@ app.get("/req", (req,resp)=>{
     to: 'actionLog'
   })*/
 
-  resp.send("<h1>Still don't do the GET work. Comeback later, sorry :'(</h1>")
-
+  if (i.query.from) {
+    let key = Object.keys(i.query)[0]
+    let foundRecord = await xd({
+      find: {[key]: i.query[key]},
+      from: i.query.from
+    })
+  
+    o.send(`<!DOCTYPE html><html>
+    <head>
+    <style>
+    h1 {color:red}
+    </style>
+    </head><body><h1>reply from xserver</h1>
+    <code>${
+      xs.pretty(
+        JSON.stringify(foundRecord[0])
+      )
+    }</code></body></html>`)
+  } else {
+    o.send(`<h1>reply from xserver</h1>
+    <code>ERROR: Wrong input</code>`)
+  }
+  
+ 
 
 }) //xget block
+
+
+//handle postId
+app.get('/post/:postId', (i,o)=>{
+  console.log(i.params) //for get and using express routing, this is work
+  //console.log(i.query) this not work for routing
+})
+
+
+//handle product
+app.get('/product/:productId', async (i,o)=>{
+  console.log(i.params)
+  let foundProduct = await xd({
+    find: {uuid: i.params.productId},
+    from: 'product'
+  })
+
+  if (foundProduct) {
+    o.send(
+      `<h1>reply from xserver</h1>
+      <code>${
+        xs.pretty(
+          JSON.stringify(foundProduct[0])
+        )
+      }</code>`
+      
+    )
+  } else {
+    o.send(
+      `<h1>reply from xserver</h1>
+      <code>ERROR: Not found this productId in our database.</code>`
+    )
+  }
+})
+
+
+//transaction handling
+app.get('/transac/:transacId', (i,o)=>{
+  console.log(i.params)
+})
+
+
+//contract handling
+app.get('/contract/:contractId',(i,o)=>{
+  console.log(i.params)
+})
+
+app.get('/user/:username/post/:postId',(i,o)=>{
+  console.log(i.params)
+})
+
+//file handling
+app.get('/file/:fileName', async (i,o)=>{
+  console.log(i.params)
+  let foundFile = await xf({
+    exist: '/home/sunsern/xserver/file/' + i.params.fileName
+  })
+
+  if (foundFile) {
+    o.sendFile('/home/sunsern/xserver/file/' + i.params.fileName)
+  } else {
+    o.send(`<p>File not found.</p>`)
+  }
+})
+
+
+
 
 
 
@@ -112,14 +201,14 @@ app.get("/req", (req,resp)=>{
  * Takes only JSON data
  */
 
-app.post("/xserver", async (req,resp)=> {
+app.post("/xserver", async (i,o)=> {
   //A) certifying msg
   console.log('-----------------------------------------------------')
   console.log('--POST packet, ', new Date().toISOString() )
-  console.log('--req packet = ', req.body)
+  console.log('--req packet = ', i.body)
 
   //got a packet
-  let packet = req.body //just put name to avoid confuse
+  let packet = i.body //just put name to avoid confuse
 
   //log
   xd({ add:{packet: packet}, to:'log' })
@@ -199,7 +288,7 @@ app.post("/xserver", async (req,resp)=> {
                       })
 
                       //send back to XB
-                      resp.json(rePacket)
+                      o.json(rePacket)
                   
                   }).catch(error => {
                     console.log(error)
@@ -237,7 +326,7 @@ app.post("/xserver", async (req,resp)=> {
                   })
 
                   //send back to XB
-                  resp.json(rePacket)
+                  o.json(rePacket)
 
                 }).catch(error => {
                   console.log(error)
@@ -320,8 +409,9 @@ app.post("/xserver", async (req,resp)=> {
                 rePacket.active = true
 
                 rePacket.msg = {
-                  act: 'response',
-                  msg: 'Your new session is now activated.',
+                  act: 'reply_new_session',
+                  ref:  '',
+                  msg: 'Successfully registered new session.',
                   refPacketId:      packet.id,
                   sessionActivated: true,
                   yourNewSalt:      newSalt, 
@@ -352,7 +442,7 @@ console.log(rePacket)
                   })
 
                   console.log('\n--response packet = ', rePacket)
-                  resp.json(rePacket)
+                  o.json(rePacket)
                   return
                 })
 
