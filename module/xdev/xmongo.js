@@ -42,7 +42,16 @@ class DocControl {
   updatedBy   = ''
   createdTime = ''
   createdBy   = ''
+  
   rights      = {
+    doc: {
+      owner:  ['full','!delete'],
+      team:   ['read','comment'],
+      project:['read','comment'],
+      group:  ['read','comment'],
+      org:    ['read','comment'],
+      all:    []
+    },
     allGeneralFields: { //excludes sesitive fields by default
       owner:  ['full','!delete'],
       team:   ['read','comment'],

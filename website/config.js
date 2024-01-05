@@ -147,12 +147,12 @@ xv.template = {
   </script>`,
   
   just_note: `<div class="w3-container">
-  <h3>Just a note -- fills note to mutita.justNote</h3>
+  <h3>justNote 0.1</h3>
   <form id="just_note">
     Note*<br>
-    <textarea name="note" rows="12" style="width:100%"></textarea>
+    <textarea name="note" rows="12" style="width:100%" placeholder="Put your note here..."></textarea>
     Tag <input name="tag" type="text" size="30"><br>
-    By <input name="by" type="text" value="M">
+    By &nbsp;<input name="by" type="text" value="M">
   </form>
   <br>
   <button class="w3-btn w3-blue" onclick="saveJustNote(); just_note.reset()">Save</button> <button class="w3-btn w3-yellow" onclick="just_note.reset()">Clear</button> &nbsp;&nbsp; <button class="w3-btn w3-gray" onclick="contentSet('close')">Close</button>

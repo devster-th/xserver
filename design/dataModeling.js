@@ -88,14 +88,25 @@ mdb.w(uuid,data)
 doc = {
   _id: '',
   uuid: '',
+  //
   _control:{
-    owner: [userId, orgId, teamId, projId],
-    rights: [
-      {
-        field: [aaa,bbb,ccc],
-        who:    [owner,userId,orgId,projId,teamId],
-        access: ['read','write','edit','delete','import','export','share','comment']
+    owner:  [userId, orgId, teamId, projId],
+    team:   [],
+    group:  [],
+    org:    [],
+    rights: {
+      allGeneralFields: {
+        owner:  ['read','write'],
+        team:   [],
+        project:[],
+        org:    [],
+        all:    []
+      },
+      allSensitiveFields: {},
+      [field]: {
+        [who]: [rights]
       }
-    ]
+    }
   }
 }
+

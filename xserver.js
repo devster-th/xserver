@@ -57,18 +57,35 @@ global.XSERVER = {
 
 
 
-//setting
-app.use(express.static("website"))
+//setting expressjs
+app.use(
+  (i,o,next) => {
+    if (i.path.includes('/pic/fish.jpeg')) {
+      o.send('<p>this is secured file</p>')
+    } else {
+      next()
+    }
+  }
+) //put this block 20240104.0959 this can be way to secure static file
+
+app.use(express.static('website'))
 app.use(express.json())
 
 
 
 
 
-//2) GET works ----------------------------------------------------
+//2) GET works ////////////////////////////////////////////////////////////
 /**
  * open/insecured msg handling mainly used for static & web pages not private data.
  */
+
+/*
+app.get('/', (i,o) => {
+  console.log(i.query)
+  o.send('<p>Please log-in first</p>')
+})
+*/
 
 app.get("/req", async (i,o)=>{
 
@@ -128,6 +145,7 @@ app.get("/req", async (i,o)=>{
 
 //handle postId
 app.get('/post/:postId', (i,o)=>{
+  // http://domain.io/post/[uuid] will show that post
   console.log(i.params) //for get and using express routing, this is work
   //console.log(i.query) this not work for routing
 })
@@ -135,6 +153,7 @@ app.get('/post/:postId', (i,o)=>{
 
 //handle product
 app.get('/product/:productId', async (i,o)=>{
+  // http://domain.io/product/[productId] ...shows product page
   console.log(i.params)
   let foundProduct = await xd({
     find: {uuid: i.params.productId},
@@ -162,21 +181,25 @@ app.get('/product/:productId', async (i,o)=>{
 
 //transaction handling
 app.get('/transac/:transacId', (i,o)=>{
+  // http://domain.io/transac/[transacId] ...shows transac info
   console.log(i.params)
 })
 
 
 //contract handling
 app.get('/contract/:contractId',(i,o)=>{
+  // http://domain.io/contract/[contractId] ...shows contract info
   console.log(i.params)
 })
 
 app.get('/user/:username/post/:postId',(i,o)=>{
+  // http://domain.io/user/[username]/post/[postId] ...shows that post of that user
   console.log(i.params)
 })
 
 //file handling
 app.get('/file/:fileName', async (i,o)=>{
+  // http://domain.io/file/[fileName] ...gives that file
   console.log(i.params)
   let foundFile = await xf({
     exist: '/home/sunsern/xserver/file/' + i.params.fileName
@@ -194,7 +217,7 @@ app.get('/file/:fileName', async (i,o)=>{
 
 
 
-//3 POST works ------------------------------------------------
+//3 POST works ///////////////////////////////////////////////////////////
 /**
  * secured msg handling
  * POST will be main channel for all communications in the app
@@ -233,7 +256,7 @@ app.post("/xserver", async (i,o)=> {
       if (foundSess.active) {
         //in the xdb.session also active so the session is good to work with
 
-        //uses salt in the found record form db to cert the coming packet
+        //uses salt in the found record from db to cert the coming packet
         xs.cert(packet, foundSess.salt).then(certified => {
           if (certified) {
 
@@ -311,6 +334,7 @@ app.post("/xserver", async (i,o)=> {
                   console.log('return from core: ', re)
 
                   if (!re) re = { //in case something wrong in the module
+//should make more formal msg                    
                     module: 'core',
                     msg:    'none'
                   }
@@ -393,6 +417,7 @@ app.post("/xserver", async (i,o)=> {
                 let newSalt = xs.password()
                 
                 //register new session
+//if db error?                
                 xd({ 
                   add: {  
                     sessionId:  packet.from, //regis this id
