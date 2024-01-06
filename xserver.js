@@ -1,3 +1,10 @@
+// CONFIGURATION ////////////////////////////////////////////////////
+require('dotenv').config()
+
+
+// general
+const {xconfig} = require('./xconfig.js')
+/* move this to xconfig.js
 global.fileTag = {
   fileName:     'xserver.js',
   brief:        'xserver is a platform for everything.',
@@ -10,12 +17,12 @@ global.fileTag = {
   releasedDate: 'not yet',
   status:       'dev'
 }
+*/
 
 
 
 
-
-//1) initialize/config -----------------------------------------
+// INITIALIZATION ////////////////////////////////////////////////
 
 //load modules
 const express = require("express")
@@ -37,15 +44,15 @@ const {test} = require('./module/test/test.js')
 // variables
 global.XSERVER = {
   appName:    "xserver",
-  version:    fileTag.version,
+  version:    xconfig.version,
   startTime:  Date.now(),
   domain:     "localhost",
   port:       2000,
   operator:   'nexWorld',
   secure:{
-    defaultSalt: "#|~}v4&u&1R",
-    serverId: xs.uuid(),
-    masterKey: 'c40b93b2dfb61810e5ad22d132de54b7e718d10f66a8f523379826de95dbadf1'
+    defaultSalt:  process.env.defaultSalt, 
+    serverId:     xs.uuid(),
+    masterKey:    process.env.masterKey, 
   },
   xRootPath:          '/home/sunsern/xserver/', //root of xserver
   xsModulePath:       'module/',
@@ -57,7 +64,7 @@ global.XSERVER = {
 
 
 
-//setting expressjs
+// VERY FIRST PROCESS //////////////////////////////////////////////
 app.use(
   (i,o,next) => {
     if (i.path.includes('/pic/fish.jpeg')) {
@@ -75,7 +82,7 @@ app.use(express.json())
 
 
 
-//2) GET works ////////////////////////////////////////////////////////////
+// GET METHOD ////////////////////////////////////////////////////
 /**
  * open/insecured msg handling mainly used for static & web pages not private data.
  */
@@ -217,7 +224,7 @@ app.get('/file/:fileName', async (i,o)=>{
 
 
 
-//3 POST works ///////////////////////////////////////////////////////////
+// POST METHOD ///////////////////////////////////////////////////
 /**
  * secured msg handling
  * POST will be main channel for all communications in the app
@@ -514,7 +521,7 @@ console.log(rePacket)
 
 
 
-// 4 - listen /////////////////////////////////////////////////
+// LISTENING ///////////////////////////////////////////////////////
 app.listen(XSERVER.port, () => {
   console.log("//////////////////////////////////////////////////////////////////////")
   console.log(
@@ -529,11 +536,16 @@ app.listen(XSERVER.port, () => {
 })
 
 
+
+// NOTE ///////////////////////////////////////////////////////////
 /*
 2023-12-14
   -reviewed codes, made some notes, and uses mdb.r() instead of xd() 
   
-  
+2024-01-05
+  -added 'dotenv' module, and added .env file and put in the top line of this file. This will be used for main security of the server program xserver.js
+
+  -move the tagFile variable to xconfig.js file so we can do some configuration in this file separately, don't need to touch the main xserver.js file.  
 */
 
 
